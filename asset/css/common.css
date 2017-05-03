@@ -1,0 +1,31 @@
+
+.bg-fade{
+  background-color: #EEE;
+}
+
+.bg-white{
+  background-color: #FFF;
+}
+
+.radius{
+  padding: 12px;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -ms-border-radius: 4px;
+}
+
+.box-shadow{
+  box-shadow:0px 2px 8px -2px #777;
+  -moz-box-shadow:0px 2px 8px -2px #777;
+  -webkit-box-shadow:0px 2px 8px -2px #777;
+  -ms-box-shadow:0px 2px 8px -2px #777;
+}
+
+.container{
+  padding-top: 12px;
+}
+
+.row{
+  margin-bottom: 12px;
+}

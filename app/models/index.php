@@ -1,6 +1,6 @@
 <?php
 class index {
-  function index($params) {
+  function index() {
     return array('str'=>'Hello World!');
   }
 }
