@@ -2,7 +2,7 @@
 
 /* 重要 ※必ずお読み下さい
 
-このconfigフォルダ及び〇〇のフォルダは
+このconfigフォルダ及び「データベースディレクトリ」のフォルダは
 .htaccessなどを用いて必ず外部からのアクセスを遮断して下さい
 
 */
@@ -25,7 +25,10 @@ class config {
       'max_file_size'       => 1024,
 
       //アップロードできる拡張子
-      'extension'           => array('zip','rar','lzh')
+      'extension'           => array('zip','rar','lzh'),
+
+      //データベースディレクトリ
+      'db_directory'        => './db'
     );
   }
 }

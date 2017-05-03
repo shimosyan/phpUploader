@@ -2,6 +2,8 @@
 
 //簡易フレームワーク
 
+// エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
+ini_set('display_errors',1);
 
 if($_GET['page'] !== null){
   $call = $_GET['page'];
@@ -19,6 +21,9 @@ if (!is_null($ret)) {
     extract($ret);
   }
 }
+
+//初期設定・DBオープン
+include('./app/models/init.php');
 
 //modelをインクルード
 if (file_exists('./app/models/'.$call.'.php')) {
@@ -41,6 +46,7 @@ include('./app/views/header.php');
 if (file_exists('./app/views/'.$call.'.php')) {
   include('./app/views/'.$call.'.php');
 } else {
+  $error = '404 - ページが見つかりません。';
   include('./app/views/error.php');
 }
 include('./app/views/footer.php');
