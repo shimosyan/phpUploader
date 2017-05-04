@@ -4,6 +4,8 @@ phpUploader
 ## Description
 サーバーに設置するだけで使える簡易PHPアップローダーです。
 
+![スクリーンショット](https://cloud.githubusercontent.com/assets/26715606/25690448/622ac98c-30cc-11e7-8ff7-044f34d225d4.png)
+
 ## Requirement
 ・PHP Version 5.3.3  
 ・SQLite (PHPにバンドルされたもので可)
