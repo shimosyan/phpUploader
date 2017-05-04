@@ -6,10 +6,12 @@ phpUploader
 
 ## Requirement
 ・PHP Version 5.3.3
+
 ・SQLite (PHPにバンドルされたもので可)
 
 ## Usage
 ものすごい簡易なアップローダーなので以下の利用を想定しています。
+
 ・少人数且つ、不特定多数ではない利用者間でのファイルのやり取り
 
 ## Install
@@ -26,3 +28,4 @@ phpUploader
 ## Licence
 Copyright (c) 2017 shimosyan
 Released under the MIT license
+https://github.com/shimosyan/phpUploader/blob/master/MIT-LICENSE.txt
