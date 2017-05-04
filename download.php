@@ -48,6 +48,6 @@
   header('Content-Type: application/force-download');
   header('Content-Disposition: attachment; filename="'.basename($filename).'"');
   header('Content-Length: ' . filesize($path));
-  
+  ob_end_clean();//ファイル破損を防ぐ //出力バッファのゴミ捨て 
   readfile($path);
 ?>
