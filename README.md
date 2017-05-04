@@ -23,9 +23,9 @@ phpUploader
 
 ③設置したディレクトリにapacheまたはnginxの実行権限を付与して下さい。
 
-④この状態でサーバーに接続するとDBファイル(既定値 /db/uploader.db)とデータ設置用のディレクトリ(既定値 /data)が作成されます。
+④この状態でサーバーに接続するとDBファイル(既定値 ./db/uploader.db)とデータ設置用のディレクトリ(既定値 ./data)が作成されます。
 
-⑤/configディレクトリとデータ設置用のディレクトリ(既定値 /data)に.htaccessを設置して外部からの接続を遮断させます。
+⑤/configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessを設置して外部からの接続を遮断させます。
 
 ## Licence
 Copyright (c) 2017 shimosyan  
