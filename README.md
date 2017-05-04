@@ -5,17 +5,17 @@ phpUploader
 サーバーに設置するだけで使える簡易PHPアップローダーです。
 
 ## Requirement
-・PHP Version 5.3.3
-
+・PHP Version 5.3.3  
 ・SQLite (PHPにバンドルされたもので可)
 
 ## Usage
-ものすごい簡易なアップローダーなので以下の利用を想定しています。
-
+ものすごい簡易なアップローダーなので以下の利用を想定しています。  
 ・少人数且つ、不特定多数ではない利用者間でのファイルのやり取り
 
 ## Install
 ①ダウンロードしたファイルを任意のディレクトリに展開して下さい。
+
+<https://github.com/shimosyan/phpUploader/releases>
 
 ②config/config.phpを任意の値で編集して下さい。
 
@@ -26,6 +26,6 @@ phpUploader
 ⑤/configディレクトリとデータ設置用のディレクトリ(既定値 /data)に.htaccessを設置して外部からの接続を遮断させます。
 
 ## Licence
-Copyright (c) 2017 shimosyan
-Released under the MIT license
+Copyright (c) 2017 shimosyan  
+Released under the MIT license  
 https://github.com/shimosyan/phpUploader/blob/master/MIT-LICENSE.txt
