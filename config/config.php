@@ -11,24 +11,24 @@
 class config {
   function index() {
     return array(
-      // 管理用パスワード
-      // 全てのファイルのDLキー、DELキーとして使えます。
-      'master'              =>'hogehoge',
-
       // タイトル
       'title'               => 'アップローダー',
 
-      // 最大保存件数
-      'max_number_of_file'  => 500,
+      // コメントの最大文字数
+      'max_comment'         => 80,
 
-      // 1件あたりの最大ファイルサイズ(単位 : KByte)
-      'max_file_size'       => 1024,
+      // 1件あたりの最大ファイルサイズ(単位 : MByte)
+      // php.iniのmemory_limit, post_max_size, upload_max_filesizeの値以下になるようにして下さい
+      'max_file_size'       => 2,
 
       //アップロードできる拡張子
       'extension'           => array('zip','rar','lzh'),
 
       //データベースディレクトリ
-      'db_directory'        => './db'
+      'db_directory'        => './db',
+
+      //アップロードしたファイルを置くディレクトリ
+      'data_directory'      => './data'
     );
   }
 }
