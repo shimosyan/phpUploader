@@ -1,5 +1,6 @@
 <?php
-  $id = $_GET['id'];
+  $id     = $_GET['id'];
+  $delkey = $_GET['key'];
 
   if($id === null){
     exit;
@@ -19,7 +20,7 @@
 
   //データベースの作成・オープン
   try{
-    $db = new PDO("sqlite:".$db_directory."/uploader.db");
+    $db = new PDO('sqlite:'.$db_directory.'/uploader.db');
   }catch (Exception $e){
     exit;
   }
@@ -34,6 +35,13 @@
   $result = $stmt->fetchAll();
   foreach($result as $s){
     $filename = $s['origin_file_name'];
+    $origin_delkey = $s['del_key'];
+  }
+
+  // ハッシュを照合して認証が通ればDEL可
+  if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
+    header('location: ./');
+    exit;
   }
 
   // sqlから削除

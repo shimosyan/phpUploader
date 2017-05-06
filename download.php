@@ -2,7 +2,8 @@
   // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
   ini_set('display_errors',0);
 
-  $id = $_GET['id'];
+  $id    = $_GET['id'];
+  $dlkey = $_GET['key'];
 
   if($id === null){
     exit;
@@ -37,13 +38,25 @@
   $result = $stmt->fetchAll();
   foreach($result as $s){
     $filename = $s['origin_file_name'];
+    $origin_dlkey = $s['dl_key'];
   }
+
+  // トークンを照合して認証が通ればDL可
+  if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
+    header('location: ./');
+    exit;
+  }
+
+
+  // カウンターを増やす
+  $upd = $db->prepare("UPDATE uploaded SET count = count + 1 WHERE id = $id");
+  $upd->execute();
 
 
   $ext = substr( $filename, strrpos( $filename, '.') + 1);
   $path =$data_directory.'/' . 'file_' . $id . '.'.$ext;
 
-  var_dump($path);
+  //var_dump($path);
 
   header('Content-Type: application/force-download');
   header('Content-Disposition: attachment; filename="'.basename($filename).'"');

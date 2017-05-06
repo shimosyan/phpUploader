@@ -13,7 +13,7 @@ class index {
 
     //データベースの作成・オープン
     try{
-      $db = new PDO("sqlite:".$db_directory."/uploader.db");
+      $db = new PDO('sqlite:'.$db_directory.'/uploader.db');
     }catch (Exception $e){
       $error = '500 - データベースの接続に失敗しました。';
       include('./app/views/header.php');

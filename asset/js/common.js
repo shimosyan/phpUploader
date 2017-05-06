@@ -1,18 +1,24 @@
 $(document).ready(function(){
 
-  if(document.getElementById("fileList") != null){
+  if(document.getElementById('fileList') != null){
 
     $.extend( $.fn.dataTable.defaults, { 
       language: {
-        url: "http://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json"
+        url: 'http://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
       } 
     });
 
-    $('#fileList').DataTable();
+    $('#fileList').DataTable({
+      "order": [ [0, "desc"] ],
+      "columnDefs": [ {
+        "ordered": false,
+        "targets": [6]
+      } ]
+    });
   }
 
   $('input[id=lefile]').change(function() {
-    $('#fileInput').val($(this).val().replace("C:\\fakepath\\", ""));
+    $('#fileInput').val($(this).val().replace('C:\\fakepath\\', ''));
   });
 });
 
@@ -75,10 +81,102 @@ function file_upload()
 
   })
   .fail(function(jqXHR, textStatus, errorThrown){
-    $('#errorContainer > .panel-body').text('サーバーエラー');
+    $('#errorContainer > .panel-body').html('サーバーエラー<br>jqXHR: '+JSON.stringify(jqXHR)+'<br>textSattus: '+textStatus+'<br>errorThrown: '+errorThrown);
     $('#errorContainer').fadeIn();
   })
   .always(function( jqXHR, textStatus ) {
-    $('#uploadContainer').fadeOut();
+    $('#uploadContainer').hide();
+  });
+}
+
+// DLボタンを押すと実行
+function dl_button(id){
+  // DLkey空白で投げる
+  dl_certificat(id ,'');
+}
+
+function confirm_dl_button(id){
+  // DLkey空白で投げる
+  closeModal();
+  dl_certificat(id ,$('#confirmDlkeyInput').val());
+}
+
+function dl_certificat(id, key){
+  var postdata ={
+    id: id,
+    key: key
+  }
+  
+  $.ajax({
+    url  : './app/api/verifydownload.php',
+    type : 'POST',
+    data : postdata,
+    dataType    : 'json'
+  })
+  .done(function(data, textStatus, jqXHR){
+    //alert(data.tmp_file);
+
+    var html = '<div class="form-group"><label for="confirmDlkeyInput">DLキーの入力</label><input type="text" class="form-control" id="confirmDlkeyInput" name="confirmdlkey" placeholder="DLキーを入力..."></div>';
+    switch (data.status){
+      case 'failed':
+        openModal('okcansel', '認証が必要です', html, 'confirm_dl_button('+id+');');
+        break;
+      case 'ok':
+        location.href = './download.php?id='+data.id+'&key='+data.key;
+        break;
+    }
+
+  })
+  .fail(function(jqXHR, textStatus, errorThrown){
+    alert(JSON.stringify(jqXHR));
+  })
+  .always(function( jqXHR, textStatus ) {
+    
+  });
+}
+
+// DELボタンを押すと実行
+function del_button(id){
+  // DLkey空白で投げる
+  del_certificat(id ,'');
+}
+
+function confirm_del_button(id){
+  // DLkey空白で投げる
+  closeModal();
+  del_certificat(id ,$('#confirmDelkeyInput').val());
+}
+
+function del_certificat(id, key){
+  var postdata ={
+    id: id,
+    key: key
+  }
+  
+  $.ajax({
+    url  : './app/api/verifydelete.php',
+    type : 'POST',
+    data : postdata,
+    dataType    : 'json'
+  })
+  .done(function(data, textStatus, jqXHR){
+    //alert(data.tmp_file);
+
+    var html = '<div class="form-group"><label for="confirmDelkeyInput">DELキーの入力</label><input type="text" class="form-control" id="confirmDelkeyInput" name="confirmdelkey" placeholder="DELキーを入力..."></div>';
+    switch (data.status){
+      case 'failed':
+        openModal('okcansel', '認証が必要です', html, 'confirm_del_button('+id+');');
+        break;
+      case 'ok':
+        location.href = './delete.php?id='+data.id+'&key='+data.key;
+        break;
+    }
+
+  })
+  .fail(function(jqXHR, textStatus, errorThrown){
+    alert(JSON.stringify(jqXHR));
+  })
+  .always(function( jqXHR, textStatus ) {
+    
   });
 }

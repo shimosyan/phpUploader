@@ -11,8 +11,19 @@
 class config {
   function index() {
     return array(
+      // 管理者用キー
+      // DLキーとDELキーで使用するマスターキーです
+      'master'              => 'hoge',
+
+      // 各キーの暗号化用ハッシュ
+      // ランダムな英数字の羅列を設定してください
+      'key'                 => 'hogehoge',
+
       // タイトル
       'title'               => 'アップローダー',
+
+      // 保存ファイル数
+      'save_max_files'      => 500,
 
       // コメントの最大文字数
       'max_comment'         => 80,

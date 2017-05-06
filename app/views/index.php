@@ -21,7 +21,22 @@
           <p class="help-block"><?php echo $max_comment; ?>字までの入力できます。</p>
         </div>
 
-        
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="dlkeyInput">DLキー</label>
+              <input type="text" class="form-control" id="dleyInput" name="dlkey" placeholder="DLキーを入力...">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="delkeyInput">DELキー</label>
+              <input type="text" class="form-control" id="deleyInput" name="delkey" placeholder="DELキーを入力...">
+            </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-sm-offset-10 col-sm-2">
             <button type="button" class="btn btn-success btn-block" onclick="file_upload()">送信</button>
@@ -64,6 +79,7 @@
             <th>コメント</th>
             <th>サイズ</th>
             <th>日付</th>
+            <th>DL数</th>
             <th>削除</th>
           </tr>
         </thead>
@@ -72,11 +88,12 @@
           foreach($data as $s){
             echo '<tr>';
             echo '<td>'.$s['id'].'</td>';
-            echo '<td><a href="./download.php?id='.$s['id'].'">'.$s['origin_file_name'].'</a></td>';
+            echo '<td><a href="javascript:void(0);" onclick="dl_button('.$s['id'].');">'.$s['origin_file_name'].'</a></td>';
             echo '<td>'.$s['comment'].'</td>';
             echo '<td>'.floor($s['size'] / (1024*1024) ).'MB</td>';
             echo '<td>'.date("Y/m/d H:i:s", $s['input_date']).'</td>';
-            echo '<td><a href="./delete.php?id='.$s['id'].'">[DEL]</a></td>';
+            echo '<td>'.$s['count'].'</td>';
+            echo '<td><a href="javascript:void(0);" onclick="del_button('.$s['id'].');">[DEL]</a></td>';
             echo '</tr>';
           }
         
@@ -89,6 +106,7 @@
             <th>コメント</th>
             <th>サイズ</th>
             <th>日付</th>
+            <th>DL数</th>
             <th>削除</th>
           </tr>
         </tfoot>
