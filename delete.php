@@ -1,4 +1,11 @@
 <?php
+
+  $var = explode('.',PHP_VERSION);
+  // PHPメジャーバージョン
+  define("PHP_MAJOR_VERSION",$var[0]);
+  // PHPマイナーバージョン
+  define("PHP_MINOR_VERSION",$var[1]);
+
   $id     = $_GET['id'];
   $delkey = $_GET['key'];
 
@@ -39,9 +46,16 @@
   }
 
   // ハッシュを照合して認証が通ればDEL可
-  if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
-    header('location: ./');
-    exit;
+  if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
+    if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, true)) ){
+      header('location: ./');
+      exit;
+    }
+  }else{
+    if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
+      header('location: ./');
+      exit;
+    }
   }
 
   // sqlから削除

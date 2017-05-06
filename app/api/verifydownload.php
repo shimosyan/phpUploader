@@ -3,6 +3,12 @@
 // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
 ini_set('display_errors',1);
 
+$var = explode('.',PHP_VERSION);
+// PHPメジャーバージョン
+define("PHP_MAJOR_VERSION",$var[0]);
+// PHPマイナーバージョン
+define("PHP_MINOR_VERSION",$var[1]);
+
 $id       = $_POST['id'];
 $post_key = $_POST['key'];
 
@@ -60,7 +66,11 @@ if($post_key !== $master){
 }
 
 // DL用のトークンを生成
-$dl_key = bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA));
+if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
+  $dl_key = bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, true));
+}else{
+  $dl_key = bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA));
+}
 
 //JSON形式で出力する
 echo json_encode( array('status' => 'ok', 'id' => $id, 'key' => $dl_key) );

@@ -2,6 +2,12 @@
   // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
   ini_set('display_errors',0);
 
+  $var = explode('.',PHP_VERSION);
+  // PHPメジャーバージョン
+  define("PHP_MAJOR_VERSION",$var[0]);
+  // PHPマイナーバージョン
+  define("PHP_MINOR_VERSION",$var[1]);
+
   $id    = $_GET['id'];
   $dlkey = $_GET['key'];
 
@@ -42,9 +48,16 @@
   }
 
   // トークンを照合して認証が通ればDL可
-  if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
-    header('location: ./');
-    exit;
+  if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
+    if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, true)) ){
+      header('location: ./');
+      exit;
+    }
+  }else{
+    if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
+      header('location: ./');
+      exit;
+    }
   }
 
 
