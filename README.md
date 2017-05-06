@@ -19,13 +19,15 @@ phpUploader
 
 <https://github.com/shimosyan/phpUploader/releases>
 
+注意: v0.1及びv0.2からv1.0へのアップデートはできません。
+
 ②config/config.phpを任意の値で編集して下さい。
 
 ③設置したディレクトリにapacheまたはnginxの実行権限を付与して下さい。
 
 ④この状態でサーバーに接続するとDBファイル(既定値 ./db/uploader.db)とデータ設置用のディレクトリ(既定値 ./data)が作成されます。
 
-⑤/configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessを設置して外部からの接続を遮断させます。
+⑤configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessを設置して外部からの接続を遮断させます。
 
 ## Licence
 Copyright (c) 2017 shimosyan  
