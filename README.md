@@ -19,7 +19,7 @@ phpUploader
 
 <https://github.com/shimosyan/phpUploader/releases>
 
-注意: v0.1及びv0.2からv1.0へのアップデートはできません。
+注意: v0.1及びv0.2からv1.0以降へのアップデートはできません。
 
 ②config/config.phpを任意の値で編集して下さい。
 
