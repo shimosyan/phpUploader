@@ -2,12 +2,6 @@
   // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
   ini_set('display_errors',0);
 
-  $var = explode('.',PHP_VERSION);
-  // PHPメジャーバージョン
-  define("PHP_MAJOR_VERSION",$var[0]);
-  // PHPマイナーバージョン
-  define("PHP_MINOR_VERSION",$var[1]);
-
   $id    = $_GET['id'];
   $dlkey = $_GET['key'];
 
