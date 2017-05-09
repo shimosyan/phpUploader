@@ -15,11 +15,11 @@ phpUploader
 ・少人数且つ、不特定多数ではない利用者間でのファイルのやり取り
 
 ## Install
-①ダウンロードしたファイルを任意のディレクトリに展開して下さい。
+①下記URLからダウンロードしたファイルを任意のディレクトリに展開して下さい。
 
 <https://github.com/shimosyan/phpUploader/releases>
 
-注意: v0.1及びv0.2からv1.0以降へのアップデートはできません。
+**注意: v0.1及びv0.2からv1.0以降へのアップデートはできません。**
 
 ②config/config.phpを任意の値で編集して下さい。
 
@@ -27,7 +27,7 @@ phpUploader
 
 ④この状態でサーバーに接続するとDBファイル(既定値 ./db/uploader.db)とデータ設置用のディレクトリ(既定値 ./data)が作成されます。
 
-⑤configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessを設置して外部からの接続を遮断させます。
+⑤configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessなどを用いて外部からの接続を遮断させます。
 
 ## Licence
 Copyright (c) 2017 shimosyan  
