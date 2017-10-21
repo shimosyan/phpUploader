@@ -90,7 +90,7 @@
             echo '<td>'.$s['id'].'</td>';
             echo '<td><a href="javascript:void(0);" onclick="dl_button('.$s['id'].');">'.$s['origin_file_name'].'</a></td>';
             echo '<td>'.$s['comment'].'</td>';
-            echo '<td>'.floor($s['size'] / (1024*1024) ).'MB</td>';
+            echo '<td>'.round($s['size'] / (1024*1024), 1).'MB</td>';
             echo '<td>'.date("Y/m/d H:i:s", $s['input_date']).'</td>';
             echo '<td>'.$s['count'].'</td>';
             echo '<td><a href="javascript:void(0);" onclick="del_button('.$s['id'].');">[DEL]</a></td>';
