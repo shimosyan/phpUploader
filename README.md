@@ -29,6 +29,8 @@ phpUploader
 
 ⑤configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessなどを用いて外部からの接続を遮断させて下さい。
 
+⑥ファイルがアップロードできるよう、PHPとapacheまたはnginxの設定を変更してください。
+
 ## Licence
 Copyright (c) 2017 shimosyan  
 Released under the MIT license  

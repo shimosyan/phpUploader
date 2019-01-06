@@ -6,7 +6,7 @@
       <form id="upload">
         <input id="lefile" name="file" type="file" style="display:none">
         <div class="input-group">
-          <input type="text" id="fileInput" class="form-control" placeholder="ファイルを選択...">
+          <input type="text" id="fileInput" class="form-control" name="file" placeholder="ファイルを選択...">
           <span class="input-group-btn"><button type="button" class="btn btn-primary" onclick="$('input[id=lefile]').click();">Browse</button></span>
         </div>
         <p class="help-block"><?php echo $max_file_size; ?>MBまでのファイルがアップロードできます。<br>対応拡張子： <?php 
