@@ -1,8 +1,60 @@
 <?php
 
 // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
-ini_set('display_errors',1);
+ini_set('display_errors',0);
+ini_set('max_execution_time',300);
+set_time_limit(300);
 header('Content-Type: application/json');
+
+$messages = array();
+switch ($_FILES['file']['error']) {
+	case UPLOAD_ERR_OK:
+		//値: 0; この場合のみ、ファイルあり
+		break;
+
+	case UPLOAD_ERR_INI_SIZE:
+		//値: 1; アップロードされたファイルは、php.ini の upload_max_filesize ディレクティブの値を超えています（post_max_size, upload_max_filesize）
+		$messages[] = 'アップロードされたファイルが大きすぎます。' . ini_get('upload_max_filesize') . '以下のファイルをアップロードしてください。';
+		break;
+
+	case UPLOAD_ERR_FORM_SIZE:
+		//値: 2; アップロードされたファイルは、HTML フォームで指定された MAX_FILE_SIZE を超えています。
+		$messages[] = 'アップロードされたファイルが大きすぎます。' . ($_POST['MAX_FILE_SIZE'] / 1000) . 'KB以下のファイルをアップロードしてください。';
+		break;
+
+	case UPLOAD_ERR_PARTIAL:
+		//値: 3; アップロードされたファイルは一部のみしかアップロードされていません。
+		$messages[] = 'アップロードに失敗しています（通信エラー）。もう一度アップロードをお試しください。';
+		break;
+
+	case UPLOAD_ERR_NO_FILE:
+		//値: 4; ファイルはアップロードされませんでした。（この場合のみ、ファイルがないことを表している）
+		$messages[] = 'ファイルをアップロードしてください';
+		break;
+
+	case UPLOAD_ERR_NO_TMP_DIR:
+		//値: 6; テンポラリフォルダがありません。PHP 4.3.10 と PHP 5.0.3 で導入されました。
+		$messages[] = 'アップロードに失敗しています（システムエラー）。もう一度アップロードをお試しください。';
+		break;
+
+	default:
+		//UPLOAD_ERR_CANT_WRITE 値: 7; ディスクへの書き込みに失敗しました。PHP 5.1.0 で導入されました。
+		//UPLOAD_ERR_EXTENSION 値: 8; ファイルのアップロードが拡張モジュールによって停止されました。 PHP 5.2.0 で導入されました。 
+		//何かおかしい
+		$messages[] = 'アップロードファイルをご確認ください。 - 1';
+		break;
+}
+if (!$messages && !is_uploaded_file($_FILES["file"]['tmp_name'])) {
+	//何か妙なことがおきているようだ
+	$messages[] = 'アップロードファイルをご確認ください。 - 0';
+}
+
+if ($messages) {
+  $response = array('status' => 'upload_error', 'message' => $messages);
+  //JSON形式で出力する
+  echo json_encode( $response );
+  exit;
+}
 
 // 一時アップロード先ファイルパス
 $file_tmp  = $_FILES['file']['tmp_name'];
