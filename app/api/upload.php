@@ -155,7 +155,11 @@ $id = $db->lastInsertId('id');
 
 
 // 正式保存先ファイルパス
-$file_save = '../../'.$data_directory.'/' . 'file_'.$id.'.'.$ext;
+if ($encrypt_filename) {
+  $file_save = '../../'.$data_directory.'/' . 'file_'.str_replace(array('\\', '¥', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)).'.'.$ext;
+} else {
+  $file_save = '../../'.$data_directory.'/' . 'file_'.$id.'.'.$ext;
+}
 
 // ファイル移動
 $result = @move_uploaded_file($file_tmp, $file_save);

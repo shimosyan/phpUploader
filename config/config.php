@@ -32,14 +32,19 @@ class config {
       // php.iniのmemory_limit, post_max_size, upload_max_filesizeの値以下になるようにして下さい
       'max_file_size'       => 2,
 
-      //アップロードできる拡張子
+      // アップロードできる拡張子
       'extension'           => array('zip','rar','lzh'),
 
-      //データベースディレクトリ
+      // データベースディレクトリ
       'db_directory'        => './db',
 
-      //アップロードしたファイルを置くディレクトリ
-      'data_directory'      => './data'
+      // アップロードしたファイルを置くディレクトリ
+      'data_directory'      => './data',
+
+      // アップロードされたファイル名をハッシュ化して管理する (trueまたはfalse デフォルト: false)
+      // サーバー内ではIDで格納されているファイル名をハッシュされた文字列で格納します。
+      // セキュリティを向上したいときにお使いください。
+      'encrypt_filename'    => false
     );
   }
 }
