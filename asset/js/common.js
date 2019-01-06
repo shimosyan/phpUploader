@@ -25,7 +25,7 @@ $(document).ready(function(){
 function file_upload()
 {
   if($('#fileInput').val() == ''){
-    retuen;
+    return;
   }
 
   $('#errorContainer').fadeOut();
@@ -96,7 +96,6 @@ function dl_button(id){
 }
 
 function confirm_dl_button(id){
-  // DLkey空白で投げる
   closeModal();
   dl_certificat(id ,$('#confirmDlkeyInput').val());
 }
@@ -142,7 +141,6 @@ function del_button(id){
 }
 
 function confirm_del_button(id){
-  // DLkey空白で投げる
   closeModal();
   del_certificat(id ,$('#confirmDelkeyInput').val());
 }
