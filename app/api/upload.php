@@ -82,7 +82,7 @@ if($filesize > $max_file_size*1024*1024){
 
 //ファイル拡張子
 $ext = substr( $_FILES['file']['name'], strrpos( $_FILES['file']['name'], '.') + 1);
-if(in_array($ext, $extension) === false){
+if(in_array(mb_strtolower($ext), $extension) === false){
   $response = array('status' => 'extension_error', 'ext' => $ext);
   //JSON形式で出力する
   echo json_encode( $response );
