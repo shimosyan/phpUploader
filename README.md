@@ -8,7 +8,7 @@ phpUploader
 
 ## Requirement
 ・PHP Version 5.3.3+  
-・SQLite (PHPにバンドルされたもので可)
+・SQLite (PHPにバンドルされたもので可、一部の環境によってはphp○-sqliteのインストールが必要です。)
 
 ## Usage
 ものすごい簡易なアップローダーなので以下の利用を想定しています。  

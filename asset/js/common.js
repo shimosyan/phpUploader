@@ -25,7 +25,7 @@ $(document).ready(function(){
 function file_upload()
 {
   if($('#fileInput').val() == ''){
-    retuen;
+    return;
   }
 
   $('#errorContainer').fadeOut();
@@ -96,7 +96,6 @@ function dl_button(id){
 }
 
 function confirm_dl_button(id){
-  // DLkey空白で投げる
   closeModal();
   dl_certificat(id ,$('#confirmDlkeyInput').val());
 }
@@ -114,8 +113,6 @@ function dl_certificat(id, key){
     dataType    : 'json'
   })
   .done(function(data, textStatus, jqXHR){
-    //alert(data.tmp_file);
-
     var html = '<div class="form-group"><label for="confirmDlkeyInput">DLキーの入力</label><input type="text" class="form-control" id="confirmDlkeyInput" name="confirmdlkey" placeholder="DLキーを入力..."></div>';
     switch (data.status){
       case 'failed':
@@ -142,7 +139,6 @@ function del_button(id){
 }
 
 function confirm_del_button(id){
-  // DLkey空白で投げる
   closeModal();
   del_certificat(id ,$('#confirmDelkeyInput').val());
 }

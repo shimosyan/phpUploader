@@ -62,7 +62,14 @@
 
   //ディレクトリから削除
   $ext = substr( $filename, strrpos( $filename, '.') + 1);
-  $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
+  if ($encrypt_filename) {
+    $path = $data_directory.'/' . 'file_' . str_replace(array('\\', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)) . '.'.$ext;
+    if (!file_exists ( $path )) {
+      $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
+    }
+  } else {
+    $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
+  }
   unlink($path);
 
 
