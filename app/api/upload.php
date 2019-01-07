@@ -156,7 +156,7 @@ $id = $db->lastInsertId('id');
 
 // 正式保存先ファイルパス
 if ($encrypt_filename) {
-  $file_save = '../../'.$data_directory.'/' . 'file_'.str_replace(array('\\', '¥', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)).'.'.$ext;
+  $file_save = '../../'.$data_directory.'/' . 'file_'.str_replace(array('\\', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)).'.'.$ext;
 } else {
   $file_save = '../../'.$data_directory.'/' . 'file_'.$id.'.'.$ext;
 }
