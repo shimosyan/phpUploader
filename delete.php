@@ -7,7 +7,6 @@
     exit;
   }
 
-  
   //configをインクルード
   include('./config/config.php');
   $config = new config();
@@ -26,12 +25,13 @@
     exit;
   }
 
-  // デフォルトのフェッチモードを連想配列形式に設定 
+  // デフォルトのフェッチモードを連想配列形式に設定
   // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
   $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
   // ファイル名取得
-  $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = $id");
+  $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
+  $stmt->bindValue(':id', $id); //ID
   $stmt->execute();
   $result = $stmt->fetchAll();
   foreach($result as $s){
@@ -53,11 +53,10 @@
   }
 
   // sqlから削除
-  $sql  = $db->prepare("DELETE FROM uploaded WHERE " .
-                      "id = :id");
-  $arg  = array('id' => $id);
-  if (! $sql->execute($arg)) {
-    
+  $sql = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+  $sql->bindValue(':id', $id); //ID
+  if (! $sql->execute()) {
+    // 削除を実施
   }
 
   //ディレクトリから削除

@@ -111,7 +111,7 @@ try{
   exit;
 }
 
-// デフォルトのフェッチモードを連想配列形式に設定 
+// デフォルトのフェッチモードを連想配列形式に設定
 // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
 $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
@@ -125,10 +125,9 @@ $count  = $countResult[0]['count'];
 $min_id = $countResult[0]['min'];
 
 if($count >= $save_max_files){
-  $sql  = $db->prepare("DELETE FROM uploaded WHERE " .
-                      "id = :id");
-  $arg  = array('id' => $min_id);
-  if (! $sql->execute($arg)) {
+  $sql = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+  $sql->bindValue(':id', $id); //ID
+  if (! $sql->execute()) {
     // 削除を実施
   }
 }
