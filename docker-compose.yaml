@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+    web:
+        build: "./docker"
+        container_name: "php_apache"
+        ports:
+            - "80:80"
+        volumes:
+            - ".:/var/www/html/"

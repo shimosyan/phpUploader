@@ -46,7 +46,7 @@ class config {
       // サーバー内ではIDで格納されているファイル名を暗号化された文字列で格納します。
       // 暗号に使用するsaltは「key」で指定した値を使用します。
       // セキュリティを向上したいときにお使いください。
-      'encrypt_filename'    => false
+      'encrypt_filename'    => false,
 
       // バージョン情報です。書き換えないでください。
       'version'             => '1.2.1'
