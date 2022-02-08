@@ -59,6 +59,10 @@ if ($messages) {
 // 一時アップロード先ファイルパス
 $file_tmp  = $_FILES['file']['tmp_name'];
 
+// ファイル名、コメントからHTMLタグを無効化
+$escaped_file_name = htmlspecialchars($_FILES['file']['name'], ENT_QUOTES, 'UTF-8');
+$escaped_comment   = htmlspecialchars($_POST['comment'], ENT_QUOTES, 'UTF-8');
+
 //configをインクルード
 include('../../config/config.php');
 $config = new config();
@@ -81,7 +85,7 @@ if($filesize > $max_file_size*1024*1024){
 }
 
 //ファイル拡張子
-$ext = substr( $_FILES['file']['name'], strrpos( $_FILES['file']['name'], '.') + 1);
+$ext = substr( $escaped_file_name, strrpos( $escaped_file_name, '.') + 1);
 if(in_array(mb_strtolower($ext), $extension) === false){
   $response = array('status' => 'extension_error', 'ext' => $ext);
   //JSON形式で出力する
@@ -90,7 +94,7 @@ if(in_array(mb_strtolower($ext), $extension) === false){
 }
 
 //コメント文字数
-if(mb_strlen($_POST['comment']) > $max_comment){
+if(mb_strlen($escaped_comment) > $max_comment){
   $response = array('status' => 'comment_error');
   //JSON形式で出力する
   echo json_encode( $response );
@@ -125,7 +129,7 @@ if($count >= $save_max_files){
                       "id = :id");
   $arg  = array('id' => $min_id);
   if (! $sql->execute($arg)) {
-    
+    // 削除を実施
   }
 }
 
@@ -136,8 +140,8 @@ $sql  = $db->prepare("INSERT INTO uploaded(origin_file_name, comment, size, coun
                     "VALUES (:origin_file_name, :comment, :size, :count, :input_date, :dl_key, :del_key)");
 
 $escape = array('<','>','&','\'','"','\\');
-$arg  = array(':origin_file_name' => $_FILES['file']['name'],
-              ':comment'          => str_replace($escape,'',$_POST['comment']),
+$arg  = array(':origin_file_name' => $escaped_file_name,
+              ':comment'          => str_replace($escape,'',$escaped_comment),
               ':size'             => $filesize,
               ':count'            => 0,
               ':input_date'       => strtotime(date('Y/m/d H:i:s')),
