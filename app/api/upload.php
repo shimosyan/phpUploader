@@ -139,9 +139,8 @@ if($count >= $save_max_files){
 $sql  = $db->prepare("INSERT INTO uploaded(origin_file_name, comment, size, count, input_date, dl_key, del_key) " . 
                     "VALUES (:origin_file_name, :comment, :size, :count, :input_date, :dl_key, :del_key)");
 
-$escape = array('<','>','&','\'','"','\\');
 $arg  = array(':origin_file_name' => $escaped_file_name,
-              ':comment'          => str_replace($escape,'',$escaped_comment),
+              ':comment'          => $escaped_comment,
               ':size'             => $filesize,
               ':count'            => 0,
               ':input_date'       => strtotime(date('Y/m/d H:i:s')),
