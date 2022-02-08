@@ -2,10 +2,10 @@ $(document).ready(function(){
 
   if(document.getElementById('fileList') != null){
 
-    $.extend( $.fn.dataTable.defaults, { 
+    $.extend( $.fn.dataTable.defaults, {
       language: {
         url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
-      } 
+      }
     });
 
     $('#fileList').DataTable({
@@ -105,7 +105,7 @@ function dl_certificat(id, key){
     id: id,
     key: key
   }
-  
+
   $.ajax({
     url  : './app/api/verifydownload.php',
     type : 'POST',
@@ -128,7 +128,6 @@ function dl_certificat(id, key){
     alert(JSON.stringify(jqXHR));
   })
   .always(function( jqXHR, textStatus ) {
-    
   });
 }
 
@@ -148,7 +147,7 @@ function del_certificat(id, key){
     id: id,
     key: key
   }
-  
+
   $.ajax({
     url  : './app/api/verifydelete.php',
     type : 'POST',
@@ -173,6 +172,5 @@ function del_certificat(id, key){
     alert(JSON.stringify(jqXHR));
   })
   .always(function( jqXHR, textStatus ) {
-    
   });
 }

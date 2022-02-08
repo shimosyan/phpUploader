@@ -27,13 +27,13 @@
     exit;
   }
 
-  // デフォルトのフェッチモードを連想配列形式に設定 
+  // デフォルトのフェッチモードを連想配列形式に設定
   // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
   $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-  
 
   // 選択 (プリペアドステートメント)
-  $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = $id");
+  $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
+  $stmt->bindValue(':id', $id); //ID
   $stmt->execute();
   $result = $stmt->fetchAll();
   foreach($result as $s){
@@ -56,7 +56,8 @@
 
 
   // カウンターを増やす
-  $upd = $db->prepare("UPDATE uploaded SET count = count + 1 WHERE id = $id");
+  $upd = $db->prepare("UPDATE uploaded SET count = count + 1 WHERE id = :id");
+  $upd->bindValue(':id', $id); //ID
   $upd->execute();
 
 
@@ -75,6 +76,6 @@
   header('Content-Type: application/force-download');
   header('Content-Disposition: attachment; filename*=UTF-8\'\''.rawurlencode($filename));
   header('Content-Length: ' . filesize($path));
-  ob_end_clean();//ファイル破損を防ぐ //出力バッファのゴミ捨て 
+  ob_end_clean();//ファイル破損を防ぐ //出力バッファのゴミ捨て
   readfile($path);
 ?>
