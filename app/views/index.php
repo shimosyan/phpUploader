@@ -116,5 +116,3 @@
     <p class="text-right">@<a href="https://github.com/shimosyan/phpUploader" target="_blank">shimosyan/phpUploader</a> (GitHub)</p>
   </div>
 </div>
-
-

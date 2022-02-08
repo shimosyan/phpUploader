@@ -126,7 +126,7 @@ $min_id = $countResult[0]['min'];
 
 if($count >= $save_max_files){
   $sql = $db->prepare("DELETE FROM uploaded WHERE id = :id");
-  $sql->bindValue(':id', $id); //ID
+  $sql->bindValue(':id', $min_id); //ID
   if (! $sql->execute()) {
     // 削除を実施
   }
