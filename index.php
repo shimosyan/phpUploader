@@ -3,7 +3,7 @@
   //簡易フレームワーク
 
   // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
-  ini_set('display_errors',1);
+  ini_set('display_errors',0);
 
   if($_GET['page'] !== null){
     $call = $_GET['page'];
