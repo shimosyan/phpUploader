@@ -34,6 +34,7 @@ class config {
       'max_file_size'       => 2,
 
       // アップロードできる拡張子
+      // nullならば制限なし
       'extension'           => array('zip','rar','lzh'),
 
       // データベースディレクトリ

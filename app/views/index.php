@@ -9,11 +9,13 @@
           <input type="text" id="fileInput" class="form-control" name="file" placeholder="ファイルを選択...">
           <span class="input-group-btn"><button type="button" class="btn btn-primary" onclick="$('input[id=lefile]').click();">Browse</button></span>
         </div>
-        <p class="help-block"><?php echo $max_file_size; ?>MBまでのファイルがアップロードできます。<br>対応拡張子： <?php 
+        <p class="help-block"><?php echo $max_file_size; ?>MBまでのファイルがアップロードできます。<br>
+        <?php if (!is_null($extension)) { ?>
+          対応拡張子： <?php
           foreach($extension as $s){
             echo $s.' ';
           }
-         ?></p>
+        }?></p>
 
         <div class="form-group">
           <label for="commentInput">コメント</label>
