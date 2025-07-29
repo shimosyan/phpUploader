@@ -38,44 +38,24 @@ ob_start();
 include('./config/config.php');
 ob_end_clean();
 
-if (function_exists('getVersion')) {
-    $configVersion = getVersion();
-    echo "⚙️  config.php バージョン: $configVersion\n";
-
-    if ($expectedVersion === $configVersion) {
-        echo "✅ バージョンが一致しています！\n";
-        exit(0);
-    } else {
-        echo "❌ バージョンが一致しません\n";
-        echo "  期待値: $expectedVersion\n";
-        echo "  実際の値: $configVersion\n";
-        exit(1);
-    }
-} else {
-    echo "❌ getVersion()関数が見つかりません\n";
-    exit(1);
-}
-
-echo "=== バージョン情報テスト ===\n\n";
-
 // configクラスのインスタンス化
 $config = new config();
 $configData = $config->index();
 
-// composer.jsonから直接読み取り
-$composerData = json_decode(file_get_contents('composer.json'), true);
-
-echo "📦 composer.json version: " . ($composerData['version'] ?? 'N/A') . "\n";
-echo "⚙️  config.php version:   " . ($configData['version'] ?? 'N/A') . "\n";
+$configVersion = $configData['version'] ?? 'N/A';
+echo "⚙️  config.php バージョン: $configVersion\n";
 
 // 一致確認
-if (($composerData['version'] ?? '') === ($configData['version'] ?? '')) {
-    echo "✅ バージョン情報が一致しています！\n";
+if ($expectedVersion === $configVersion) {
+    echo "✅ バージョンが一致しています！\n";
+    echo "\n=== その他の設定情報 ===\n";
+    echo "Title: " . $configData['title'] . "\n";
+    echo "Max file size: " . $configData['max_file_size'] . "MB\n";
+    echo "Allowed extensions: " . implode(', ', $configData['extension']) . "\n";
+    exit(0);
 } else {
-    echo "❌ バージョン情報が一致していません。\n";
+    echo "❌ バージョンが一致しません\n";
+    echo "  期待値: $expectedVersion\n";
+    echo "  実際の値: $configVersion\n";
+    exit(1);
 }
-
-echo "\n=== その他の設定情報 ===\n";
-echo "Title: " . $configData['title'] . "\n";
-echo "Max file size: " . $configData['max_file_size'] . "MB\n";
-echo "Allowed extensions: " . implode(', ', $configData['extension']) . "\n";
