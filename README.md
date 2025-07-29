@@ -88,6 +88,9 @@ cp config/config.php.example config/config.php
 docker-compose up -d web
 
 # 5. ブラウザで http://localhost にアクセス
+
+# 終了するとき
+docker-compose down web
 ```
 
 ## Security Notes
@@ -133,7 +136,11 @@ cp config/config.php.example config/config.php
 
 ```bash
 # Docker環境で実行
+docker-compose --profile tools up -d php-cli
 docker-compose exec php-cli php scripts/test-version.php
+
+# 終了するとき
+docker-compose down php-cli
 ```
 
 ### Docker環境での開発
