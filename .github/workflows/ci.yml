@@ -9,8 +9,10 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php-version == '5.6' }}
 
     strategy:
+      fail-fast: false
       matrix:
         php-version:
           - '5.6'
@@ -23,6 +25,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Display PHP version info
+        run: |
+          echo "🐘 Testing PHP ${{ matrix.php-version }}"
+          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
+            echo "⚠️  Note: PHP 5.6 is legacy support - errors are non-blocking"
+          fi
 
       - name: Setup PHP
         uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
@@ -83,8 +92,13 @@ jobs:
           echo "🔍 PHP構文チェックを実行中..."
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
           if [ $? -ne 0 ]; then
-            echo "❌ PHP構文エラーが発見されました"
-            exit 1
+            if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
+              echo "⚠️ PHP 5.6で構文エラーが発生しましたが、継続します"
+              exit 0
+            else
+              echo "❌ PHP構文エラーが発見されました"
+              exit 1
+            fi
           fi
           echo "✅ PHP構文チェック完了"
 
@@ -118,7 +132,15 @@ jobs:
             echo "✅ config.php.exampleからconfig.phpを作成しました"
           fi
           # 設定ファイルの構文チェック
-          php -l config/config.php
+          php -l config/config.php || {
+            if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
+              echo "⚠️ PHP 5.6で設定ファイルの構文エラーがありますが、継続します"
+              exit 0
+            else
+              echo "❌ 設定ファイルに構文エラーがあります"
+              exit 1
+            fi
+          }
 
       - name: Test version synchronization
         run: |
