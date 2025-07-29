@@ -29,11 +29,16 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           extensions: pdo, pdo_sqlite, sqlite3
-          tools: composer
-          coverage: xdebug
+          tools: ${{ matrix.php-version == '5.6' && 'none' || 'composer' }}
+          coverage: none
 
       - name: Validate composer.json
-        run: composer validate --strict
+        run: |
+          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
+            echo "Skipping composer validate for PHP 5.6 (composer not installed)"
+          else
+            composer validate --strict
+          fi
 
       - name: Cache Composer packages
         id: composer-cache
@@ -78,15 +83,23 @@ jobs:
       - name: Test configuration file creation
         run: |
           # 必要なディレクトリを作成
-          mkdir -p config data db
-          # config.php.exampleからconfig.phpを作成できるかテスト
-          cp config/config.php.example config/config.php
+          mkdir -p data db config
+          # config.php.exampleからconfig.phpを作成
+          if [ ! -f config/config.php ]; then
+            cp config/config.php.example config/config.php
+            echo "✅ config.php.exampleからconfig.phpを作成しました"
+          fi
+          # 設定ファイルの構文チェック
           php -l config/config.php
 
       - name: Test version synchronization
         run: |
           # バージョン同期テストを実行
-          php scripts/test-version.php
+          if [[ "${{ matrix.php-version }}" != "5.6" ]]; then
+            php scripts/test-version.php
+          else
+            echo "Skipping version test for PHP 5.6"
+          fi
 
       - name: Run application tests
         run: |

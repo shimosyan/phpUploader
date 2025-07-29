@@ -32,6 +32,8 @@ jobs:
             -x ".github/*" \
             -x "composer.lock" \
             -x "phpunit.xml" \
+            -x "cspell.json" \
+            -x ".config" \
             -x "*.md" \
             -x "data/*" \
             -x "db/*"
