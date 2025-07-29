@@ -10,7 +10,7 @@ phpUploader
 
 ## Requirement
 
-- PHP Version 5.3.3+
+- PHP Version 5.6+ (推奨: PHP 7.4+)
 - SQLite (PHPにバンドルされたもので可、一部の環境によってはphp○-sqliteのインストールが必要です。)
 
 ## Usage

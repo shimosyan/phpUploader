@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD024 -->
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -13,10 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions による自動リリース機能
 - Composer による依存関係管理
 - バージョン管理スクリプト
+- Pull Request テンプレートとIssueテンプレート
+- 自動ラベル付け機能
+- コード品質チェック（PHPStan, PHP CodeSniffer）
+- Docker による開発環境整備
 
 ### Changed
 
 - リリース管理プロセスの改善
+- PHP要件を5.6+に更新
+- config.phpをテンプレート化（config.php.example）
+- バージョン情報をcomposer.jsonから動的取得に変更
+
+### Security
+
+- 設定ファイルの機密情報をGit管理外に移動
 
 ## [1.2.1] - 2022-02-09
 
