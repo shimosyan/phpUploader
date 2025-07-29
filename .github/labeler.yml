@@ -1,0 +1,44 @@
+# 設定ファイル関連
+"area/config":
+  - config/**/*
+  - "config.php.example"
+
+# API関連
+"area/api":
+  - app/api/**/*
+
+# UI/フロントエンド関連
+"area/frontend":
+  - app/views/**/*
+  - asset/**/*
+
+# データベース関連
+"area/database":
+  - app/models/**/*
+  - db/**/*
+
+# Docker関連
+"area/docker":
+  - docker/**/*
+  - docker-compose.yaml
+  - Dockerfile
+
+# ドキュメント関連
+"area/documentation":
+  - "*.md"
+  - docs/**/*
+
+# CI/CD関連
+"area/ci":
+  - .github/**/*
+
+# セキュリティ関連
+"area/security":
+  - config/**/*
+  - app/api/verify*
+
+# リリース関連
+"area/release":
+  - scripts/release.*
+  - composer.json
+  - CHANGELOG.md

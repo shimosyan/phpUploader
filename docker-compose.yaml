@@ -8,3 +8,13 @@ services:
             - "80:80"
         volumes:
             - ".:/var/www/html/"
+
+    # リリース管理用PHPコンテナ
+    php-cli:
+        build: "./docker"
+        container_name: "php_cli"
+        volumes:
+            - ".:/var/www/html/"
+        working_dir: /var/www/html
+        profiles:
+            - tools

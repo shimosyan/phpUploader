@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version:
+          - '5.3'
+          - '7.4'
+          - '8.1'
+          - '8.2'
+          - '8.3'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo, pdo_sqlite, sqlite3
+          tools: composer
+          coverage: xdebug
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Check PHP syntax
+        run: find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+
+      - name: Run PHP CodeSniffer
+        run: |
+          if [ -f "vendor/bin/phpcs" ]; then
+            vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ .
+          else
+            echo "PHPCS not installed, skipping..."
+          fi
+
+      - name: Run PHPStan
+        run: |
+          if [ -f "vendor/bin/phpstan" ]; then
+            vendor/bin/phpstan analyse --level=1 --no-progress .
+          else
+            echo "PHPStan not installed, skipping..."
+          fi
+
+      - name: Test configuration file creation
+        run: |
+          # config.php.exampleからconfig.phpを作成できるかテスト
+          cp config/config.php.example config/config.php
+          php -l config/config.php
+
+      - name: Test version synchronization
+        run: |
+          # バージョン同期テストを実行
+          php scripts/test-version.php
+
+      - name: Run application tests
+        run: |
+          # 基本的な機能テスト（将来のPHPUnit用）
+          echo "Basic functionality tests would run here"
+
+      - name: Test Docker build
+        run: |
+          docker build -t phpuploader-test ./docker/
+
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
+        with:
+          php-version: '8.1'
+          extensions: pdo, pdo_sqlite
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Security audit
+        run: |
+          # Composerセキュリティ監査
+          composer audit
+
+      - name: Check for sensitive files
+        run: |
+          # 機密ファイルがコミットされていないかチェック
+          if [ -f "config/config.php" ]; then
+            echo "Error: config.php should not be committed"
+            exit 1
+          fi
+
+          # .envファイルのチェック
+          if [ -f ".env" ]; then
+            echo "Error: .env should not be committed"
+            exit 1
+          fi
+
+          echo "✅ No sensitive files found"
+
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
+        with:
+          node-version: '18'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint README
+        run: markdownlint README.md CHANGELOG.md --ignore node_modules
+
+      - name: Check links in README
+        uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 #v1.10.17
+        with:
+          use-quiet-mode: 'yes'

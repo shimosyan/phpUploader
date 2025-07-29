@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
+        with:
+          php-version: '8.1'
+          extensions: pdo, sqlite3
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Create release archive
+        run: |
+          # 不要なファイルを除外してアーカイブ作成
+          zip -r phpUploader-${GITHUB_REF#refs/tags/}.zip . \
+            -x "*.git*" \
+            -x "tests/*" \
+            -x "docker/*" \
+            -x "node_modules/*" \
+            -x ".github/*" \
+            -x "composer.lock" \
+            -x "phpunit.xml" \
+            -x "*.md" \
+            -x "data/*" \
+            -x "db/*"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 #2.3.2
+        with:
+          files: phpUploader-*.zip
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
