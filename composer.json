@@ -21,15 +21,16 @@
         "phpstan/phpstan": "^1.10"
     },
     "autoload": {
-        "psr-4": {
-            "PhpUploader\\": "src/"
-        }
+        "classmap": [
+            "app/models/",
+            "config/"
+        ]
     },
     "config": {
         "optimize-autoloader": true
     },
     "scripts": {
-        "test": "phpunit",
+        "check-syntax": "find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
         "release": "php scripts/release.php"
     }
 }
