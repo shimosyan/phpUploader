@@ -8,3 +8,6 @@ shivammathur
 gaurav-nelson
 squizlabs
 codesniffer
+phpunit
+softprops
+classmap

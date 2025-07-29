@@ -9,7 +9,6 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.php-version == '5.6' }}
 
     strategy:
       fail-fast: false
@@ -28,48 +27,40 @@ jobs:
       - name: Display PHP version info
         run: |
           echo "🐘 Testing PHP ${{ matrix.php-version }}"
-          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-            echo "⚠️  Note: PHP 5.6 is legacy support - errors are non-blocking"
-          fi
 
       - name: Setup PHP
         uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
         with:
           php-version: ${{ matrix.php-version }}
           extensions: pdo, pdo_sqlite, sqlite3
-          tools: ${{ matrix.php-version == '5.6' && 'none' || 'composer' }}
+          tools: composer
           coverage: none
           ini-values: error_reporting=E_ALL&~E_DEPRECATED&~E_STRICT
 
       - name: Validate composer.json
         run: |
-          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-            echo "Skipping composer validate for PHP 5.6 (composer not installed)"
-          else
-            echo "🔍 Validating composer.json..."
+          echo "🔍 Validating composer.json..."
 
-            # まず基本的なJSONの妥当性をチェック
-            if ! php -r "json_decode(file_get_contents('composer.json'), true); if (json_last_error() !== JSON_ERROR_NONE) exit(1);"; then
-              echo "❌ composer.json contains invalid JSON"
-              exit 1
-            fi
-
-            # Composer validation実行
-            composer validate --no-check-publish || {
-              echo "❌ composer.json validation failed"
-              echo "🔍 詳細な診断情報:"
-              composer validate --verbose
-              echo "📋 composer.json の内容確認:"
-              cat composer.json
-              exit 1
-            }
-            echo "✅ composer.json validation passed"
+          # まず基本的なJSONの妥当性をチェック
+          if ! php -r "json_decode(file_get_contents('composer.json'), true); if (json_last_error() !== JSON_ERROR_NONE) exit(1);"; then
+            echo "❌ composer.json contains invalid JSON"
+            exit 1
           fi
+
+          # Composer validation実行
+          composer validate --no-check-publish || {
+            echo "❌ composer.json validation failed"
+            echo "🔍 詳細な診断情報:"
+            composer validate --verbose
+            echo "📋 composer.json の内容確認:"
+            cat composer.json
+            exit 1
+          }
+          echo "✅ composer.json validation passed"
 
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
-        if: matrix.php-version != '5.6'
         with:
           path: vendor
           key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}
@@ -78,34 +69,19 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-            echo "Skipping Composer install for PHP 5.6 (dev tools not compatible)"
-          else
-            echo "📦 Installing Composer dependencies..."
-            composer install --prefer-dist --no-progress --no-interaction
-            echo "✅ Dependencies installed successfully"
-          fi
+          echo "📦 Installing Composer dependencies..."
+          composer install --prefer-dist --no-progress --no-interaction
+          echo "✅ Dependencies installed successfully"
 
       - name: Check PHP syntax
         run: |
           echo "🔍 PHP構文チェックを実行中..."
           find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
-          if [ $? -ne 0 ]; then
-            if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-              echo "⚠️ PHP 5.6で構文エラーが発生しましたが、継続します"
-              exit 0
-            else
-              echo "❌ PHP構文エラーが発見されました"
-              exit 1
-            fi
-          fi
           echo "✅ PHP構文チェック完了"
 
       - name: Run PHP CodeSniffer
         run: |
-          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-            echo "Skipping PHPCS for PHP 5.6 (not compatible)"
-          elif [ -f "vendor/bin/phpcs" ]; then
+          if [ -f "vendor/bin/phpcs" ]; then
             vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ . || echo "⚠️ Coding standard violations found (non-blocking)"
           else
             echo "PHPCS not installed, skipping..."
@@ -113,9 +89,7 @@ jobs:
 
       - name: Run PHPStan
         run: |
-          if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-            echo "Skipping PHPStan for PHP 5.6 (not compatible)"
-          elif [ -f "vendor/bin/phpstan" ]; then
+          if [ -f "vendor/bin/phpstan" ]; then
             vendor/bin/phpstan analyse --level=1 --no-progress . || echo "⚠️ Static analysis issues found (non-blocking)"
           else
             echo "PHPStan not installed, skipping..."
@@ -131,28 +105,15 @@ jobs:
             echo "✅ config.php.exampleからconfig.phpを作成しました"
           fi
           # 設定ファイルの構文チェック
-          php -l config/config.php || {
-            if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
-              echo "⚠️ PHP 5.6で設定ファイルの構文エラーがありますが、継続します"
-              exit 0
-            else
-              echo "❌ 設定ファイルに構文エラーがあります"
-              exit 1
-            fi
-          }
+          php -l config/config.php
 
       - name: Test version synchronization
         run: |
-          # バージョン同期テストを実行
-          if [[ "${{ matrix.php-version }}" != "5.6" ]]; then
-            echo "🧪 バージョン同期テストを実行中..."
-            php scripts/test-version.php || {
-              echo "⚠️ バージョンテストで問題が発生しましたが、継続します"
-              exit 0
-            }
-          else
-            echo "Skipping version test for PHP 5.6"
-          fi
+          echo "🧪 バージョン同期テストを実行中..."
+          php scripts/test-version.php || {
+            echo "⚠️ バージョンテストで問題が発生しましたが、継続します"
+            exit 0
+          }
 
       - name: Run application tests
         run: |
