@@ -1,0 +1,13 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "dictionaryDefinitions": [
+    {
+      "name": "myWords",
+      "path": "./.config/dictionary.txt"
+    }
+  ],
+  "dictionaries": [
+    "myWords"
+  ]
+}

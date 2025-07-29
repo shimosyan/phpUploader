@@ -1,0 +1,13 @@
+phpuploader
+shimosyan
+phpcs
+codelytv
+phpstan
+analyse
+shivammathur
+gaurav-nelson
+squizlabs
+codesniffer
+phpunit
+softprops
+classmap

@@ -1,0 +1,105 @@
+name: 🐛 バグ報告
+description: バグや不具合の報告
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグを報告していただき、ありがとうございます。
+        以下の情報を提供していただくことで、問題の解決を迅速に行うことができます。
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🐛 バグの内容
+      description: 発生している問題について詳しく説明してください
+      placeholder: 何が起こったか、何を期待していたかを記載してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 🔄 再現手順
+      description: バグを再現するための手順を記載してください
+      placeholder: |
+        1. '...'にアクセス
+        2. '...'をクリック
+        3. '...'を入力
+        4. エラーが発生
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ 期待される動作
+      description: 本来どのような動作をするべきかを記載してください
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: ❌ 実際の動作
+      description: 実際に起こった動作を記載してください
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 📦 バージョン
+      description: 使用しているphpUploaderのバージョン
+      placeholder: v1.2.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: php-version
+    attributes:
+      label: 🐘 PHP バージョン
+      description: 使用しているPHPのバージョン
+      options:
+        - PHP 7.4
+        - PHP 8.0
+        - PHP 8.1
+        - PHP 8.2
+        - PHP 8.3
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 🌍 実行環境
+      description: アプリケーションを実行している環境
+      options:
+        - Apache
+        - Nginx
+        - Docker
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: browser-info
+    attributes:
+      label: 🌐 ブラウザ情報
+      description: 使用しているブラウザとバージョン（フロントエンドの問題の場合）
+      placeholder: Chrome 120.0.0.0, Firefox 121.0, Safari 17.0 など
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: 📋 エラーログ
+      description: 関連するエラーログがあれば貼り付けてください
+      render: shell
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 追加情報
+      description: その他、問題の解決に役立つ情報があれば記載してください

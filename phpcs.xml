@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<ruleset name="phpUploader Coding Standard">
+    <description>Coding standard for phpUploader project</description>
+    
+    <!-- 対象ファイル -->
+    <file>.</file>
+    
+    <!-- 除外パス -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>tests/*</exclude-pattern>
+    <exclude-pattern>docker/*</exclude-pattern>
+    
+    <!-- 基本規則 -->
+    <rule ref="PSR12">
+        <!-- レガシーコードのため一時的に無視 -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+        <exclude name="PSR12.Files.FileHeader.IncorrectOrder"/>
+    </rule>
+    
+    <!-- ファイルエンコーディング -->
+    <rule ref="Generic.Files.ByteOrderMark"/>
+    
+    <!-- セキュリティ関連 -->
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    
+    <!-- 設定 -->
+    <ini name="memory_limit" value="256M"/>
+</ruleset>

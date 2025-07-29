@@ -1,0 +1,12 @@
+parameters:
+    level: 1
+    paths:
+        - .
+    excludePaths:
+        - vendor
+        - tests
+    ignoreErrors:
+        # レガシーコードのため一時的に無視する項目
+        - '#Variable \$[a-zA-Z_]+ might not be defined#'
+        - '#Function extract\(\) should not be used#'
+    reportUnmatchedIgnoredErrors: false

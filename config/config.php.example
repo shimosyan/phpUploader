@@ -13,11 +13,11 @@ class config {
     return array(
       // 管理者用キー
       // DLキーとDELキーで使用するマスターキーです。
-      'master'              => 'hoge',
+      'master'              => 'CHANGE_THIS_MASTER_KEY',
 
       // 各キーの暗号化用ハッシュ
       // ランダムな英数字の羅列を設定してください。
-      'key'                 => 'hogehoge',
+      'key'                 => 'CHANGE_THIS_ENCRYPTION_KEY',
 
       // タイトル
       'title'               => 'アップローダー',
@@ -48,8 +48,26 @@ class config {
       // セキュリティを向上したいときにお使いください。
       'encrypt_filename'    => false,
 
-      // バージョン情報です。書き換えないでください。
-      'version'             => '1.2.1'
+      // バージョン情報（composer.jsonから自動取得）
+      'version'             => $this->getVersion()
     );
+  }
+
+  /**
+   * composer.jsonからバージョン情報を取得
+   * ファイルが存在しない場合はデフォルト値を返す
+   */
+  private function getVersion() {
+    $composerPath = __DIR__ . '/../composer.json';
+
+    if (file_exists($composerPath)) {
+      $composerData = json_decode(file_get_contents($composerPath), true);
+      if (isset($composerData['version'])) {
+        return $composerData['version'];
+      }
+    }
+
+    // composer.jsonが存在しない、または読み取れない場合のフォールバック
+    return 'x.x.x';
   }
 }

@@ -1,3 +1,22 @@
-.vscode/launch.json
+# IDE
+.vscode/
+.idea/
+
+# Application data
 data/*
 db/*
+
+# Dependencies
+vendor/
+node_modules/
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Environment
+.env
+config/config.php
+
+# Logs
+*.log
