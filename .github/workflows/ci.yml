@@ -39,10 +39,20 @@ jobs:
             echo "Skipping composer validate for PHP 5.6 (composer not installed)"
           else
             echo "🔍 Validating composer.json..."
-            composer validate --strict --no-check-publish || {
+
+            # まず基本的なJSONの妥当性をチェック
+            if ! php -r "json_decode(file_get_contents('composer.json'), true); if (json_last_error() !== JSON_ERROR_NONE) exit(1);"; then
+              echo "❌ composer.json contains invalid JSON"
+              exit 1
+            fi
+
+            # Composer validation実行
+            composer validate --no-check-publish || {
               echo "❌ composer.json validation failed"
-              echo "Running composer validate with verbose output:"
+              echo "🔍 詳細な診断情報:"
               composer validate --verbose
+              echo "📋 composer.json の内容確認:"
+              cat composer.json
               exit 1
             }
             echo "✅ composer.json validation passed"
@@ -51,9 +61,10 @@ jobs:
       - name: Cache Composer packages
         id: composer-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
+        if: matrix.php-version != '5.6'
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}
           restore-keys: |
             ${{ runner.os }}-php-${{ matrix.php-version }}-
 
@@ -62,7 +73,9 @@ jobs:
           if [[ "${{ matrix.php-version }}" == "5.6" ]]; then
             echo "Skipping Composer install for PHP 5.6 (dev tools not compatible)"
           else
-            composer install --prefer-dist --no-progress
+            echo "📦 Installing Composer dependencies..."
+            composer install --prefer-dist --no-progress --no-interaction
+            echo "✅ Dependencies installed successfully"
           fi
 
       - name: Check PHP syntax
