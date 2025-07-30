@@ -125,46 +125,6 @@
         </tfoot>
          
       </table>
-
-      <!-- カード表示用（モバイル） -->
-      <div id="fileListCards">
-        <?php 
-          foreach($data as $s){
-            echo '<div class="file-card">';
-            echo '  <div class="file-card__main" onclick="toggleCardDetails(this)">';
-            echo '    <div class="file-card__content">';
-            echo '      <a href="javascript:void(0);" class="file-card__filename" onclick="event.stopPropagation(); dl_button('.$s['id'].');">'.$s['origin_file_name'].'</a>';
-            echo '      <p class="file-card__comment">'.$s['comment'].'</p>';
-            echo '    </div>';
-            echo '    <button class="file-card__toggle" type="button">▼</button>';
-            echo '  </div>';
-            echo '  <div class="file-card__details">';
-            echo '    <div class="file-card__detail-row">';
-            echo '      <span class="file-card__detail-label">ID:</span>';
-            echo '      <span class="file-card__detail-value">'.$s['id'].'</span>';
-            echo '    </div>';
-            echo '    <div class="file-card__detail-row">';
-            echo '      <span class="file-card__detail-label">サイズ:</span>';
-            echo '      <span class="file-card__detail-value file-card__detail-value--size">'.round($s['size'] / (1024*1024), 1 ).'MB</span>';
-            echo '    </div>';
-            echo '    <div class="file-card__detail-row">';
-            echo '      <span class="file-card__detail-label">日付:</span>';
-            echo '      <span class="file-card__detail-value file-card__detail-value--date">'.date("Y/m/d H:i:s", $s['input_date']).'</span>';
-            echo '    </div>';
-            echo '    <div class="file-card__detail-row">';
-            echo '      <span class="file-card__detail-label">DL数:</span>';
-            echo '      <span class="file-card__detail-value file-card__detail-value--count">'.$s['count'].'</span>';
-            echo '    </div>';
-            echo '    <div class="file-card__actions">';
-            echo '      <a href="javascript:void(0);" class="file-card__action-btn" onclick="dl_button('.$s['id'].');">ダウンロード</a>';
-            echo '      <a href="javascript:void(0);" class="file-card__action-btn file-card__action-btn--delete" onclick="del_button('.$s['id'].');">削除</a>';
-            echo '    </div>';
-            echo '  </div>';
-            echo '</div>';
-          }
-        ?>
-      </div>
-
     </div>
     <p class="text-right">@<a href="https://github.com/shimosyan/phpUploader" target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
   </div>
