@@ -14,21 +14,24 @@
 
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
-      <p class="h2">???????</p>
+      <div class="page-header">
+        <h1><?php echo $title; ?> <small>ファイルアップロード</small></h1>
+      </div>
       <form id="upload" class="upload-form">
         <input type="hidden" id="csrfToken" name="csrf_token" 
                value="<?php echo htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8'); ?>">
         
-        <!-- ????&??????? -->
+        <!-- ドラッグ&ドロップエリア -->
         <div id="dragDropArea" class="drag-drop-area">
           <div class="drag-drop-content">
             <div class="drag-drop-icon">
               <span class="glyphicon glyphicon-cloud-upload"></span>
             </div>
-            <h4>?????????&????</h4>
-            <p>???</p>
-            <button type="button" class="btn btn-primary" id="selectFilesBtn">???????</button>
-            <button type="button" class="btn btn-info" id="selectFolderBtn">???????</button>
+            <h4>ファイルをドラッグ&ドロップ</h4>
+            <p class="text-muted">複数ファイルやフォルダにも対応しています</p>
+            <p>または</p>
+            <button type="button" class="btn btn-primary" id="selectFilesBtn">ファイルを選択</button>
+            <button type="button" class="btn btn-info" id="selectFolderBtn">フォルダを選択</button>
           </div>
           <div class="drag-drop-overlay">
             <div class="drag-drop-overlay-content">
