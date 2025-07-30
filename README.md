@@ -6,12 +6,18 @@ phpUploader
 
 サーバーに設置するだけで使える簡易PHPアップローダーです。
 
-![スクリーンショット](https://cloud.githubusercontent.com/assets/26715606/25776917/1b5dbc02-3307-11e7-8155-e2d86c08f4a1.png)
+![cover](https://github.com/user-attachments/assets/bd485c47-6acd-4525-9a17-5eb38cf98fc0)
+
+## ⚠️ 重要: Ver.2.0 の破壊的変更について
+
+**Ver.2.0 は DB の仕様を刷新したため、Ver.1.x 系との互換性がありません。**
 
 ## Requirement
 
-- PHP Version 5.6+ (推奨: PHP 7.4+)
+- PHP Version 8.1+
 - SQLite (PHPにバンドルされたもので可、一部の環境によってはphp○-sqliteのインストールが必要です。)
+- PHP拡張: `openssl`, `json`, `mbstring`, `hash`
+- Webサーバー: Apache もしくは Nginx + PHP-FPM
 
 ## Usage
 
@@ -21,37 +27,41 @@ phpUploader
 
 ## Install
 
-①下記URLからダウンロードしたファイルを任意のディレクトリに展開して下さい。
+① 下記URLからダウンロードしたファイルを任意のディレクトリに展開して下さい。
 
 <https://github.com/shimosyan/phpUploader/releases>
 
-**注意: v0.1及びv0.2からv1.0以降へのアップデートはできません。**
-
-②設定ファイルを作成して下さい。
+② 設定ファイルを作成して下さい。
 
 ```bash
 # config.php.exampleをコピーして設定ファイルを作成
 cp config/config.php.example config/config.php
 ```
 
-③config/config.phpを任意の値で編集して下さい。
+③ `config/config.php`を任意の値で編集して下さい。
 
 **重要**: 以下の項目は必ず変更してください：
 
 - `master`: 管理者用キー（DLキー・DELキーのマスターキー）
 - `key`: 暗号化用ハッシュ（ランダムな英数字）
+- `session_salt`: セッションソルト（ランダムな英数字）
 
 ```php
 // 例：セキュリティのため必ず変更してください
-'master' => 'your_secure_master_key_here',
-'key'    => 'your_random_encryption_key_here',
+'master' => 'YOUR_SECURE_MASTER_KEY_HERE',              // マスターキー
+'key' => hash('sha256', 'YOUR_ENCRYPTION_SEED_HERE'),   // 暗号化キー
+'session_salt' => hash('sha256', 'YOUR_SESSION_SALT'),  // セッションソルト
 ```
 
-④設置したディレクトリにapacheまたはnginxの実行権限を付与して下さい。
+④ 設置したディレクトリにapacheまたはnginxの実行権限を付与して下さい。
 
-④この状態でサーバーに接続するとDBファイル(既定値 ./db/uploader.db)とデータ設置用のディレクトリ(既定値 ./data)が作成されます。
+④ この状態でサーバーに接続すると下記のディレクトリが自動作成されます。
 
-⑤configディレクトリとデータ設置用のディレクトリ(既定値 ./data)に.htaccessなどを用いて外部からの接続を遮断させて下さい。
+- DBファイル(既定値 `./db/uploader.db`)
+- データ設置用のディレクトリ(既定値 `./data`)
+- ログファイル用のディレクトリ(既定値 `./logs`)
+
+⑤ configディレクトリとDBファイル設置用のディレクトリ(既定値 `./db`)、ログファイル用のディレクトリ(既定値 `./logs`)には`.htaccess`などを用いて外部からの接続を遮断させて下さい。
 
 **セキュリティ設定例（Apache）:**
 
@@ -61,7 +71,12 @@ cp config/config.php.example config/config.php
     Deny from all
 </Files>
 
-# data/.htaccess
+# db/.htaccess
+<Files "*">
+    Deny from all
+</Files>
+
+# logs/.htaccess
 <Files "*">
     Deny from all
 </Files>
@@ -99,14 +114,15 @@ docker-compose down web
 
 - `config/config.php`は機密情報を含むため、必ず外部アクセスを遮断してください
 - `master`と`key`には推測困難なランダムな値を設定してください
-- 本番環境では`config`と`data`ディレクトリへの直接アクセスを禁止してください
+- 本番環境では`config`と`db`、`logs`ディレクトリへの直接アクセスを禁止してください
 
 **推奨セキュリティ設定**:
 
 ```php
 // 強力なキーの例（実際は異なる値を使用してください）
-'master' => bin2hex(random_bytes(16)), // 32文字のランダム文字列
-'key'    => bin2hex(random_bytes(32)), // 64文字のランダム文字列
+'master'       => bin2hex(random_bytes(16)), // 32文字のランダム文字列
+'key'          => bin2hex(random_bytes(32)), // 64文字のランダム文字列
+'session_salt' => hash('sha256', bin2hex(random_bytes(32))), // 32文字のランダム文字列
 ```
 
 ## Development
@@ -152,13 +168,13 @@ PHPがローカルにインストールされていなくても、Dockerを使�
 docker-compose up -d web
 
 # リリース管理（Linux/Mac）
-./scripts/release.sh 1.3.0
+./scripts/release.sh x.x.x
 
 # リリース管理（Windows）
-scripts\release.bat 1.3.0
+scripts\release.bat x.x.x
 
 # 自動プッシュ付きリリース
-./scripts/release.sh 1.3.0 --push
+./scripts/release.sh x.x.x --push
 
 # Composer管理
 ./scripts/composer.sh install

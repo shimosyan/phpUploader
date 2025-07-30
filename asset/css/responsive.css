@@ -1,0 +1,473 @@
+/* ===================================================
+   PHP Uploader Ver.2.0 - レスポンシブ対応CSS
+   ================================================= */
+
+/* モバイル対応のカード型レイアウト */
+@media (max-width: 768px) {
+  /* テーブル表示を隠してカード表示に切り替え */
+  .file-table-container {
+    display: none !important;
+  }
+  
+  .file-cards-container {
+    display: block !important;
+  }
+  
+  /* アップロードフォームの調整 */
+  .upload-form .row .col-sm-6 {
+    margin-bottom: 15px;
+  }
+  
+  .upload-form .col-sm-offset-10 {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .upload-form .btn-submit {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 769px) {
+  /* デスクトップ表示時はカードを隠してテーブル表示 */
+  .file-table-container {
+    display: block !important;
+  }
+  
+  .file-cards-container {
+    display: none !important;
+  }
+}
+
+/* ===================================================
+   カード型レイアウトのスタイル
+   ================================================= */
+
+.file-cards-container {
+  display: none; /* デフォルトは非表示 */
+  margin-top: 20px;
+}
+
+.file-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.file-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.file-card__header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-card__header:hover {
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+}
+
+.file-card__main-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-card__filename {
+  font-size: 16px;
+  font-weight: 600;
+  color: #007bff;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 4px;
+  word-wrap: break-word;
+  transition: color 0.2s ease;
+}
+
+.file-card__filename:hover {
+  color: #0056b3;
+  text-decoration: none;
+}
+
+.file-card__comment {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.file-card__comment:empty:before {
+  content: "コメントなし";
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.file-card__toggle {
+  background: none;
+  border: none;
+  color: #6c757d;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-card__toggle:hover {
+  background: rgba(0,123,255,0.1);
+  color: #007bff;
+}
+
+.file-card__toggle.expanded {
+  transform: rotate(180deg);
+  color: #007bff;
+}
+
+.file-card__details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  background: #fff;
+}
+
+.file-card__details.expanded {
+  max-height: 300px;
+  padding: 20px;
+}
+
+.file-card__detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.file-card__detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-card__detail-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.file-card__detail-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.file-card__detail-value--size {
+  font-family: 'Courier New', monospace;
+  color: #28a745;
+}
+
+.file-card__detail-value--date {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.file-card__detail-value--count {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 24px;
+  text-align: center;
+}
+
+.file-card__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f3f4;
+}
+
+.file-card__action-btn {
+  flex: 1;
+  background: #fff;
+  border: 2px solid #007bff;
+  color: #007bff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-card__action-btn:hover {
+  background: #007bff;
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+.file-card__action-btn--delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.file-card__action-btn--delete:hover {
+  background: #dc3545;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+}
+
+/* ===================================================
+   アップロードフォームの改善
+   ================================================= */
+
+.upload-form {
+  margin-bottom: 30px;
+}
+
+.upload-form .form-section {
+  margin-bottom: 20px;
+}
+
+.upload-form .file-input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.upload-form .btn-submit {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.upload-form .btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+}
+
+/* ===================================================
+   ステータスメッセージの改善
+   ================================================= */
+
+.status-message {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  padding: 16px 20px;
+  border: none;
+  font-weight: 500;
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-message.success {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.status-message.error {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+/* =================================================
+   プログレスバーとアップロード表示
+   ================================================= */
+
+.upload-progress {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.upload-progress h4 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-weight: 600;
+  text-align: center;
+}
+
+.progress {
+  height: 20px;
+  background: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  background: linear-gradient(45deg, #28a745, #20c997);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.3) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.3) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+  animation: progress-stripe 1s linear infinite;
+}
+
+.progress-bar span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  color: #fff;
+  font-size: 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes progress-stripe {
+  0% { background-position: 20px 0; }
+  100% { background-position: 0 0; }
+}
+
+/* エラーコンテナ */
+.error-container {
+  margin: 20px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 1px solid #f56565;
+  border-radius: 12px;
+  color: #c53030;
+  box-shadow: 0 2px 10px rgba(245, 101, 101, 0.1);
+}
+
+.error-container .panel-heading h4 {
+  margin: 0 0 15px 0;
+  color: #c53030;
+  font-weight: 600;
+  text-align: center;
+}
+
+.error-container .panel-body {
+  color: #c53030;
+  font-weight: 500;
+}
+
+/* ===================================================
+   プログレスバーとエラー表示の改善
+   ================================================= */
+
+.upload-progress {
+  margin-top: 15px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.upload-progress .progress {
+  height: 8px;
+  border-radius: 4px;
+  background: #e9ecef;
+  overflow: hidden;
+}
+
+.upload-progress .progress-bar {
+  background: linear-gradient(90deg, #007bff 0%, #28a745 100%);
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+
+.error-container {
+  margin-top: 15px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  border-left: 4px solid #dc3545;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.1);
+}
+
+/* ===================================================
+   アニメーション効果
+   ================================================= */
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

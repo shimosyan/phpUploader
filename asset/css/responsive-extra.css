@@ -1,0 +1,99 @@
+/* =================================================
+   レスポンシブデザイン最終調整とアクセシビリティ
+   ================================================= */
+
+/* より小さなスクリーン向け調整 */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px 5px;
+  }
+  
+  .form-section {
+    padding: 15px;
+  }
+  
+  .btn-submit {
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .file-card {
+    margin-bottom: 10px;
+  }
+  
+  .file-card__header {
+    padding: 12px 15px;
+  }
+  
+  .file-card__details {
+    padding: 15px;
+  }
+}
+
+/* タブレット向け調整 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .file-cards-container {
+    display: none;
+  }
+  
+  .file-table-container {
+    display: block;
+  }
+}
+
+/* 印刷時の調整 */
+@media print {
+  .btn, .file-card__toggle, .upload-progress {
+    display: none !important;
+  }
+  
+  .file-card {
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+}
+
+/* アクセシビリティ改善 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ハイコントラストモード対応 */
+@media (prefers-contrast: high) {
+  .file-card {
+    border: 2px solid #000;
+  }
+  
+  .file-card__header {
+    background: #fff;
+    color: #000;
+  }
+  
+  .btn-success {
+    background: #000;
+    border-color: #000;
+  }
+}
+
+/* ダークモード対応（必要に応じて） */
+@media (prefers-color-scheme: dark) {
+  .file-card {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .file-card__header {
+    background: #4a5568;
+    color: #e2e8f0;
+  }
+  
+  .upload-progress {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+}

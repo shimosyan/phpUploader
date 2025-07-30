@@ -29,3 +29,111 @@
 .row{
   margin-bottom: 12px;
 }
+
+/* Ver.2.0 エラー表示の改善 */
+.panel-danger .panel-body small.text-muted {
+  font-size: 0.85em;
+  opacity: 0.8;
+  display: block;
+  margin-top: 8px;
+}
+
+.panel-danger .panel-body strong {
+  color: #a94442;
+}
+
+/* エラーメッセージ内のコード表示 */
+.error-code {
+  font-family: 'Courier New', monospace;
+  background-color: rgba(0,0,0,0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Ver.2.0 レスポンシブ対応強化 */
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .radius {
+    padding: 16px;
+  }
+
+  /* フォームの2カラムレイアウトをモバイルで1カラムに */
+  .row .col-sm-6 {
+    margin-bottom: 15px;
+  }
+
+  /* ボタンをフル幅に */
+  .btn-block {
+    width: 100% !important;
+  }
+
+  /* アップロードセクションの調整 */
+  #upload .row:last-child .col-sm-offset-10 {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* アップロード進捗とエラーメッセージのスタイル改善 */
+#uploadContainer,
+#errorContainer,
+#successContainer {
+  margin-top: 15px;
+}
+
+/* ステータスメッセージの改善 */
+.alert {
+  border-radius: 6px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* プログレスバーの改善 */
+.progress {
+  height: 20px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+/* ファイル選択エリアの改善 */
+.input-group {
+  position: relative;
+}
+
+.input-group .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group-btn .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* ヘルプテキストの改善 */
+.help-block {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.4;
+}

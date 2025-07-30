@@ -1,0 +1,614 @@
+/* 
+ * ファイル一覧カード + 検索・ページネーション機能
+ * DataTables完全廃止版 Ver.2.0
+ */
+
+/* === ファイル一覧コンテナ === */
+.file-manager {
+  margin-top: 20px;
+}
+
+.file-manager__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.file-manager__title {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-manager__stats {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* === コントロール全体 === */
+.file-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* === 検索・フィルター === */
+.file-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.file-search__input {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.file-search__input input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.file-search__input input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.file-search__sort {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.file-search__sort select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+}
+
+.file-search__clear {
+  padding: 6px 12px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.file-search__clear:hover {
+  background: #5a6268;
+}
+
+/* === ビュー切り替えボタン === */
+.file-view-toggle {
+  display: flex;
+  gap: 2px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.file-view-toggle__btn {
+  padding: 6px 12px;
+  background: white;
+  color: #6c757d;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.file-view-toggle__btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.file-view-toggle__btn--active {
+  background: #007bff;
+  color: white;
+}
+
+.file-view-toggle__btn--active:hover {
+  background: #0056b3;
+}
+
+/* === 統一カードレイアウト === */
+.file-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* === リストビューレイアウト === */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.file-list-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  gap: 12px;
+}
+
+.file-list-item:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-color: #007bff;
+}
+
+.file-list-item__icon {
+  font-size: 24px;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.file-list-item__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-list-item__info {
+  margin-bottom: 4px;
+}
+
+.file-list-item__filename {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #007bff;
+  text-decoration: none;
+  margin-bottom: 2px;
+  word-break: break-word;
+}
+
+.file-list-item__filename:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.file-list-item__comment {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.3;
+  max-height: 2.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.file-list-item__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.file-list-item__meta-item {
+  font-size: 12px;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.file-list-item__meta-label {
+  font-weight: 500;
+}
+
+.file-list-item__meta-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.file-list-item__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.file-list-item__btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-list-item__btn:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.file-list-item__btn--delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.file-list-item__btn--delete:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.file-card-v2 {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.file-card-v2:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.file-card-v2__header {
+  padding: 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.file-card-v2__filename {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #007bff;
+  text-decoration: none;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.file-card-v2__filename:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.file-card-v2__comment {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.4;
+  max-height: 2.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.file-card-v2__body {
+  padding: 16px;
+}
+
+.file-card-v2__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.file-card-v2__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.file-card-v2__meta-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.file-card-v2__meta-label {
+  color: #6c757d;
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.file-card-v2__meta-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.file-card-v2__actions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #e9ecef;
+  padding-top: 12px;
+}
+
+.file-card-v2__btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #007bff;
+  background: white;
+  color: #007bff;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-card-v2__btn:hover {
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+}
+
+.file-card-v2__btn--delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.file-card-v2__btn--delete:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* === ページネーション === */
+.file-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.file-pagination__info {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.file-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-pagination__per-page {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.file-pagination__per-page select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.file-pagination__nav {
+  display: flex;
+  gap: 5px;
+}
+
+.file-pagination__btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.file-pagination__btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.file-pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-pagination__btn--active {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.file-pagination__btn--active:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+/* === 空状態 === */
+.file-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.file-empty__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.file-empty__title {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #495057;
+}
+
+.file-empty__message {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* === 検索結果なし === */
+.file-no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+/* === ローディング === */
+.file-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.file-loading__spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === レスポンシブ === */
+@media (max-width: 768px) {
+  .file-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .file-card-v2__meta {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .file-manager__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .file-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .file-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .file-search__input {
+    max-width: none;
+  }
+  
+  .file-view-toggle {
+    align-self: center;
+  }
+  
+  .file-pagination {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .file-pagination__controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  /* リストビューのレスポンシブ対応 */
+  .file-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .file-list-item__main {
+    width: 100%;
+  }
+  
+  .file-list-item__meta {
+    justify-content: space-between;
+  }
+  
+  .file-list-item__actions {
+    align-self: center;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-card-v2__actions {
+    flex-direction: column;
+  }
+  
+  .file-pagination__nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .file-list-item__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* === 隠しクラス（DataTables削除用） === */
+.file-table-container {
+  display: none !important;
+}
+
+/* DataTablesスタイルの上書き */
+.dataTables_wrapper {
+  display: none !important;
+}
