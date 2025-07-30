@@ -77,7 +77,9 @@ try {
     $viewData = array_merge($config, $modelData, [
         'logger' => $logger,
         'responseHandler' => $responseHandler,
-        'db' => $db
+        'db' => $db,
+        'csrf_token' => SecurityUtils::generateCSRFToken(),
+        'status_message' => $_GET['deleted'] ?? null
     ]);
 
     // 変数の展開

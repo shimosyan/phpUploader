@@ -1,9 +1,22 @@
 
 <div class="container">
+  <?php if (isset($status_message)): ?>
+    <?php if ($status_message === 'success'): ?>
+      <div id="statusMessage" class="alert alert-success" role="alert">
+        <strong>削除完了！</strong> ファイルが正常に削除されました。
+      </div>
+    <?php elseif ($status_message === 'error'): ?>
+      <div id="statusMessage" class="alert alert-danger" role="alert">
+        <strong>エラー</strong> ファイルの削除に失敗しました。
+      </div>
+    <?php endif; ?>
+  <?php endif; ?>
+  
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
       <p class="h2">ファイルを登録</p>
       <form id="upload">
+        <input type="hidden" id="csrfToken" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8'); ?>">
         <input id="lefile" name="file" type="file" style="display:none">
         <div class="input-group">
           <input type="text" id="fileInput" class="form-control" name="file" placeholder="ファイルを選択...">
