@@ -100,8 +100,6 @@ try {
     // 入力データの取得とサニタイズ
     $fileName = htmlspecialchars($_FILES['file']['name'], ENT_QUOTES, 'UTF-8');
     $comment = htmlspecialchars($_POST['comment'] ?? '', ENT_QUOTES, 'UTF-8');
-    $dlKey = $_POST['dlkey'] ?? '';
-    $delKey = $_POST['delkey'] ?? '';
     $fileSize = filesize($_FILES['file']['tmp_name']);
     $fileTmpPath = $_FILES['file']['tmp_name'];
 

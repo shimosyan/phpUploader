@@ -26,7 +26,10 @@ class config {
             'save_max_files' => 500,
             'max_comment' => 80,
             'max_file_size' => 2, // MB
-            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
+            
+            // DLキー・DELキーの必須設定
+            'dlkey_required' => false,  // true: 必須, false: 任意
+            'delkey_required' => false,  // true: 必須, false: 任意
 
             // ディレクトリ設定
             'db_directory' => dirname(__DIR__) . '/db',
@@ -45,33 +48,34 @@ class config {
             // ログ設定
             'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
             'log_retention_days' => 30,
-      // アップロードできる拡張子
-      'extension'           => array(
-        // アーカイブ・圧縮ファイル
-        'zip', 'rar', 'lzh', '7z', 'tar', 'gz', 'bz2', 'xz',
-        
-        // ドキュメント
-        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-        'odt', 'ods', 'odp', 'rtf', 'txt', 'csv',
-        
-        // 画像
-        'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp',
-        'tiff', 'tif', 'ico', 'psd',
-        
-        // 音声
-        'mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma',
-        
-        // 動画
-        'mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm',
-        'm4v', 'mpg', 'mpeg',
-        
-        // 開発・設定ファイル
-        'json', 'xml', 'yaml', 'yml', 'ini', 'conf', 'cfg',
-        'sql', 'log', 'md', 'html', 'htm', 'css', 'js',
-        
-        // その他
-        'epub', 'mobi', 'azw3', 'fb2'
-      ),
+
+            // アップロードできる拡張子
+            'extension' => [
+                // アーカイブ・圧縮ファイル
+                'zip', 'rar', 'lzh', '7z', 'tar', 'gz', 'bz2', 'xz',
+                
+                // ドキュメント
+                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+                'odt', 'ods', 'odp', 'rtf', 'txt', 'csv',
+                
+                // 画像
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp',
+                'tiff', 'tif', 'ico', 'psd',
+                
+                // 音声
+                'mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma',
+                
+                // 動画
+                'mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm',
+                'm4v', 'mpg', 'mpeg',
+                
+                // 開発・設定ファイル
+                'json', 'xml', 'yaml', 'yml', 'ini', 'conf', 'cfg',
+                'sql', 'log', 'md', 'html', 'htm', 'css', 'js',
+                
+                // その他
+                'epub', 'mobi', 'azw3', 'fb2'
+            ],
 
             // トークン設定
             'token_expiry_minutes' => 10,

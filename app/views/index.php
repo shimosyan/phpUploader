@@ -52,27 +52,28 @@
           <button type="button" class="btn btn-sm btn-default" id="clearFilesBtn">???</button>
         </div>
 
+        <!-- ファイル入力エリア（レガシーサポート） -->
         <div class="form-section file-input-group">
           <input id="lefile" name="file" type="file" style="display:none">
           <div class="input-group">
-            <input type="text" id="fileInput" class="form-control" name="file" placeholder="???????..." readonly>
+            <input type="text" id="fileInput" class="form-control" name="file" placeholder="ファイルを選択..." readonly>
             <span class="input-group-btn">
               <button type="button" class="btn btn-primary" onclick="$('input[id=lefile]').click();">
-                ?? ??????
+                ファイル 選択
               </button>
             </span>
           </div>
           <p class="help-block">
-            ?? ??<?php echo $max_file_size; ?>MB??????????<br>
-            ?? ?????: <?php echo implode(', ', $extension); ?>
+            最大 サイズ: <?php echo $max_file_size ?? 2; ?>MBまでアップロード可能<br>
+            対応 拡張子: <?php echo implode(', ', $extension ?? ['zip', 'pdf', 'jpg', 'png']); ?>
           </p>
         </div>
 
         <div class="form-section">
           <div class="form-group">
-            <label for="commentInput">?? ????</label>
-            <input type="text" class="form-control" id="commentInput" name="comment" placeholder="??????????...">
-            <p class="help-block"><?php echo $max_comment; ?>????????</p>
+            <label for="commentInput">コメント （任意）</label>
+            <input type="text" class="form-control" id="commentInput" name="comment" placeholder="コメントを入力...">
+            <p class="help-block"><?php echo $max_comment ?? 80; ?>文字以内で入力</p>
           </div>
         </div>
 
@@ -80,16 +81,38 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="dlkeyInput">?? ????????</label>
-                <input type="text" class="form-control" id="dleyInput" name="dlkey" placeholder="????????...">
-                <p class="help-block">???????</p>
+                <label for="dlkeyInput">
+                  DLキー
+                  <?php if (isset($dlkey_required) && $dlkey_required) : ?>
+                    <span class="text-danger">*必須</span>
+                  <?php else : ?>
+                    <small class="text-muted">(任意・自動生成)</small>
+                  <?php endif; ?>
+                </label>
+                <input type="text" class="form-control" id="dleyInput" name="dlkey"
+                       placeholder="<?php echo (isset($dlkey_required) && $dlkey_required) ?
+                                      'DLキーを入力してください' :
+                                      'DLキーを入力... (空白時は自動生成)'; ?>"
+                       <?php echo (isset($dlkey_required) && $dlkey_required) ? 'required' : ''; ?>>
+                <p class="help-block">ファイルダウンロード時に必要なキーです</p>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="delkeyInput">??? ????</label>
-                <input type="text" class="form-control" id="deleyInput" name="delkey" placeholder="????????...">
-                <p class="help-block">???????</p>
+                <label for="delkeyInput">
+                  DELキー
+                  <?php if (isset($delkey_required) && $delkey_required) : ?>
+                    <span class="text-danger">*必須</span>
+                  <?php else : ?>
+                    <small class="text-muted">(任意・自動生成)</small>
+                  <?php endif; ?>
+                </label>
+                <input type="text" class="form-control" id="deleyInput" name="delkey"
+                       placeholder="<?php echo (isset($delkey_required) && $delkey_required) ?
+                                      'DELキーを入力してください' :
+                                      'DELキーを入力... (空白時は自動生成)'; ?>"
+                       <?php echo (isset($delkey_required) && $delkey_required) ? 'required' : ''; ?>>
+                <p class="help-block">ファイル削除時に必要なキーです</p>
               </div>
             </div>
           </div>

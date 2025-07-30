@@ -161,7 +161,7 @@ function file_upload()
   })
   .done(function(data, textStatus, jqXHR){
     if (data.status === 'success') {
-      // 成功時はページをリロード（新ファイルマネージャーはリロード後に更新される）
+      // Ver.2.0の成功レスポンス - 新ファイルマネージャーはリロード後に更新される
       showSuccess(data.message || 'ファイルのアップロードが完了しました。');
       setTimeout(function() {
         location.reload();
@@ -186,7 +186,7 @@ function file_upload()
 
       showError(errorMessage);
     } else {
-      // 旧バージョン互換
+      // 旧バージョン互換 + DL/DELキー必須エラー対応
       switch (data.status){
         case 'filesize_over':
             showError('ファイル容量が大きすぎます。');
@@ -196,6 +196,12 @@ function file_upload()
           break;
         case 'comment_error':
             showError('コメントの文字数が規定数を超えています。');
+          break;
+        case 'dlkey_required':
+            showError('DLキーは必須入力です。');
+          break;
+        case 'delkey_required':
+            showError('DELキーは必須入力です。');
           break;
         case 'sqlwrite_error':
             showError('データベースの書き込みに失敗しました。');

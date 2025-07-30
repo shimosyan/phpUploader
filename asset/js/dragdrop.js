@@ -347,6 +347,12 @@ function handleUploadError(data, filename) {
     case 'comment_error':
       errorMessage = 'コメントの文字数が規定数を超えています。';
       break;
+    case 'dlkey_required':
+      errorMessage = 'DLキーは必須入力です。';
+      break;
+    case 'delkey_required':
+      errorMessage = 'DELキーは必須入力です。';
+      break;
     case 'sqlwrite_error':
       errorMessage = 'データベースの書き込みに失敗しました: ' + filename;
       break;
