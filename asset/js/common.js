@@ -476,7 +476,7 @@ function show_share_modal(data){
   html += '</div>';
   html += '</div>';
   
-  openModal('ok', 'ファイル共有', html, '');
+  openModal('ok', 'ファイル共有', html, 'closeModal()');
 }
 
 function copyToClipboard(elementId) {
