@@ -6,7 +6,7 @@ phpUploader
 
 サーバーに設置するだけで使える簡易PHPアップローダーです。
 
-![cover](/image/cover.png)
+![cover](https://github.com/user-attachments/assets/bd485c47-6acd-4525-9a17-5eb38cf98fc0)
 
 ## ⚠️ 重要: Ver.2.0 の破壊的変更について
 
