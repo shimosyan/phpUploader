@@ -1,7 +1,27 @@
 $(document).ready(function(){
 
-  if(document.getElementById('fileList') != null){
+  // === 新しいファイル管理システム初期化 (Ver.2.0) ===
+  if (window.fileData && document.getElementById('fileManagerContainer')) {
+    // DataTables完全廃止・新ファイルマネージャー使用
+    const fileManager = new FileManager(
+      document.getElementById('fileManagerContainer'), {
+        itemsPerPage: 12,
+        defaultSort: 'date_desc'
+      }
+    );
+    
+    // PHPから渡されたファイルデータを設定
+    fileManager.setFiles(window.fileData);
+    
+    // グローバルに公開（デバッグ・外部操作用）
+    window.fileManagerInstance = fileManager;
+  }
 
+  // === レガシー DataTables 処理（Ver.2.0では無効化） ===
+  if(document.getElementById('fileList') != null && !window.fileData){
+    // Ver.1.x互換性のための緊急フォールバック
+    console.warn('FileManager initialization failed, falling back to DataTables');
+    
     $.extend( $.fn.dataTable.defaults, {
       language: {
         url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
@@ -82,10 +102,15 @@ function updateProgressBar(percent) {
   $('#progressText').text(percent + '%');
 }
 
-// 画面リサイズ時の対応（必要に応じて）
+// 画面リサイズ時の対応
 $(window).resize(function() {
-  // DataTablesのリサイズ対応（デスクトップ表示時）
-  if ($(window).width() > 768 && $.fn.DataTable.isDataTable('#fileList')) {
+  // 新ファイルマネージャーのリサイズ対応
+  if (window.fileManagerInstance) {
+    window.fileManagerInstance.refresh();
+  }
+  
+  // レガシー DataTables 対応（フォールバック用）
+  if ($(window).width() > 768 && $.fn.DataTable && $.fn.DataTable.isDataTable('#fileList')) {
     $('#fileList').DataTable().columns.adjust();
   }
 });
@@ -125,7 +150,7 @@ function file_upload()
   })
   .done(function(data, textStatus, jqXHR){
     if (data.status === 'success') {
-      // 成功時はページをリロード
+      // 成功時はページをリロード（新ファイルマネージャーはリロード後に更新される）
       showSuccess(data.message || 'ファイルのアップロードが完了しました。');
       setTimeout(function() {
         location.reload();

@@ -98,10 +98,11 @@
 
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
-      <p class="h2">📁 ファイル一覧</p>
-
-      <!-- デスクトップ表示: テーブル -->
-      <div class="file-table-container">
+      <!-- 新しいファイル管理システム (DataTables完全廃止版) -->
+      <div id="fileManagerContainer"></div>
+      
+      <!-- レガシーテーブル表示（非表示） -->
+      <div class="file-table-container" style="display: none;">
         <table id="fileList" class="table table-striped" cellspacing="0" width="100%">
           <thead>
             <tr>
@@ -114,89 +115,19 @@
               <th>削除</th>
             </tr>
           </thead>
-          <tbody>
-          <?php
-            foreach($data as $s){
-              echo '<tr>';
-              echo '<td>'.$s['id'].'</td>';
-              echo '<td><a href="javascript:void(0);" onclick="dl_button('.$s['id'].');">'.$s['origin_file_name'].'</a></td>';
-              echo '<td>'.$s['comment'].'</td>';
-              echo '<td>'.round($s['size'] / (1024*1024), 1 ).'MB</td>';
-              echo '<td>'.date("Y/m/d H:i:s", $s['input_date']).'</td>';
-              echo '<td>'.$s['count'].'</td>';
-              echo '<td><a href="javascript:void(0);" onclick="del_button('.$s['id'].');">[DEL]</a></td>';
-              echo '</tr>';
-            }
-          ?>
-          </tbody>
-          <tfoot>
-            <tr>
-              <th>ID</th>
-              <th>ファイル名</th>
-              <th>コメント</th>
-              <th>サイズ</th>
-              <th>日付</th>
-              <th>DL数</th>
-              <th>削除</th>
-            </tr>
-          </tfoot>
+          <tbody></tbody>
         </table>
       </div>
 
-      <!-- モバイル表示: カード -->
-      <div class="file-cards-container">
-        <?php if (empty($data)): ?>
-          <div class="text-center" style="padding: 40px; color: #6c757d;">
-            <h4>📄 アップロードされたファイルはありません</h4>
-            <p>上のフォームからファイルをアップロードしてください。</p>
-          </div>
-        <?php else: ?>
-          <?php foreach($data as $s): ?>
-            <div class="file-card fade-in">
-              <div class="file-card__header" onclick="toggleCardDetails(this)">
-                <div class="file-card__main-info">
-                  <a href="javascript:void(0);" class="file-card__filename" onclick="event.stopPropagation(); dl_button(<?php echo $s['id']; ?>);">
-                    📄 <?php echo htmlspecialchars($s['origin_file_name'], ENT_QUOTES, 'UTF-8'); ?>
-                  </a>
-                  <p class="file-card__comment"><?php echo htmlspecialchars($s['comment'], ENT_QUOTES, 'UTF-8'); ?></p>
-                </div>
-                <button class="file-card__toggle" type="button">▼</button>
-              </div>
-
-              <div class="file-card__details">
-                <div class="file-card__detail-grid">
-                  <div class="file-card__detail-item">
-                    <span class="file-card__detail-label">ID</span>
-                    <span class="file-card__detail-value">#<?php echo $s['id']; ?></span>
-                  </div>
-                  <div class="file-card__detail-item">
-                    <span class="file-card__detail-label">サイズ</span>
-                    <span class="file-card__detail-value file-card__detail-value--size"><?php echo round($s['size'] / (1024*1024), 1); ?>MB</span>
-                  </div>
-                  <div class="file-card__detail-item">
-                    <span class="file-card__detail-label">アップロード日</span>
-                    <span class="file-card__detail-value file-card__detail-value--date"><?php echo date("Y/m/d H:i", $s['input_date']); ?></span>
-                  </div>
-                  <div class="file-card__detail-item">
-                    <span class="file-card__detail-label">ダウンロード数</span>
-                    <span class="file-card__detail-value file-card__detail-value--count"><?php echo $s['count']; ?></span>
-                  </div>
-                </div>
-
-                <div class="file-card__actions">
-                  <a href="javascript:void(0);" class="file-card__action-btn" onclick="dl_button(<?php echo $s['id']; ?>);">
-                    ⬇️ ダウンロード
-                  </a>
-                  <a href="javascript:void(0);" class="file-card__action-btn file-card__action-btn--delete" onclick="del_button(<?php echo $s['id']; ?>);">
-                    🗑️ 削除
-                  </a>
-                </div>
-              </div>
-            </div>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </div>
+      <!-- レガシーカード表示（非表示） -->
+      <div class="file-cards-container" style="display: none;"></div>
     </div>
     <p class="text-right">@<a href="https://github.com/shimosyan/phpUploader" target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
   </div>
 </div>
+
+<!-- ファイルデータをJavaScriptに渡す -->
+<script>
+  // PHPからJavaScriptにファイルデータを渡す
+  window.fileData = <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>;
+</script>
