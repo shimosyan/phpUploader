@@ -30,26 +30,47 @@
   margin-bottom: 12px;
 }
 
+/* Ver.2.0 エラー表示の改善 */
+.panel-danger .panel-body small.text-muted {
+  font-size: 0.85em;
+  opacity: 0.8;
+  display: block;
+  margin-top: 8px;
+}
+
+.panel-danger .panel-body strong {
+  color: #a94442;
+}
+
+/* エラーメッセージ内のコード表示 */
+.error-code {
+  font-family: 'Courier New', monospace;
+  background-color: rgba(0,0,0,0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
 /* Ver.2.0 レスポンシブ対応強化 */
 @media (max-width: 768px) {
   .container {
     padding: 8px;
   }
-  
+
   .radius {
     padding: 16px;
   }
-  
+
   /* フォームの2カラムレイアウトをモバイルで1カラムに */
   .row .col-sm-6 {
     margin-bottom: 15px;
   }
-  
+
   /* ボタンをフル幅に */
   .btn-block {
     width: 100% !important;
   }
-  
+
   /* アップロードセクションの調整 */
   #upload .row:last-child .col-sm-offset-10 {
     width: 100%;

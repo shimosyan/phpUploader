@@ -35,7 +35,7 @@ function showError(message) {
   $('#errorContainer').fadeIn();
 }
 
-// 成功表示ヘルパー関数  
+// 成功表示ヘルパー関数
 function showSuccess(message) {
   // 成功用のコンテナがない場合は作成
   if ($('#successContainer').length === 0) {
@@ -47,7 +47,7 @@ function showSuccess(message) {
   }
   $('#successContainer > .panel-body').html(message);
   $('#successContainer').fadeIn();
-  
+
   // 3秒後に自動で非表示
   setTimeout(function() {
     $('#successContainer').fadeOut();
@@ -64,7 +64,7 @@ function toggleCardDetails(element) {
   var $header = $(element);
   var $details = $header.next('.file-card__details');
   var $toggle = $header.find('.file-card__toggle');
-  
+
   if ($details.hasClass('expanded')) {
     // 閉じる
     $details.removeClass('expanded');
@@ -132,10 +132,22 @@ function file_upload()
       }, 1500);
     } else if (data.status === 'error') {
       // Ver.2.0のエラーレスポンス形式に対応
-      var errorMessage = data.message || 'アップロードに失敗しました。';
+      var errorMessage = '';
+
+      // バリデーションエラーがある場合は詳細を表示
       if (data.validation_errors && data.validation_errors.length > 0) {
-        errorMessage = data.validation_errors.join('<br>');
+        errorMessage = '<strong>バリデーションエラー:</strong><br>' + data.validation_errors.join('<br>');
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else {
+        errorMessage = 'アップロードに失敗しました。';
       }
+
+      // エラーコードがある場合は追加情報として表示
+      if (data.error_code) {
+        errorMessage += '<br><small class="text-muted">(エラーコード: ' + data.error_code + ')</small>';
+      }
+
       showError(errorMessage);
     } else {
       // 旧バージョン互換
@@ -162,9 +174,31 @@ function file_upload()
   })
   .fail(function(jqXHR, textStatus, errorThrown){
     var errorMsg = 'サーバーエラーが発生しました。';
-    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-      errorMsg = jqXHR.responseJSON.message;
+
+    // レスポンスがJSONの場合は詳細情報を取得
+    if (jqXHR.responseJSON) {
+      if (jqXHR.responseJSON.message) {
+        errorMsg = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.responseJSON.error_code) {
+        errorMsg += '<br><small class="text-muted">(エラーコード: ' + jqXHR.responseJSON.error_code + ')</small>';
+      }
+      if (jqXHR.responseJSON.validation_errors && jqXHR.responseJSON.validation_errors.length > 0) {
+        errorMsg += '<br><strong>詳細:</strong><br>' + jqXHR.responseJSON.validation_errors.join('<br>');
+      }
+    } else if (jqXHR.responseText) {
+      // JSONでない場合はテキスト内容を確認
+      try {
+        var parsed = JSON.parse(jqXHR.responseText);
+        if (parsed.message) {
+          errorMsg = parsed.message;
+        }
+      } catch(e) {
+        // JSONパースに失敗した場合はHTTPステータスを表示
+        errorMsg += '<br><small class="text-muted">(HTTP ' + jqXHR.status + ': ' + errorThrown + ')</small>';
+      }
     }
+
     showError(errorMsg);
   })
   .always(function( jqXHR, textStatus ) {
@@ -210,7 +244,11 @@ function dl_certificat(id, key){
                   '</div>';
         openModal('okcansel', '認証が必要です', html, 'confirm_dl_button(' + id + ');');
       } else {
-        showError(data.message || 'ダウンロードに失敗しました。');
+        var errorMessage = data.message || 'ダウンロードに失敗しました。';
+        if (data.error_code) {
+          errorMessage += '<br><small class="text-muted">(エラーコード: ' + data.error_code + ')</small>';
+        }
+        showError(errorMessage);
       }
     } else {
       // 旧バージョン互換
@@ -231,10 +269,27 @@ function dl_certificat(id, key){
     }
   })
   .fail(function(jqXHR, textStatus, errorThrown){
-    var errorMsg = 'サーバーエラーが発生しました。';
-    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-      errorMsg = jqXHR.responseJSON.message;
+    var errorMsg = 'ダウンロード処理でサーバーエラーが発生しました。';
+
+    // レスポンスがJSONの場合は詳細情報を取得
+    if (jqXHR.responseJSON) {
+      if (jqXHR.responseJSON.message) {
+        errorMsg = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.responseJSON.error_code) {
+        errorMsg += '<br><small class="text-muted">(エラーコード: ' + jqXHR.responseJSON.error_code + ')</small>';
+      }
+    } else if (jqXHR.responseText) {
+      try {
+        var parsed = JSON.parse(jqXHR.responseText);
+        if (parsed.message) {
+          errorMsg = parsed.message;
+        }
+      } catch(e) {
+        errorMsg += '<br><small class="text-muted">(HTTP ' + jqXHR.status + ': ' + errorThrown + ')</small>';
+      }
     }
+
     showError(errorMsg);
   })
   .always(function( jqXHR, textStatus ) {
@@ -279,7 +334,11 @@ function del_certificat(id, key){
                   '</div>';
         openModal('okcansel', '認証が必要です', html, 'confirm_del_button(' + id + ');');
       } else {
-        showError(data.message || '削除に失敗しました。');
+        var errorMessage = data.message || '削除に失敗しました。';
+        if (data.error_code) {
+          errorMessage += '<br><small class="text-muted">(エラーコード: ' + data.error_code + ')</small>';
+        }
+        showError(errorMessage);
       }
     } else {
       // 旧バージョン互換
@@ -300,10 +359,27 @@ function del_certificat(id, key){
     }
   })
   .fail(function(jqXHR, textStatus, errorThrown){
-    var errorMsg = 'サーバーエラーが発生しました。';
-    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
-      errorMsg = jqXHR.responseJSON.message;
+    var errorMsg = '削除処理でサーバーエラーが発生しました。';
+    
+    // レスポンスがJSONの場合は詳細情報を取得
+    if (jqXHR.responseJSON) {
+      if (jqXHR.responseJSON.message) {
+        errorMsg = jqXHR.responseJSON.message;
+      }
+      if (jqXHR.responseJSON.error_code) {
+        errorMsg += '<br><small class="text-muted">(エラーコード: ' + jqXHR.responseJSON.error_code + ')</small>';
+      }
+    } else if (jqXHR.responseText) {
+      try {
+        var parsed = JSON.parse(jqXHR.responseText);
+        if (parsed.message) {
+          errorMsg = parsed.message;
+        }
+      } catch(e) {
+        errorMsg += '<br><small class="text-muted">(HTTP ' + jqXHR.status + ': ' + errorThrown + ')</small>';
+      }
     }
+    
     showError(errorMsg);
   })
   .always(function( jqXHR, textStatus ) {
