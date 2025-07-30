@@ -26,8 +26,6 @@ class config {
             'save_max_files' => 500,
             'max_comment' => 80,
             'max_file_size' => 2, // MB
-            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
-
             // ディレクトリ設定
             'db_directory' => dirname(__DIR__) . '/db',
             'data_directory' => dirname(__DIR__) . '/data',
@@ -45,33 +43,51 @@ class config {
             // ログ設定
             'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
             'log_retention_days' => 30,
-      // アップロードできる拡張子
-      'extension'           => array(
-        // アーカイブ・圧縮ファイル
-        'zip', 'rar', 'lzh', '7z', 'tar', 'gz', 'bz2', 'xz',
-        
-        // ドキュメント
-        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-        'odt', 'ods', 'odp', 'rtf', 'txt', 'csv',
-        
-        // 画像
-        'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp',
-        'tiff', 'tif', 'ico', 'psd',
-        
-        // 音声
-        'mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma',
-        
-        // 動画
-        'mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm',
-        'm4v', 'mpg', 'mpeg',
-        
-        // 開発・設定ファイル
-        'json', 'xml', 'yaml', 'yml', 'ini', 'conf', 'cfg',
-        'sql', 'log', 'md', 'html', 'htm', 'css', 'js',
-        
-        // その他
-        'epub', 'mobi', 'azw3', 'fb2'
-      ),
+
+            // アップロードできる拡張子
+            'extension' => [
+                // アーカイブ・圧縮ファイル
+                'zip', 'rar', 'lzh', '7z', 'tar', 'gz', 'bz2', 'xz',
+                
+                // ドキュメント
+                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+                'odt', 'ods', 'odp', 'rtf', 'txt', 'csv',
+                
+                // 画像
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp',
+                'tiff', 'tif', 'ico', 'psd',
+                
+                // 音声
+                'mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma',
+                
+                // 動画
+                'mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm',
+                'm4v', 'mpg', 'mpeg',
+                
+                // 開発・設定ファイル
+                'json', 'xml', 'yaml', 'yml', 'ini', 'conf', 'cfg',
+                'sql', 'log', 'md', 'html', 'htm', 'css', 'js',
+                
+                // プログラミング言語
+                'php', 'py', 'rb', 'pl', 'sh', 'bat', 'cmd', 'ps1', 'vbs',
+                'c', 'cpp', 'cxx', 'cc', 'h', 'hpp', 'hxx', 'cs', 'java',
+                'go', 'rs', 'swift', 'kt', 'scala', 'dart', 'lua', 'r',
+                'ts', 'jsx', 'tsx', 'vue', 'svelte', 'm', 'mm',
+                
+                // 設定・データファイル
+                'toml', 'properties', 'env', 'gitignore', 'dockerfile',
+                'makefile', 'cmake', 'gradle', 'lock', 'sum', 'mod',
+                'editorconfig', 'eslintrc', 'prettierrc', 'babelrc',
+                
+                // シェル・スクリプト
+                'zsh', 'fish', 'awk', 'sed', 'vim', 'vimrc',
+                
+                // データベース
+                'sqlite', 'db', 'sqlite3',
+                
+                // その他
+                'epub', 'mobi', 'azw3', 'fb2'
+            ],
 
             // トークン設定
             'token_expiry_minutes' => 10,
