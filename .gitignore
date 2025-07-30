@@ -5,6 +5,7 @@
 # Application data
 data/*
 db/*
+logs/*
 
 # Dependencies
 vendor/
@@ -17,6 +18,22 @@ node_modules/
 # Environment
 .env
 config/config.php
+
+# Keep directory structure
+!data/.gitkeep
+!db/.gitkeep  
+!logs/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# PHP specific  
+*.php~
 
 # Logs
 *.log

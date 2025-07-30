@@ -1,178 +1,270 @@
 <?php
 
-// エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
-ini_set('display_errors',0);
-ini_set('max_execution_time',300);
+declare(strict_types=1);
+
+/**
+ * ファイルアップロードAPI
+ *
+ * セキュリティ強化版のアップロード処理
+ */
+
+// 出力バッファリング開始
+ob_start();
+
+// エラー表示設定（デバッグ用）
+ini_set('display_errors', '0');
+ini_set('log_errors', '1'); // ログファイルにエラーを記録
+error_reporting(E_ALL);
+ini_set('max_execution_time', 300);
 set_time_limit(300);
-header('Content-Type: application/json');
 
-$messages = array();
-switch ($_FILES['file']['error']) {
-	case UPLOAD_ERR_OK:
-		//値: 0; この場合のみ、ファイルあり
-		break;
+// ヘッダー設定
+header('Content-Type: application/json; charset=utf-8');
 
-	case UPLOAD_ERR_INI_SIZE:
-		//値: 1; アップロードされたファイルは、php.ini の upload_max_filesize ディレクティブの値を超えています（post_max_size, upload_max_filesize）
-		$messages[] = 'アップロードされたファイルが大きすぎます。' . ini_get('upload_max_filesize') . '以下のファイルをアップロードしてください。';
-		break;
-
-	case UPLOAD_ERR_FORM_SIZE:
-		//値: 2; アップロードされたファイルは、HTML フォームで指定された MAX_FILE_SIZE を超えています。
-		$messages[] = 'アップロードされたファイルが大きすぎます。' . ($_POST['MAX_FILE_SIZE'] / 1000) . 'KB以下のファイルをアップロードしてください。';
-		break;
-
-	case UPLOAD_ERR_PARTIAL:
-		//値: 3; アップロードされたファイルは一部のみしかアップロードされていません。
-		$messages[] = 'アップロードに失敗しています（通信エラー）。もう一度アップロードをお試しください。';
-		break;
-
-	case UPLOAD_ERR_NO_FILE:
-		//値: 4; ファイルはアップロードされませんでした。（この場合のみ、ファイルがないことを表している）
-		$messages[] = 'ファイルをアップロードしてください';
-		break;
-
-	case UPLOAD_ERR_NO_TMP_DIR:
-		//値: 6; テンポラリフォルダがありません。PHP 4.3.10 と PHP 5.0.3 で導入されました。
-		$messages[] = 'アップロードに失敗しています（システムエラー）。もう一度アップロードをお試しください。';
-		break;
-
-	default:
-		//UPLOAD_ERR_CANT_WRITE 値: 7; ディスクへの書き込みに失敗しました。PHP 5.1.0 で導入されました。
-		//UPLOAD_ERR_EXTENSION 値: 8; ファイルのアップロードが拡張モジュールによって停止されました。 PHP 5.2.0 で導入されました。 
-		//何かおかしい
-		$messages[] = 'アップロードファイルをご確認ください。 - 1';
-		break;
-}
-if (!$messages && !is_uploaded_file($_FILES["file"]['tmp_name'])) {
-	//何か妙なことがおきているようだ
-	$messages[] = 'アップロードファイルをご確認ください。 - 0';
+// セッション開始
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-if ($messages) {
-  $response = array('status' => 'upload_error', 'message' => $messages);
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
+try {
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Utils.php';
+
+    $configInstance = new config();
+    $config = $configInstance->index();
+
+    // アプリケーション初期化
+    require_once $baseDir . '/app/models/init.php';
+    $db = initializeApp($config);
+
+    // ログとレスポンスハンドラーの初期化
+    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $responseHandler = new ResponseHandler($logger);
+
+    // リクエストメソッドの確認
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $responseHandler->error('無効なリクエストメソッドです。', [], 405);
+    }
+
+    // ファイルがアップロードされているかチェック
+    if (!isset($_FILES['file'])) {
+        $responseHandler->error('ファイルが選択されていません。', [], 400);
+    }
+
+    // CSRFトークンの検証
+    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? null)) {
+        $logger->warning('CSRF token validation failed', ['ip' => $_SERVER['REMOTE_ADDR'] ?? '']);
+        $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
+    }
+
+    // ファイルアップロードエラーチェック
+    $uploadErrors = [];
+    if (!isset($_FILES['file'])) {
+        $uploadErrors[] = 'ファイルが選択されていません。';
+    } else {
+        switch ($_FILES['file']['error']) {
+            case UPLOAD_ERR_OK:
+                break;
+            case UPLOAD_ERR_INI_SIZE:
+                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ini_get('upload_max_filesize') . '以下)';
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ($_POST['MAX_FILE_SIZE'] / 1024) . 'KB以下)';
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $uploadErrors[] = 'アップロードが途中で中断されました。もう一度お試しください。';
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $uploadErrors[] = 'ファイルが選択されていません。';
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $uploadErrors[] = 'サーバーエラーが発生しました。管理者にお問い合わせください。';
+                break;
+            default:
+                $uploadErrors[] = 'アップロードに失敗しました。';
+                break;
+        }
+    }
+
+    if (!empty($uploadErrors)) {
+        $responseHandler->error('アップロードエラー', $uploadErrors, 400);
+    }
+
+    // アップロードファイルの検証
+    if (!is_uploaded_file($_FILES['file']['tmp_name'])) {
+        $responseHandler->error('不正なファイルアップロードです。', [], 400);
+    }
+
+    // 入力データの取得とサニタイズ
+    $fileName = htmlspecialchars($_FILES['file']['name'], ENT_QUOTES, 'UTF-8');
+    $comment = htmlspecialchars($_POST['comment'] ?? '', ENT_QUOTES, 'UTF-8');
+    $dlKey = $_POST['dlkey'] ?? '';
+    $delKey = $_POST['delkey'] ?? '';
+    $fileSize = filesize($_FILES['file']['tmp_name']);
+    $fileTmpPath = $_FILES['file']['tmp_name'];
+
+    // バリデーション
+    $validationErrors = [];
+
+    // ファイルサイズチェック
+    if ($fileSize > $config['max_file_size'] * 1024 * 1024) {
+        $validationErrors[] = "ファイルサイズが上限({$config['max_file_size']}MB)を超えています。";
+    }
+
+    // 拡張子チェック
+    $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    if (!in_array($fileExtension, $config['extension'])) {
+        $validationErrors[] = "許可されていない拡張子です。(" . implode(', ', $config['extension']) . "のみ)";
+    }
+
+    // コメント文字数チェック
+    if (mb_strlen($comment) > $config['max_comment']) {
+        $validationErrors[] = "コメントが長すぎます。({$config['max_comment']}文字以下)";
+    }
+
+    // キーの長さチェック
+    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['min_key_length']) {
+        $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    }
+
+    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
+        $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    }
+
+    if (!empty($validationErrors)) {
+        $responseHandler->error('バリデーションエラー', $validationErrors, 400);
+    }
+
+    // ファイル数制限チェックと古いファイルの削除
+    $fileCountStmt = $db->prepare("SELECT COUNT(id) as count, MIN(id) as min_id FROM uploaded");
+    $fileCountStmt->execute();
+    $countResult = $fileCountStmt->fetch();
+
+    if ($countResult['count'] >= $config['save_max_files']) {
+        // 古いファイルを削除
+        $oldFileStmt = $db->prepare("SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id");
+        $oldFileStmt->execute(['id' => $countResult['min_id']]);
+        $oldFile = $oldFileStmt->fetch();
+
+        if ($oldFile) {
+            // 物理ファイルの削除（ハッシュ化されたファイル名または旧形式に対応）
+            if (!empty($oldFile['stored_file_name'])) {
+                // 新形式（ハッシュ化されたファイル名）
+                $oldFilePath = $config['data_directory'] . '/' . $oldFile['stored_file_name'];
+            } else {
+                // 旧形式（互換性のため）
+                $oldFilePath = $config['data_directory'] . '/file_' . $oldFile['id'] .
+                             '.' . pathinfo($oldFile['origin_file_name'], PATHINFO_EXTENSION);
+            }
+
+            if (file_exists($oldFilePath)) {
+                unlink($oldFilePath);
+            }
+
+            // データベースから削除
+            $deleteStmt = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+            $deleteStmt->execute(['id' => $oldFile['id']]);
+
+            $logger->info('Old file deleted due to storage limit', ['deleted_file_id' => $oldFile['id']]);
+        }
+    }
+
+    // ファイルハッシュの生成
+    $fileHash = hash_file('sha256', $fileTmpPath);
+
+    // 認証キーのハッシュ化（空の場合はnull）
+    $dlKeyHash = (!empty($dlKey) && trim($dlKey) !== '') ? SecurityUtils::hashPassword($dlKey) : null;
+    $delKeyHash = (!empty($delKey) && trim($delKey) !== '') ? SecurityUtils::hashPassword($delKey) : null;
+
+    // まず仮のデータベース登録（stored_file_nameは後で更新）
+    $insertStmt = $db->prepare("
+        INSERT INTO uploaded (
+            origin_file_name, comment, size, count, input_date,
+            dl_key_hash, del_key_hash, file_hash, ip_address
+        ) VALUES (
+            :origin_file_name, :comment, :size, :count, :input_date,
+            :dl_key_hash, :del_key_hash, :file_hash, :ip_address
+        )
+    ");
+
+    $insertData = [
+        'origin_file_name' => $fileName,
+        'comment' => $comment,
+        'size' => $fileSize,
+        'count' => 0,
+        'input_date' => time(),
+        'dl_key_hash' => $dlKeyHash,
+        'del_key_hash' => $delKeyHash,
+        'file_hash' => $fileHash,
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+    ];
+
+    if (!$insertStmt->execute($insertData)) {
+        $errorInfo = $insertStmt->errorInfo();
+        error_log('Database insert failed: ' . print_r($errorInfo, true));
+        $responseHandler->error('データベースへの保存に失敗しました。', [], 500);
+    }
+
+    $fileId = (int)$db->lastInsertId();
+
+    // セキュアなファイル名の生成（ハッシュ化）
+    $hashedFileName = SecurityUtils::generateSecureFileName($fileId, $fileName);
+    $storedFileName = SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
+    $saveFilePath = $config['data_directory'] . '/' . $storedFileName;
+
+    // ファイル保存
+    if (!move_uploaded_file($fileTmpPath, $saveFilePath)) {
+        // データベースからも削除
+        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $responseHandler->error('ファイルの保存に失敗しました。', [], 500);
+    }
+
+    // データベースにハッシュ化されたファイル名を記録
+    $updateStmt = $db->prepare("UPDATE uploaded SET stored_file_name = :stored_file_name WHERE id = :id");
+    if (!$updateStmt->execute(['stored_file_name' => $storedFileName, 'id' => $fileId])) {
+        // ファイルを削除してデータベースからも削除
+        if (file_exists($saveFilePath)) {
+            unlink($saveFilePath);
+        }
+        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $responseHandler->error('ファイル情報の更新に失敗しました。', [], 500);
+    }
+
+    // アクセスログの記録
+    $logger->access($fileId, 'upload', 'success');
+
+    // 成功レスポンス
+    $responseHandler->success('ファイルのアップロードが完了しました。', [
+        'file_id' => $fileId,
+        'file_name' => $fileName,
+        'file_size' => $fileSize
+    ]);
+
+} catch (Exception $e) {
+    // 出力バッファをクリア
+    if (ob_get_level()) {
+        ob_clean();
+    }
+
+    // 緊急時のエラーハンドリング
+    if (isset($logger)) {
+        $logger->error('Upload API Error: ' . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]);
+    }
+
+    if (isset($responseHandler)) {
+        $responseHandler->error('システムエラーが発生しました。', [], 500);
+    } else {
+        // 最低限のエラーレスポンス
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'システムエラーが発生しました。'
+        ], JSON_UNESCAPED_UNICODE);
+    }
 }
-
-// 一時アップロード先ファイルパス
-$file_tmp  = $_FILES['file']['tmp_name'];
-
-// ファイル名、コメントからHTMLタグを無効化
-$escaped_file_name = htmlspecialchars($_FILES['file']['name'], ENT_QUOTES, 'UTF-8');
-$escaped_comment   = htmlspecialchars($_POST['comment'], ENT_QUOTES, 'UTF-8');
-
-//configをインクルード
-include('../../config/config.php');
-$config = new config();
-$ret = $config->index();
-//配列キーが設定されている配列なら展開
-if (!is_null($ret)) {
-  if(is_array($ret)){
-    extract($ret);
-  }
-}
-
-//データのチェック
-//ファイル容量
-$filesize = filesize($file_tmp);
-if($filesize > $max_file_size*1024*1024){
-  $response = array('status' => 'filesize_over', 'filesize' => $filesize);
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
-}
-
-//ファイル拡張子
-$ext = substr( $escaped_file_name, strrpos( $escaped_file_name, '.') + 1);
-if(in_array(mb_strtolower($ext), $extension) === false){
-  $response = array('status' => 'extension_error', 'ext' => $ext);
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
-}
-
-//コメント文字数
-if(mb_strlen($escaped_comment) > $max_comment){
-  $response = array('status' => 'comment_error');
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
-}
-
-//データベースの作成・オープン
-try{
-  $db = new PDO('sqlite:../../'.$db_directory.'/uploader.db');
-}catch (Exception $e){
-  $response = array('status' => 'sqlerror');
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
-}
-
-// デフォルトのフェッチモードを連想配列形式に設定
-// (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
-$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-
-// ファイル件数を調べて設定値より多ければ一番古いものを削除
-$fileCount = $db->prepare("SELECT count(id) as count , min(id) as min FROM uploaded");
-$fileCount->execute();
-$countResult = $fileCount->fetchAll();
-
-$count  = $countResult[0]['count'];
-$min_id = $countResult[0]['min'];
-
-if($count >= $save_max_files){
-  $sql = $db->prepare("DELETE FROM uploaded WHERE id = :id");
-  $sql->bindValue(':id', $min_id); //ID
-  if (! $sql->execute()) {
-    // 削除を実施
-  }
-}
-
-
-// ファイルの登録・ディレクトリに保存
-
-$sql  = $db->prepare("INSERT INTO uploaded(origin_file_name, comment, size, count, input_date, dl_key, del_key) " . 
-                    "VALUES (:origin_file_name, :comment, :size, :count, :input_date, :dl_key, :del_key)");
-
-$arg  = array(':origin_file_name' => $escaped_file_name,
-              ':comment'          => $escaped_comment,
-              ':size'             => $filesize,
-              ':count'            => 0,
-              ':input_date'       => strtotime(date('Y/m/d H:i:s')),
-              ':dl_key'           => openssl_encrypt($_POST['dlkey'],'aes-256-ecb',$key),
-              ':del_key'          => openssl_encrypt($_POST['delkey'],'aes-256-ecb',$key)
-              );
-if (! $sql->execute($arg)) {
-  $response = array('status' => 'sqlwrite_error');
-  //JSON形式で出力する
-  echo json_encode( $response );
-  exit;
-}
-$id = $db->lastInsertId('id');
-
-
-
-// 正式保存先ファイルパス
-if ($encrypt_filename) {
-  $file_save = '../../'.$data_directory.'/' . 'file_'.str_replace(array('\\', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)).'.'.$ext;
-} else {
-  $file_save = '../../'.$data_directory.'/' . 'file_'.$id.'.'.$ext;
-}
-
-// ファイル移動
-$result = @move_uploaded_file($file_tmp, $file_save);
-
-
-if ( $result === true ) {
-    $response = array('status' => 'ok');
-} else {
-    $response = array('status' => 'ng');
-}
-
-//JSON形式で出力する
-echo json_encode( $response );
-?>

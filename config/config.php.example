@@ -1,73 +1,131 @@
 <?php
 
-/* 重要 ※必ずお読み下さい
+declare(strict_types=1);
 
-このconfigフォルダ及び「データベースディレクトリ」のフォルダは
-.htaccessなどを用いて必ず外部からのアクセスを遮断して下さい
-
-*/
-
+/**
+ * PHP Uploader Ver.2.0 設定ファイル
+ *
+ * このファイルおよびデータディレクトリは外部からアクセスできないように
+ * .htaccess等で保護してください
+ */
 
 class config {
-  function index() {
-    return array(
-      // 管理者用キー
-      // DLキーとDELキーで使用するマスターキーです。
-      'master'              => 'CHANGE_THIS_MASTER_KEY',
+    public function index(): array {
+        return [
+            // 管理者用マスターキー（必ず変更してください）
+            'master' => 'CHANGE_THIS_MASTER_KEY',
 
-      // 各キーの暗号化用ハッシュ
-      // ランダムな英数字の羅列を設定してください。
-      'key'                 => 'CHANGE_THIS_ENCRYPTION_KEY',
+            // 暗号化・ハッシュ化用キー（必ず変更してください）
+            'key' => 'CHANGE_THIS_ENCRYPTION_KEY',
 
-      // タイトル
-      'title'               => 'アップローダー',
+            // セッション用ソルト（必ず変更してください）
+            'session_salt' => 'CHANGE_THIS_SESSION_SALT',
 
-      // 保存ファイル数
-      'save_max_files'      => 500,
+            // アプリケーション設定
+            'title' => 'PHP Uploader',
+            'save_max_files' => 500,
+            'max_comment' => 80,
+            'max_file_size' => 2, // MB
+            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
 
-      // コメントの最大文字数
-      'max_comment'         => 80,
+            // ディレクトリ設定
+            'db_directory' => dirname(__DIR__) . '/db',
+            'data_directory' => dirname(__DIR__) . '/data',
+            'log_directory' => dirname(__DIR__) . '/logs',
 
-      // 1件あたりの最大ファイルサイズ(単位 : MByte)
-      // php.iniのmemory_limit, post_max_size, upload_max_filesizeの値以下になるようにして下さい。
-      // nginxを使用している場合はサーバー設定にclient_max_body_sizeをこの値で設定してください。
-      'max_file_size'       => 2,
+            // セキュリティ設定
+            'security' => [
+                'csrf_token_expiry' => 30, // 分
+                'min_key_length' => 4,
+                'log_ip_address' => true,
+                'max_login_attempts' => 5,
+                'lockout_duration' => 900 // 15分
+            ],
 
-      // アップロードできる拡張子
-      'extension'           => array('zip','rar','lzh'),
+            // ログ設定
+            'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
+            'log_retention_days' => 30,
 
-      // データベースディレクトリ
-      'db_directory'        => './db',
+            // トークン設定
+            'token_expiry_minutes' => 10,
 
-      // アップロードしたファイルを置くディレクトリ
-      'data_directory'      => './data',
-
-      // アップロードされたファイル名を暗号化して管理する (trueまたはfalse デフォルト: false)
-      // サーバー内ではIDで格納されているファイル名を暗号化された文字列で格納します。
-      // 暗号に使用するsaltは「key」で指定した値を使用します。
-      // セキュリティを向上したいときにお使いください。
-      'encrypt_filename'    => false,
-
-      // バージョン情報（composer.jsonから自動取得）
-      'version'             => $this->getVersion()
-    );
-  }
-
-  /**
-   * composer.jsonからバージョン情報を取得
-   * ファイルが存在しない場合はデフォルト値を返す
-   */
-  private function getVersion() {
-    $composerPath = __DIR__ . '/../composer.json';
-
-    if (file_exists($composerPath)) {
-      $composerData = json_decode(file_get_contents($composerPath), true);
-      if (isset($composerData['version'])) {
-        return $composerData['version'];
-      }
+            // バージョン情報（composer.jsonから自動取得）
+            'version' => $this->getVersion()
+        ];
     }
 
-    // composer.jsonが存在しない、または読み取れない場合のフォールバック
-    return 'x.x.x';
-  }
+    /**
+     * セキュリティ設定の検証を行う
+     */
+    public function validateSecurityConfig(): bool {
+        $config = $this->index();
+
+        // 基本的なセキュリティ設定をチェック
+        if (strpos($config['master'], 'CHANGE_THIS') !== false) {
+            return false;
+        }
+
+        if (strpos($config['key'], 'CHANGE_THIS') !== false) {
+            return false;
+        }
+
+        if (strpos($config['session_salt'], 'CHANGE_THIS') !== false) {
+            return false;
+        }
+
+        return true;
+    }    /**
+     * 設定の検証を行う
+     */
+    public function validate(): array {
+        $errors = [];
+        $config = $this->index();
+
+        // 必須設定の確認
+        if ($config['master'] === 'CHANGE_THIS_MASTER_KEY_Ver2') {
+            $errors[] = 'マスターキーを変更してください';
+        }
+
+        if ($config['key'] === 'CHANGE_THIS_ENCRYPTION_KEY_Ver2') {
+            $errors[] = '暗号化キーを変更してください';
+        }
+
+        if ($config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+            $errors[] = 'セッションソルトを変更してください';
+        }
+
+        // ディレクトリの存在確認
+        $directories = ['db_directory', 'data_directory', 'log_directory'];
+        foreach ($directories as $dir) {
+            if (!is_dir($config[$dir])) {
+                $errors[] = "{$dir} ディレクトリが存在しません: {$config[$dir]}";
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * composer.jsonからバージョン情報を取得
+     */
+    private function getVersion(): string {
+        $composerPath = __DIR__ . '/../composer.json';
+
+        if (file_exists($composerPath)) {
+            $composerData = json_decode(file_get_contents($composerPath), true);
+            if (isset($composerData['version'])) {
+                return $composerData['version'];
+            }
+        }
+
+        return 'x.x.x';
+    }
+
+    /**
+     * アプリケーションルートディレクトリを取得
+     */
+    private function getAppRoot(): string {
+        // config.phpの位置からアプリケーションルートを算出
+        return dirname(__DIR__);
+    }
 }

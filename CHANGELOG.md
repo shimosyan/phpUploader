@@ -5,28 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2025-07-31
 
-### Added
-
-- GitHub Actions による自動リリース機能
-- Composer による依存関係管理
-- バージョン管理スクリプト
-- Pull Request テンプレートとIssueテンプレート
-- 自動ラベル付け機能
-- コード品質チェック（PHPStan, PHP CodeSniffer）
-- Docker による開発環境整備
+**🚨 BREAKING CHANGES: Ver.2.0は内部DBの仕様が刷新されているため、Ver.1.x系との互換性がありません。**
 
 ### Changed
 
-- リリース管理プロセスの改善
-- PHP要件を5.6+に更新
+- **PHP要件を8.1+に更新**
+- サーバー処理を全面更新
+- ファイル一覧のUIを刷新
 - config.phpをテンプレート化（config.php.example）
 - バージョン情報をcomposer.jsonから動的取得に変更
+- リリース管理プロセスの改善
+- アクセスログ機能を実装
 
 ### Security
 
-- 設定ファイルの機密情報をGit管理外に移動
+- 各認証用文字列の暗号化方式を変更
+- レインボーテーブル攻撃対策として、Argon2ID パスワードハッシュ化
+- CSRF保護を導入
+- セッション強化
+- ディレクトリトラバーサル対策として、ファイル名ハッシュ化を強制
+- SQL インジェクション完全対策として、PDO PreparedStatement に移行
 
 ## [1.2.1] - 2022-02-09
 
