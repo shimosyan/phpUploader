@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 /**
  * PHP Uploader Ver.2.0 - メインエントリーポイント
- * 
+ *
  * 簡易フレームワーク with モダンPHP対応
  */
 
-// エラー表示設定
-ini_set('display_errors', '0');
+// エラー表示設定（本番環境用）
+ini_set('display_errors', '0'); // 本番環境では 0 に設定
 error_reporting(E_ALL);
 
 // セッション開始

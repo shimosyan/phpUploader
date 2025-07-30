@@ -61,9 +61,9 @@ function getCSRFToken() {
 
 // カードの詳細部分の開閉機能
 function toggleCardDetails(element) {
-  var $main = $(element);
-  var $details = $main.next('.file-card__details');
-  var $toggle = $main.find('.file-card__toggle');
+  var $header = $(element);
+  var $details = $header.next('.file-card__details');
+  var $toggle = $header.find('.file-card__toggle');
   
   if ($details.hasClass('expanded')) {
     // 閉じる
@@ -74,6 +74,12 @@ function toggleCardDetails(element) {
     $details.addClass('expanded');
     $toggle.addClass('expanded');
   }
+}
+
+// プログレスバーのテキスト更新
+function updateProgressBar(percent) {
+  $('#progressBar').css({width: percent + '%'});
+  $('#progressText').text(percent + '%');
 }
 
 // 画面リサイズ時の対応（必要に応じて）
@@ -111,7 +117,7 @@ function file_upload()
       if(XHR.upload){
         XHR.upload.addEventListener('progress',function(e){
           var progre = parseInt(e.loaded/e.total*100);
-          $('#progressBar').css({width: progre+'%'});
+          updateProgressBar(progre);
         }, false);
       }
       return XHR;

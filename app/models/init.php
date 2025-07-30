@@ -109,6 +109,7 @@ class AppInitializer {
                 CREATE TABLE IF NOT EXISTS uploaded(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     origin_file_name text NOT NULL,
+                    stored_file_name text,
                     comment text,
                     size INTEGER NOT NULL,
                     count INTEGER DEFAULT 0,
@@ -192,6 +193,7 @@ class AppInitializer {
 
         // 新しいカラムの追加
         $newColumns = [
+            'stored_file_name' => 'ALTER TABLE uploaded ADD COLUMN stored_file_name text',
             'file_hash' => 'ALTER TABLE uploaded ADD COLUMN file_hash text',
             'ip_address' => 'ALTER TABLE uploaded ADD COLUMN ip_address text',
             'created_at' => 'ALTER TABLE uploaded ADD COLUMN created_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))',

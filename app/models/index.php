@@ -22,7 +22,7 @@ class index {
       exit;
     }
 
-    // デフォルトのフェッチモードを連想配列形式に設定 
+    // デフォルトのフェッチモードを連想配列形式に設定
     // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 

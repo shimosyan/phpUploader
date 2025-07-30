@@ -40,15 +40,13 @@ try {
     $db->beginTransaction();
 
     try {
-        // トークンの検証
-        $tokenStmt = $db->prepare("
-            SELECT t.*, u.origin_file_name, u.file_hash
-            FROM access_tokens t
-            JOIN uploaded u ON t.file_id = u.id
-            WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
-        ");
-
-        $tokenStmt->execute([
+    // トークンの検証
+    $tokenStmt = $db->prepare("
+        SELECT t.*, u.origin_file_name, u.stored_file_name, u.file_hash
+        FROM access_tokens t
+        JOIN uploaded u ON t.file_id = u.id
+        WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
+    ");        $tokenStmt->execute([
             'token' => $token,
             'file_id' => $fileId,
             'now' => time()
@@ -76,11 +74,17 @@ try {
             }
         }
 
-        // ファイルパスの生成
+        // ファイルパスの生成（ハッシュ化されたファイル名または旧形式に対応）
         $fileName = $tokenData['origin_file_name'];
-        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $safeFileName = SecurityUtils::generateSafeFileName($fileId, $config['key']);
-        $filePath = $config['data_directory'] . '/' . $safeFileName . '.' . $fileExtension;
+        
+        if (!empty($tokenData['stored_file_name'])) {
+            // 新形式（ハッシュ化されたファイル名）
+            $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
+        } else {
+            // 旧形式（互換性のため）
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $filePath = $config['data_directory'] . '/file_' . $fileId . '.' . $fileExtension;
+        }
 
         // 物理ファイルの削除
         $fileDeleted = false;

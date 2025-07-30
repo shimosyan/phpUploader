@@ -38,7 +38,7 @@ try {
 
     // トークンの検証
     $tokenStmt = $db->prepare("
-        SELECT t.*, u.origin_file_name, u.size, u.file_hash
+        SELECT t.*, u.origin_file_name, u.stored_file_name, u.size, u.file_hash
         FROM access_tokens t
         JOIN uploaded u ON t.file_id = u.id
         WHERE t.token = :token AND t.token_type = 'download' AND t.file_id = :file_id AND t.expires_at > :now
@@ -71,11 +71,17 @@ try {
         }
     }
 
-    // ファイルパスの生成
+    // ファイルパスの生成（ハッシュ化されたファイル名または旧形式に対応）
     $fileName = $tokenData['origin_file_name'];
-    $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-    $safeFileName = SecurityUtils::generateSafeFileName($fileId, $config['key']);
-    $filePath = $config['data_directory'] . '/' . $safeFileName . '.' . $fileExtension;
+    
+    if (!empty($tokenData['stored_file_name'])) {
+        // 新形式（ハッシュ化されたファイル名）
+        $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
+    } else {
+        // 旧形式（互換性のため）
+        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+        $filePath = $config['data_directory'] . '/file_' . $fileId . '.' . $fileExtension;
+    }
 
     // ファイルの存在確認
     if (!file_exists($filePath)) {
