@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 /**
- * ファイル削除処理 (Ver.2.0)
+ * ファイル削除処理
  *
  * ワンタイムトークンによる安全なファイル削除
  */
 
 // エラー表示設定
 ini_set('display_errors', '0');
+ini_set('log_errors', '1'); // ログファイルにエラーを記録
+error_reporting(E_ALL);
 
 try {
     // 設定とユーティリティの読み込み
@@ -76,7 +78,7 @@ try {
 
         // ファイルパスの生成（ハッシュ化されたファイル名または旧形式に対応）
         $fileName = $tokenData['origin_file_name'];
-        
+
         if (!empty($tokenData['stored_file_name'])) {
             // 新形式（ハッシュ化されたファイル名）
             $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
@@ -91,7 +93,7 @@ try {
         if (file_exists($filePath)) {
             // ファイルハッシュの検証（ファイル整合性チェック）
             if (!empty($tokenData['file_hash'])) {
-                $currentHash = SecurityUtils::generateFileHash($filePath);
+                $currentHash = hash_file('sha256', $filePath);
                 if ($currentHash !== $tokenData['file_hash']) {
                     $logger->warning('File integrity check failed during delete', [
                         'file_id' => $fileId,
@@ -152,49 +154,3 @@ try {
     header('Location: ./?deleted=error');
     exit;
 }
-
-// ファイル名取得
-$stmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
-$stmt->bindValue(':id', $id); //ID
-$stmt->execute();
-$result = $stmt->fetchAll();
-foreach($result as $s){
-    $filename = $s['origin_file_name'];
-    $origin_delkey = $s['del_key'];
-}
-
-// ハッシュを照合して認証が通ればDEL可
-if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
-    if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, true)) ){
-        header('location: ./');
-        exit;
-    }
-}else{
-    if( $delkey !== bin2hex(openssl_encrypt($origin_delkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
-        header('location: ./');
-        exit;
-    }
-}
-
-// sqlから削除
-$sql = $db->prepare("DELETE FROM uploaded WHERE id = :id");
-$sql->bindValue(':id', $id); //ID
-if (! $sql->execute()) {
-    // 削除を実施
-}
-
-//ディレクトリから削除
-$ext = substr( $filename, strrpos( $filename, '.') + 1);
-if ($encrypt_filename) {
-    $path = $data_directory.'/' . 'file_' . str_replace(array('\\', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)) . '.'.$ext;
-    if (!file_exists ( $path )) {
-        $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
-    }
-} else {
-    $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
-}
-unlink($path);
-
-
-header('location: ./');
-exit();

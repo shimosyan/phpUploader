@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 /**
- * ファイルダウンロード処理 (Ver.2.0)
+ * ファイルダウンロード処理
  *
  * ワンタイムトークンによる安全なダウンロード
  */
 
 // エラー表示設定
 ini_set('display_errors', '0');
+ini_set('log_errors', '1'); // ログファイルにエラーを記録
+error_reporting(E_ALL);
 
 try {
     // 設定とユーティリティの読み込み
@@ -73,7 +75,7 @@ try {
 
     // ファイルパスの生成（ハッシュ化されたファイル名または旧形式に対応）
     $fileName = $tokenData['origin_file_name'];
-    
+
     if (!empty($tokenData['stored_file_name'])) {
         // 新形式（ハッシュ化されたファイル名）
         $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
@@ -92,7 +94,7 @@ try {
 
     // ファイルハッシュの検証（ファイル整合性チェック）
     if (!empty($tokenData['file_hash'])) {
-        $currentHash = SecurityUtils::generateFileHash($filePath);
+        $currentHash = hash_file('sha256', $filePath);
         if ($currentHash !== $tokenData['file_hash']) {
             $logger->error('File integrity check failed', [
                 'file_id' => $fileId,

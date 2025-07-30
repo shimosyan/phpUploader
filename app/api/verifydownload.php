@@ -3,13 +3,15 @@
 declare(strict_types=1);
 
 /**
- * ダウンロード検証API (Ver.2.0)
+ * ダウンロード検証API
  *
  * ハッシュ化された認証キーの検証とワンタイムトークンの生成
  */
 
 // エラー表示設定
 ini_set('display_errors', '0');
+ini_set('log_errors', '1'); // ログファイルにエラーを記録
+error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 // セッション開始
@@ -38,13 +40,13 @@ try {
     $inputKey = $_POST['key'] ?? '';
 
     if ($fileId <= 0) {
-        $responseHandler->validationError(['ファイルIDが指定されていません。']);
+        $responseHandler->error('ファイルIDが指定されていません。', [], 400);
     }
 
     // CSRFトークンの検証
-    if (!SecurityUtils::verifyCSRFToken($_POST['csrf_token'] ?? '', $config['security']['csrf_token_expiry'] * 60)) {
+    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $logger->warning('CSRF token validation failed in download verify', ['file_id' => $fileId]);
-        $responseHandler->authError('無効なリクエストです。ページを再読み込みしてください。');
+        $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
     }
 
     // ファイル情報の取得
@@ -54,7 +56,7 @@ try {
 
     if (!$fileData) {
         $logger->warning('File not found for download', ['file_id' => $fileId]);
-        $responseHandler->error('FILE_NOT_FOUND', 'ファイルが見つかりません。');
+        $responseHandler->error('ファイルが見つかりません。', [], 404);
     }
 
     // マスターキーチェック
@@ -69,14 +71,24 @@ try {
         } else {
             // ハッシュ化されたキーとの照合
             if (!empty($inputKey)) {
-                $isValidAuth = SecurityUtils::verifyPassword($inputKey, $fileData['dl_key_hash'], $config['session_salt']);
+                $isValidAuth = SecurityUtils::verifyPassword($inputKey, $fileData['dl_key_hash']);
+            } else {
+                // キーが設定されているが、入力されていない場合
+                $isValidAuth = false;
             }
         }
     }
 
     if (!$isValidAuth) {
-        $logger->warning('Invalid download key', ['file_id' => $fileId]);
-        $responseHandler->authError('ダウンロードキーが正しくありません。');
+        // ダウンロードキーが設定されているが、入力されていない場合
+        if (!empty($fileData['dl_key_hash']) && empty($inputKey)) {
+            $logger->info('Download key required', ['file_id' => $fileId]);
+            $responseHandler->error('ダウンロードキーの入力が必要です。', [], 200, 'AUTH_REQUIRED');
+        } else {
+            // キーが間違っている場合
+            $logger->warning('Invalid download key', ['file_id' => $fileId]);
+            $responseHandler->error('ダウンロードキーが正しくありません。', [], 200, 'INVALID_KEY');
+        }
     }
 
     // 既存の期限切れトークンをクリーンアップ
@@ -84,7 +96,7 @@ try {
     $cleanupStmt->execute(['now' => time()]);
 
     // ワンタイムトークンの生成
-    $token = SecurityUtils::generateOneTimeToken();
+    $token = SecurityUtils::generateRandomToken(32);
     $expiresAt = time() + ($config['token_expiry_minutes'] * 60);
 
     // トークンをデータベースに保存
@@ -102,19 +114,19 @@ try {
     ];
 
     if (!$tokenStmt->execute($tokenData)) {
-        $responseHandler->error('TOKEN_GENERATION_ERROR', 'ダウンロードトークンの生成に失敗しました。');
+        $responseHandler->error('ダウンロードトークンの生成に失敗しました。', [], 500);
     }
 
     // アクセスログの記録
     $logger->access($fileId, 'download_verify', 'success');
 
     // 成功レスポンス
-    $responseHandler->success([
+    $responseHandler->success('ダウンロード準備が完了しました。', [
         'id' => $fileId,
         'token' => $token,
         'expires_at' => $expiresAt,
         'file_name' => $fileData['origin_file_name']
-    ], 'ダウンロード準備が完了しました。');
+    ]);
 
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
@@ -127,14 +139,13 @@ try {
     }
 
     if (isset($responseHandler)) {
-        $responseHandler->error('INTERNAL_ERROR', 'システムエラーが発生しました。');
+        $responseHandler->error('システムエラーが発生しました。', [], 500);
     } else {
         // 最低限のエラーレスポンス
         header('Content-Type: application/json; charset=utf-8');
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'error_code' => 'INTERNAL_ERROR',
             'message' => 'システムエラーが発生しました。'
         ], JSON_UNESCAPED_UNICODE);
     }

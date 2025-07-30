@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * ファイルアップロードAPI (Ver.2.0)
+ * ファイルアップロードAPI
  *
  * セキュリティ強化版のアップロード処理
  */
@@ -12,7 +12,7 @@ declare(strict_types=1);
 ob_start();
 
 // エラー表示設定（デバッグ用）
-ini_set('display_errors', '1'); // 一時的にエラー表示を有効化
+ini_set('display_errors', '0');
 ini_set('log_errors', '1'); // ログファイルにエラーを記録
 error_reporting(E_ALL);
 ini_set('max_execution_time', 300);

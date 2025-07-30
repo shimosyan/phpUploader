@@ -436,7 +436,7 @@ class ResponseHandler
     /**
      * エラー応答を送信
      */
-    public function error(string $message, array $validationErrors = [], int $httpCode = 400): void
+    public function error(string $message, array $validationErrors = [], int $httpCode = 400, ?string $errorCode = null): void
     {
         $response = [
             'status' => 'error',
@@ -446,6 +446,10 @@ class ResponseHandler
 
         if (!empty($validationErrors)) {
             $response['validation_errors'] = $validationErrors;
+        }
+
+        if ($errorCode !== null) {
+            $response['error_code'] = $errorCode;
         }
 
         http_response_code($httpCode);
