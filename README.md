@@ -192,6 +192,6 @@ scripts\release.bat x.x.x
 
 ## License
 
-Copyright (c) 2017 shimosyan
+Copyright (c) 2025 shimosyan
 Released under the MIT license
 <https://github.com/shimosyan/phpUploader/blob/master/MIT-LICENSE.txt>
