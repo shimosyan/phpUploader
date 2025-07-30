@@ -22,6 +22,31 @@ $(document).ready(function(){
   });
 });
 
+// カードの詳細部分の開閉機能
+function toggleCardDetails(element) {
+  var $main = $(element);
+  var $details = $main.next('.file-card__details');
+  var $toggle = $main.find('.file-card__toggle');
+  
+  if ($details.hasClass('expanded')) {
+    // 閉じる
+    $details.removeClass('expanded');
+    $toggle.removeClass('expanded');
+  } else {
+    // 開く
+    $details.addClass('expanded');
+    $toggle.addClass('expanded');
+  }
+}
+
+// 画面リサイズ時の対応（必要に応じて）
+$(window).resize(function() {
+  // DataTablesのリサイズ対応（デスクトップ表示時）
+  if ($(window).width() > 768 && $.fn.DataTable.isDataTable('#fileList')) {
+    $('#fileList').DataTable().columns.adjust();
+  }
+});
+
 function file_upload()
 {
   if($('#fileInput').val() == ''){
