@@ -51,17 +51,27 @@ function show_share_modal(data){
   
   // 共有制限設定
   html += '<div class="form-group">';
-  html += '<label>共有制限設定</label>';
+  html += '<label>共有制限設定 <small class="text-muted">(現在の設定)</small></label>';
   html += '<div class="row">';
   html += '<div class="col-sm-6">';
   html += '<label for="maxDownloadsInput">最大ダウンロード数</label>';
-  html += '<input type="number" class="form-control" id="maxDownloadsInput" placeholder="無制限" min="1" onchange="regenerateShareLink(' + data.id + ')">';
-  html += '<small class="help-block">空白で無制限</small>';
+  html += '<input type="number" class="form-control" id="maxDownloadsInput" placeholder="無制限" min="1" onchange="regenerateShareLink(' + data.id + ')" value="' + (data.current_max_downloads || '') + '">';
+  html += '<small class="help-block">現在: ' + (data.current_max_downloads ? data.current_max_downloads + '回' : '無制限') + '</small>';
   html += '</div>';
   html += '<div class="col-sm-6">';
   html += '<label for="expiresInput">有効期限（日数）</label>';
-  html += '<input type="number" class="form-control" id="expiresInput" placeholder="無期限" min="1" onchange="regenerateShareLink(' + data.id + ')">';
-  html += '<small class="help-block">空白で無期限</small>';
+  var expiresValue = '';
+  var expiresStatus = '無期限';
+  if (data.current_expires_days !== null) {
+    if (data.current_expires_days > 0) {
+      expiresValue = data.current_expires_days;
+      expiresStatus = '残り' + data.current_expires_days + '日';
+    } else {
+      expiresStatus = '<span class="text-danger">期限切れ</span>';
+    }
+  }
+  html += '<input type="number" class="form-control" id="expiresInput" placeholder="無期限" min="1" onchange="regenerateShareLink(' + data.id + ')" value="' + expiresValue + '">';
+  html += '<small class="help-block">現在: ' + expiresStatus + '</small>';
   html += '</div>';
   html += '</div>';
   html += '</div>';

@@ -126,6 +126,17 @@ function file_upload()
   $('#uploadContainer').fadeIn();
    // フォームデータを取得
   var formdata = new FormData($('#upload').get(0));
+  
+  // 共有制限設定を明示的に追加（フォーム要素が取得されない場合の対策）
+  var maxDownloads = $('#maxDownloadsUploadInput').val();
+  var expiresDays = $('#expiresDaysUploadInput').val();
+  
+  if (maxDownloads && parseInt(maxDownloads) > 0) {
+    formdata.append('max_downloads', parseInt(maxDownloads));
+  }
+  if (expiresDays && parseInt(expiresDays) > 0) {
+    formdata.append('expires_days', parseInt(expiresDays));
+  }
 
   // POSTでアップロード
   $.ajax({

@@ -272,6 +272,17 @@ function uploadFilesSequentially(index) {
   formData.append('dlkey', $('#dleyInput').val());
   formData.append('delkey', $('#deleyInput').val());
   
+  // 共有制限設定を追加
+  var maxDownloads = $('#maxDownloadsUploadInput').val();
+  var expiresDays = $('#expiresDaysUploadInput').val();
+  
+  if (maxDownloads && parseInt(maxDownloads) > 0) {
+    formData.append('max_downloads', parseInt(maxDownloads));
+  }
+  if (expiresDays && parseInt(expiresDays) > 0) {
+    formData.append('expires_days', parseInt(expiresDays));
+  }
+  
   $.ajax({
     url: './app/api/upload.php',
     type: 'POST',

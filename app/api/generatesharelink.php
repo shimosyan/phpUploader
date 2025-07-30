@@ -62,14 +62,28 @@ $fileData = $result[0];
 $filename = $fileData['origin_file_name'];
 $comment = $fileData['comment'];
 $origin_dlkey = $fileData['dl_key'];
+$current_max_downloads = $fileData['max_downloads'];
+$current_expires_at = $fileData['expires_at'];
 
-// 制限情報を更新（もし新しい制限が設定されている場合）
-if ($max_downloads !== null || $expires_at !== null) {
+// 制限情報を更新（変更があった場合のみ）
+$should_update = false;
+if (isset($_POST['max_downloads']) && $max_downloads !== $current_max_downloads) {
+    $should_update = true;
+}
+if (isset($_POST['expires_days']) && $expires_at !== $current_expires_at) {
+    $should_update = true;
+}
+
+if ($should_update) {
     $updateStmt = $db->prepare("UPDATE uploaded SET max_downloads = :max_downloads, expires_at = :expires_at WHERE id = :id");
     $updateStmt->bindValue(':max_downloads', $max_downloads);
     $updateStmt->bindValue(':expires_at', $expires_at);
     $updateStmt->bindValue(':id', $id);
     $updateStmt->execute();
+    
+    // 更新後の値を使用
+    $current_max_downloads = $max_downloads;
+    $current_expires_at = $expires_at;
 }
 
 // 共有用のトークンを生成（DLキーなしで直接ダウンロード可能にする）
@@ -90,6 +104,17 @@ if ($base_path === '/' || $base_path === '\\') {
 
 $share_url = $protocol . $host . $base_path . '/download.php?id=' . $id . '&key=' . $share_key;
 
+// 有効期限を日数に変換
+$expires_days = null;
+if ($current_expires_at !== null) {
+    $remaining_seconds = $current_expires_at - time();
+    if ($remaining_seconds > 0) {
+        $expires_days = ceil($remaining_seconds / (24 * 60 * 60));
+    } else {
+        $expires_days = 0; // 期限切れ
+    }
+}
+
 // JSON形式で出力する
 echo json_encode(array(
     'status' => 'ok',
@@ -97,5 +122,8 @@ echo json_encode(array(
     'filename' => $filename,
     'comment' => $comment,
     'share_url' => $share_url,
-    'share_url_with_comment' => $comment . "\n" . $share_url
+    'share_url_with_comment' => $comment . "\n" . $share_url,
+    'current_max_downloads' => $current_max_downloads,
+    'current_expires_days' => $expires_days,
+    'expires_at' => $current_expires_at
 ));

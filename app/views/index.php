@@ -95,13 +95,45 @@
           </div>
         </div>
 
-        <div class="form-section">
-          <div class="row">
-            <div class="col-sm-offset-10 col-sm-2">
-              <button type="button" class="btn btn-success btn-block btn-submit" onclick="file_upload()">
-                ?? ??????
-              </button>
+        <!-- 共有制限設定 -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href="#shareLimitsPanel" aria-expanded="false" aria-controls="shareLimitsPanel">
+                共有制限設定 <small class="text-muted">(オプション)</small>
+                <span class="glyphicon glyphicon-chevron-down pull-right"></span>
+              </a>
+            </h4>
+          </div>
+          <div id="shareLimitsPanel" class="panel-collapse collapse">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="maxDownloadsInput">最大ダウンロード数</label>
+                    <input type="number" class="form-control" id="maxDownloadsUploadInput" name="max_downloads" placeholder="無制限" min="1">
+                    <p class="help-block">空白で無制限</p>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group">
+                    <label for="expiresInput">有効期限（日数）</label>
+                    <input type="number" class="form-control" id="expiresDaysUploadInput" name="expires_days" placeholder="無期限" min="1">
+                    <p class="help-block">空白で無期限</p>
+                  </div>
+                </div>
+              </div>
+              <p class="text-info">
+                <span class="glyphicon glyphicon-info-sign"></span>
+                ここで設定した制限は、このファイルの共有リンクに適用されます。後から変更も可能です。
+              </p>
             </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-offset-10 col-sm-2">
+            <button type="button" class="btn btn-success btn-block" onclick="file_upload()">送信</button>
           </div>
         </div>
       </form>
