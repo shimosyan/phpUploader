@@ -23,6 +23,22 @@ try {
         throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
     }
 
+    // エラーパラメータをチェック
+    $error_message = '';
+    if (isset($_GET['error'])) {
+        switch ($_GET['error']) {
+            case 'expired':
+                $error_message = 'この共有リンクは有効期限が切れています。';
+                break;
+            case 'limit_exceeded':
+                $error_message = 'この共有リンクはダウンロード回数制限に達しています。';
+                break;
+            default:
+                $error_message = 'エラーが発生しました。';
+                break;
+        }
+    }
+
     require_once './config/config.php';
     require_once './src/Core/Utils.php';
 
@@ -79,7 +95,8 @@ try {
         'responseHandler' => $responseHandler,
         'db' => $db,
         'csrf_token' => SecurityUtils::generateCSRFToken(),
-        'status_message' => $_GET['deleted'] ?? null
+        'status_message' => $_GET['deleted'] ?? null,
+        'error_message' => $error_message
     ]);
 
     // 変数の展開

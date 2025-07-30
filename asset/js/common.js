@@ -456,6 +456,24 @@ function show_share_modal(data){
   if(data.comment) {
     html += '<p><strong>コメント:</strong> ' + escapeHtml(data.comment) + '</p>';
   }
+  
+  // 共有制限設定
+  html += '<div class="form-group">';
+  html += '<label>共有制限設定</label>';
+  html += '<div class="row">';
+  html += '<div class="col-sm-6">';
+  html += '<label for="maxDownloadsInput">最大ダウンロード数</label>';
+  html += '<input type="number" class="form-control" id="maxDownloadsInput" placeholder="無制限" min="1" onchange="regenerateShareLink(' + data.id + ')">';
+  html += '<small class="help-block">空白で無制限</small>';
+  html += '</div>';
+  html += '<div class="col-sm-6">';
+  html += '<label for="expiresInput">有効期限（日数）</label>';
+  html += '<input type="number" class="form-control" id="expiresInput" placeholder="無期限" min="1" onchange="regenerateShareLink(' + data.id + ')">';
+  html += '<small class="help-block">空白で無期限</small>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>';
+  
   html += '<div class="form-group">';
   html += '<label for="shareUrlInput">共有URL</label>';
   html += '<div class="input-group">';
@@ -477,6 +495,39 @@ function show_share_modal(data){
   html += '</div>';
   
   openModal('ok', 'ファイル共有', html, 'closeModal()');
+}
+
+function regenerateShareLink(id) {
+  var maxDownloads = $('#maxDownloadsInput').val();
+  var expires = $('#expiresInput').val();
+  
+  var postdata = {
+    id: id
+  };
+  
+  // 空文字列でない場合のみパラメータを追加
+  if (maxDownloads && parseInt(maxDownloads) > 0) {
+    postdata.max_downloads = parseInt(maxDownloads);
+  }
+  if (expires && parseInt(expires) > 0) {
+    postdata.expires_days = parseInt(expires);
+  }
+
+  $.ajax({
+    url  : './app/api/generatesharelink.php',
+    type : 'POST',
+    data : postdata,
+    dataType    : 'json'
+  })
+  .done(function(data, textStatus, jqXHR){
+    if(data.status === 'ok') {
+      $('#shareUrlInput').val(data.share_url);
+      $('#shareUrlWithCommentInput').val(data.share_url_with_comment);
+    }
+  })
+  .fail(function(jqXHR, textStatus, errorThrown){
+    console.error('共有リンク再生成エラー:', textStatus);
+  });
 }
 
 function copyToClipboard(elementId) {

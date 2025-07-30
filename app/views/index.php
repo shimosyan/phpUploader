@@ -86,11 +86,12 @@
         </div>
       </div>
 
-      <div id="errorContainer" class="error-container" style="display: none;">
+      <div id="errorContainer" class="panel panel-danger" style="<?php echo !empty($error_message) ? 'display: block;' : 'display: none;'; ?>">
         <div class="panel-heading">
           <h4>⚠️ エラー</h4>
         </div>
         <div class="panel-body">
+          <?php echo !empty($error_message) ? htmlspecialchars($error_message) : ''; ?>
         </div>
       </div>
 

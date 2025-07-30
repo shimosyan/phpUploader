@@ -4,6 +4,8 @@
 ini_set('display_errors', 0);
 
 $id = $_POST['id'];
+$max_downloads = isset($_POST['max_downloads']) ? (int)$_POST['max_downloads'] : null;
+$expires_days = isset($_POST['expires_days']) ? (int)$_POST['expires_days'] : null;
 
 header('Content-Type: application/json');
 
@@ -11,6 +13,12 @@ if ($id === null) {
     // JSON形式で出力する
     echo json_encode(array('status' => 'ng'));
     exit;
+}
+
+// 有効期限を計算（日数から UNIX タイムスタンプに変換）
+$expires_at = null;
+if ($expires_days && $expires_days > 0) {
+    $expires_at = time() + ($expires_days * 24 * 60 * 60);
 }
 
 // configをインクルード
@@ -54,6 +62,15 @@ $fileData = $result[0];
 $filename = $fileData['origin_file_name'];
 $comment = $fileData['comment'];
 $origin_dlkey = $fileData['dl_key'];
+
+// 制限情報を更新（もし新しい制限が設定されている場合）
+if ($max_downloads !== null || $expires_at !== null) {
+    $updateStmt = $db->prepare("UPDATE uploaded SET max_downloads = :max_downloads, expires_at = :expires_at WHERE id = :id");
+    $updateStmt->bindValue(':max_downloads', $max_downloads);
+    $updateStmt->bindValue(':expires_at', $expires_at);
+    $updateStmt->bindValue(':id', $id);
+    $updateStmt->execute();
+}
 
 // 共有用のトークンを生成（DLキーなしで直接ダウンロード可能にする）
 if (PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
