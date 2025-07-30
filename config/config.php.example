@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /* 重要 ※必ずお読み下さい
 
 このconfigフォルダ及び「データベースディレクトリ」のフォルダは
@@ -7,67 +9,112 @@
 
 */
 
-
 class config {
-  function index() {
-    return array(
-      // 管理者用キー
-      // DLキーとDELキーで使用するマスターキーです。
-      'master'              => 'CHANGE_THIS_MASTER_KEY',
 
-      // 各キーの暗号化用ハッシュ
-      // ランダムな英数字の羅列を設定してください。
-      'key'                 => 'CHANGE_THIS_ENCRYPTION_KEY',
+    public function index(): array {
+        return [
+            // 管理者用キー
+            // DLキーとDELキーで使用するマスターキーです。
+            'master' => 'CHANGE_THIS_MASTER_KEY',
 
-      // タイトル
-      'title'               => 'アップローダー',
+            // 各キーの暗号化用ハッシュ
+            // ランダムな英数字の羅列を設定してください。
+            'key' => 'CHANGE_THIS_ENCRYPTION_KEY',
 
-      // 保存ファイル数
-      'save_max_files'      => 500,
+            // セッション用ソルト（ワンタイムトークン生成用）
+            'session_salt' => 'CHANGE_THIS_SESSION_SALT',
 
-      // コメントの最大文字数
-      'max_comment'         => 80,
+            // タイトル
+            'title' => 'アップローダー Ver.2.0',
 
-      // 1件あたりの最大ファイルサイズ(単位 : MByte)
-      // php.iniのmemory_limit, post_max_size, upload_max_filesizeの値以下になるようにして下さい。
-      // nginxを使用している場合はサーバー設定にclient_max_body_sizeをこの値で設定してください。
-      'max_file_size'       => 2,
+            // 保存ファイル数
+            'save_max_files' => 500,
 
-      // アップロードできる拡張子
-      'extension'           => array('zip','rar','lzh'),
+            // コメントの最大文字数
+            'max_comment' => 80,
 
-      // データベースディレクトリ
-      'db_directory'        => './db',
+            // 1件あたりの最大ファイルサイズ(単位 : MByte)
+            // php.iniのmemory_limit, post_max_size, upload_max_filesizeの値以下になるようにして下さい。
+            // nginxを使用している場合はサーバー設定にclient_max_body_sizeをこの値で設定してください。
+            'max_file_size' => 2,
 
-      // アップロードしたファイルを置くディレクトリ
-      'data_directory'      => './data',
+            // アップロードできる拡張子
+            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'doc', 'docx'],
 
-      // アップロードされたファイル名を暗号化して管理する (trueまたはfalse デフォルト: false)
-      // サーバー内ではIDで格納されているファイル名を暗号化された文字列で格納します。
-      // 暗号に使用するsaltは「key」で指定した値を使用します。
-      // セキュリティを向上したいときにお使いください。
-      'encrypt_filename'    => false,
+            // データベースディレクトリ
+            'db_directory' => './db',
 
-      // バージョン情報（composer.jsonから自動取得）
-      'version'             => $this->getVersion()
-    );
-  }
+            // アップロードしたファイルを置くディレクトリ
+            'data_directory' => './data',
 
-  /**
-   * composer.jsonからバージョン情報を取得
-   * ファイルが存在しない場合はデフォルト値を返す
-   */
-  private function getVersion() {
-    $composerPath = __DIR__ . '/../composer.json';
+            // ログディレクトリ
+            'log_directory' => './logs',
 
-    if (file_exists($composerPath)) {
-      $composerData = json_decode(file_get_contents($composerPath), true);
-      if (isset($composerData['version'])) {
-        return $composerData['version'];
-      }
+            // アップロードされたファイル名を暗号化して管理する (Ver.2.0では常時有効)
+            // サーバー内ではIDで格納されているファイル名を暗号化された文字列で格納します。
+            // 暗号に使用するsaltは「key」で指定した値を使用します。
+            'encrypt_filename' => true,
+
+            // ワンタイムトークンの有効期限（分）
+            'token_expiry_minutes' => 30,
+
+            // ログレベル (DEBUG, INFO, WARNING, ERROR)
+            'log_level' => 'INFO',
+
+            // セキュリティ設定
+            'security' => [
+                // DL/Delキーの最小長
+                'min_key_length' => 4,
+                // CSRFトークンの有効期限（分）
+                'csrf_token_expiry' => 60,
+                // 連続アクセス制限（秒）
+                'rate_limit_seconds' => 1,
+                // IPアドレス記録の有効化
+                'log_ip_address' => true,
+            ],
+
+            // バージョン情報（composer.jsonから自動取得）
+            'version' => $this->getVersion()
+        ];
     }
 
-    // composer.jsonが存在しない、または読み取れない場合のフォールバック
-    return 'x.x.x';
-  }
+    /**
+     * composer.jsonからバージョン情報を取得
+     * ファイルが存在しない場合はデフォルト値を返す
+     */
+    private function getVersion(): string {
+        $composerPath = __DIR__ . '/../composer.json';
+
+        if (file_exists($composerPath)) {
+            $composerData = json_decode(file_get_contents($composerPath), true);
+            if (isset($composerData['version'])) {
+                return $composerData['version'];
+            }
+        }
+
+        // composer.jsonが存在しない、または読み取れない場合のフォールバック
+        return '2.0.0';
+    }
+
+    /**
+     * セキュリティ設定の検証
+     */
+    public function validateSecurityConfig(): bool {
+        $config = $this->index();
+
+        // 必須設定のチェック
+        if ($config['master'] === 'CHANGE_THIS_MASTER_KEY') {
+            return false;
+        }
+
+        if ($config['key'] === 'CHANGE_THIS_ENCRYPTION_KEY') {
+            return false;
+        }
+
+        if ($config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+            return false;
+        }
+
+        return true;
+    }
 }
