@@ -95,19 +95,35 @@ function initializeDragDrop() {
     clearSelectedFiles();
   });
 
-  // 送信ボタンのクリックイベントを上書き
+  // 送信ボタンのクリックイベントを上書き（再開可能アップロード統合）
   $(document).on('click', 'button[onclick="file_upload()"]', function(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    if (selectedFiles.length > 0) {
-      uploadMultipleFiles();
+    console.log('Upload button clicked, selectedFiles:', selectedFiles.length);
+    
+    // 差し替えキー必須チェック
+    var replaceKey = $('#replaceKeyInput').val();
+    if (!replaceKey || replaceKey.trim() === '') {
+      alert('差し替えキーの入力は必須です。');
+      return;
+    }
+    
+    // 再開可能アップロード機能が利用可能かチェック
+    if (typeof enhancedFileUpload === 'function') {
+      console.log('Using enhanced file upload');
+      enhancedFileUpload();
     } else {
-      // 従来の単一ファイルアップロード（隠しファイル入力が選択されている場合）
-      if ($('#lefile')[0].files.length > 0) {
-        file_upload();
+      console.log('Using traditional upload');
+      // フォールバック: 従来の方式
+      if (selectedFiles.length > 0) {
+        uploadMultipleFiles();
       } else {
-        alert('ファイルが選択されていません。');
+        if ($('#lefile')[0].files.length > 0) {
+          file_upload();
+        } else {
+          alert('ファイルが選択されていません。');
+        }
       }
     }
     return false;
@@ -143,22 +159,43 @@ function updateFilesList() {
   
   selectedFiles.forEach(function(file, index) {
     var fileItem = $('<div class="file-item">');
+    fileItem.attr('data-filename', file.name);
     
     var fileIcon = getFileIcon(file.name);
     var fileName = file.name;
     var fileSize = formatFileSize(file.size);
     
     fileItem.html(
+      '<div class="upload-method-indicator" style="display: none;"></div>' +
       '<span class="file-icon">' + fileIcon + '</span>' +
       '<div class="file-info">' +
         '<span class="file-name">' + escapeHtml(fileName) + '</span>' +
         '<span class="file-size">' + fileSize + '</span>' +
+      '</div>' +
+      '<div class="upload-controls">' +
+        '<button type="button" class="upload-control-btn pause" title="一時停止" style="display: none;">' +
+          '<span class="glyphicon glyphicon-pause"></span>' +
+        '</button>' +
+        '<button type="button" class="upload-control-btn resume" title="再開" style="display: none;">' +
+          '<span class="glyphicon glyphicon-play"></span>' +
+        '</button>' +
+        '<button type="button" class="upload-control-btn cancel" title="キャンセル" style="display: none;">' +
+          '<span class="glyphicon glyphicon-stop"></span>' +
+        '</button>' +
       '</div>' +
       '<button type="button" class="file-remove" data-index="' + index + '">' +
         '<span class="glyphicon glyphicon-remove"></span>' +
       '</button>' +
       '<div class="upload-progress" style="display: none;">' +
         '<div class="upload-progress-bar"></div>' +
+      '</div>' +
+      '<div class="upload-status" style="display: none;"></div>' +
+      '<div class="detailed-progress" style="display: none;">' +
+        '<div class="progress-text">' +
+          '<span class="progress-percentage">0%</span>' +
+          '<span class="progress-size">0B / ' + fileSize + '</span>' +
+        '</div>' +
+        '<div class="speed-info">速度: 計算中...</div>' +
       '</div>'
     );
     
@@ -174,6 +211,28 @@ function updateFilesList() {
     
     if (selectedFiles.length === 0) {
       hideSelectedFilesContainer();
+    }
+  });
+  
+  // アップロード制御ボタンイベント
+  $('.upload-control-btn.pause').click(function() {
+    var filename = $(this).closest('.file-item').data('filename');
+    if (typeof pauseUpload === 'function') {
+      pauseUpload(filename);
+    }
+  });
+  
+  $('.upload-control-btn.resume').click(function() {
+    var filename = $(this).closest('.file-item').data('filename');
+    if (typeof resumeUpload === 'function') {
+      resumeUpload(filename);
+    }
+  });
+  
+  $('.upload-control-btn.cancel').click(function() {
+    var filename = $(this).closest('.file-item').data('filename');
+    if (typeof cancelUpload === 'function') {
+      cancelUpload(filename);
     }
   });
 }
@@ -271,6 +330,7 @@ function uploadFilesSequentially(index) {
   formData.append('comment', $('#commentInput').val());
   formData.append('dlkey', $('#dleyInput').val());
   formData.append('delkey', $('#deleyInput').val());
+  formData.append('replacekey', $('#replaceKeyInput').val());
   
   // 共有制限設定を追加
   var maxDownloads = $('#maxDownloadsUploadInput').val();

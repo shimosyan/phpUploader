@@ -18,6 +18,10 @@ error_reporting(E_ALL);
 ini_set('max_execution_time', 300);
 set_time_limit(300);
 
+// APIモードかどうかを判定
+$isApiMode = (strpos($_SERVER['REQUEST_URI'], '/api/') !== false);
+error_log("Upload request - Method: " . $_SERVER['REQUEST_METHOD'] . ", API Mode: " . ($isApiMode ? 'true' : 'false'));
+
 // ヘッダー設定
 header('Content-Type: application/json; charset=utf-8');
 
@@ -102,6 +106,13 @@ try {
     $comment = htmlspecialchars($_POST['comment'] ?? '', ENT_QUOTES, 'UTF-8');
     $fileSize = filesize($_FILES['file']['tmp_name']);
     $fileTmpPath = $_FILES['file']['tmp_name'];
+    
+    // フォルダIDの処理
+    $folder_id = isset($_POST['folder_id']) && !empty($_POST['folder_id']) ? intval($_POST['folder_id']) : null;
+    
+    // 認証キーの処理（空のキーは認証不要として扱うため、NULLとして保存）
+    $dlKey = $_POST['dlkey'] ?? '';
+    $delKey = $_POST['delkey'] ?? '';
 
     // バリデーション
     $validationErrors = [];
@@ -115,6 +126,15 @@ try {
     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     if (!in_array($fileExtension, $config['extension'])) {
         $validationErrors[] = "許可されていない拡張子です。(" . implode(', ', $config['extension']) . "のみ)";
+    }
+    
+    // フォルダIDの存在確認（フォルダ機能が有効な場合のみ）
+    if (isset($config['folders_enabled']) && $config['folders_enabled'] && $folder_id !== null) {
+        $folderCheck = $db->prepare("SELECT id FROM folders WHERE id = ?");
+        $folderCheck->execute([$folder_id]);
+        if (!$folderCheck->fetch()) {
+            $responseHandler->error('指定されたフォルダが見つかりません。', [], 404);
+        }
     }
 
     // コメント文字数チェック
@@ -180,10 +200,10 @@ try {
     $insertStmt = $db->prepare("
         INSERT INTO uploaded (
             origin_file_name, comment, size, count, input_date,
-            dl_key_hash, del_key_hash, file_hash, ip_address
+            dl_key_hash, del_key_hash, file_hash, ip_address, folder_id
         ) VALUES (
             :origin_file_name, :comment, :size, :count, :input_date,
-            :dl_key_hash, :del_key_hash, :file_hash, :ip_address
+            :dl_key_hash, :del_key_hash, :file_hash, :ip_address, :folder_id
         )
     ");
 
@@ -196,7 +216,8 @@ try {
         'dl_key_hash' => $dlKeyHash,
         'del_key_hash' => $delKeyHash,
         'file_hash' => $fileHash,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+        'folder_id' => $folder_id
     ];
 
     if (!$insertStmt->execute($insertData)) {
@@ -266,3 +287,4 @@ try {
         ], JSON_UNESCAPED_UNICODE);
     }
 }
+

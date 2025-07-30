@@ -27,3 +27,6 @@ COPY ./php/php.ini /usr/local/etc/php/
 
 # Apache設定の最適化
 RUN a2enmod rewrite
+
+# カスタムApache設定をコピー
+COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf

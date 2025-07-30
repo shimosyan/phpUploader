@@ -197,16 +197,19 @@ try {
     $expires_at = $s['expires_at'];
   }
 
-  // トークンを照合して認証が通ればDL可
-  if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
-    if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, true)) ){
-      header('location: ./');
-      exit;
-    }
-  }else{
-    if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
-      header('location: ./');
-      exit;
+  // DLキーがNULL（空）の場合は認証不要、そうでない場合は認証チェック
+  if ($origin_dlkey !== null) {
+    // トークンを照合して認証が通ればDL可
+    if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
+      if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, true)) ){
+        header('location: ./');
+        exit;
+      }
+    }else{
+      if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
+        header('location: ./');
+        exit;
+      }
     }
   }
 

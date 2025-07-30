@@ -37,4 +37,32 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Test files
+*-test.txt
+test_*.php
+*_test.php
+final-test.txt
+migration-test.txt
+security-test.txt
+test-replace.txt
+
+# Reports and documentation
+*_REPORT.md
+*_RESULTS.md
+*_SUMMARY.md
+
+# Temporary upload data
+app/api/data/chunks/
+app/api/data/rate_limits/
+app/api/data/*.7z
+app/api/data/*.zip
+app/api/data/*.rar
+
+# Debug files
+docker-debug.md
+
+# settings
+.htaccess
+
 TODO.md

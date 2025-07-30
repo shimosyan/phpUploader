@@ -104,7 +104,7 @@ class AppInitializer {
      */
     private function setupDatabase(): void {
         try {
-            // メインテーブルの作成
+            // メインテーブルの作成（フォルダ機能とセキュリティ機能を統合）
             $query = "
                 CREATE TABLE IF NOT EXISTS uploaded(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,11 +118,68 @@ class AppInitializer {
                     del_key_hash text,
                     file_hash text,
                     ip_address text,
+                    folder_id INTEGER,
+                    replace_key text,
+                    max_downloads INTEGER,
+                    expires_at INTEGER,
                     created_at INTEGER DEFAULT (strftime('%s', 'now')),
                     updated_at INTEGER DEFAULT (strftime('%s', 'now'))
                 )";
 
             $this->db->exec($query);
+
+            // Tus.io再開可能アップロード管理テーブル
+            $tusQuery = "
+                CREATE TABLE IF NOT EXISTS tus_uploads (
+                    id TEXT PRIMARY KEY,
+                    file_size INTEGER NOT NULL,
+                    offset INTEGER DEFAULT 0,
+                    metadata TEXT,
+                    chunk_path TEXT,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    expires_at INTEGER,
+                    completed BOOLEAN DEFAULT FALSE,
+                    final_file_id INTEGER,
+                    comment TEXT,
+                    dl_key TEXT,
+                    del_key TEXT,
+                    replace_key TEXT,
+                    max_downloads INTEGER,
+                    share_expires_at INTEGER,
+                    folder_id INTEGER
+                )";
+
+            $this->db->exec($tusQuery);
+
+            // フォルダ管理テーブル
+            $folderQuery = "
+                CREATE TABLE IF NOT EXISTS folders (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    parent_id INTEGER,
+                    created_at INTEGER NOT NULL,
+                    FOREIGN KEY (parent_id) REFERENCES folders (id) ON DELETE CASCADE
+                )";
+
+            $this->db->exec($folderQuery);
+
+            // ファイル差し替え履歴管理テーブル
+            $historyQuery = "
+                CREATE TABLE IF NOT EXISTS file_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    file_id INTEGER NOT NULL,
+                    old_filename TEXT,
+                    new_filename TEXT,
+                    old_comment TEXT,
+                    new_comment TEXT,
+                    change_type TEXT NOT NULL,
+                    changed_at INTEGER NOT NULL,
+                    changed_by TEXT,
+                    FOREIGN KEY (file_id) REFERENCES uploaded (id) ON DELETE CASCADE
+                )";
+
+            $this->db->exec($historyQuery);
 
             // トークンテーブルの作成（ワンタイムトークン用）
             $tokenQuery = "
@@ -172,10 +229,17 @@ class AppInitializer {
         $indexes = [
             "CREATE INDEX IF NOT EXISTS idx_uploaded_input_date ON uploaded(input_date)",
             "CREATE INDEX IF NOT EXISTS idx_uploaded_file_hash ON uploaded(file_hash)",
+            "CREATE INDEX IF NOT EXISTS idx_uploaded_folder ON uploaded(folder_id)",
             "CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON access_tokens(expires_at)",
             "CREATE INDEX IF NOT EXISTS idx_tokens_file_id ON access_tokens(file_id)",
             "CREATE INDEX IF NOT EXISTS idx_logs_created_at ON access_logs(created_at)",
-            "CREATE INDEX IF NOT EXISTS idx_logs_file_id ON access_logs(file_id)"
+            "CREATE INDEX IF NOT EXISTS idx_logs_file_id ON access_logs(file_id)",
+            "CREATE INDEX IF NOT EXISTS idx_tus_uploads_expires ON tus_uploads(expires_at)",
+            "CREATE INDEX IF NOT EXISTS idx_tus_uploads_created ON tus_uploads(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_tus_uploads_completed ON tus_uploads(completed)",
+            "CREATE INDEX IF NOT EXISTS idx_folders_parent ON folders(parent_id)",
+            "CREATE INDEX IF NOT EXISTS idx_file_history_file_id ON file_history(file_id)",
+            "CREATE INDEX IF NOT EXISTS idx_file_history_changed_at ON file_history(changed_at)"
         ];
 
         foreach ($indexes as $indexQuery) {
@@ -196,6 +260,10 @@ class AppInitializer {
             'stored_file_name' => 'ALTER TABLE uploaded ADD COLUMN stored_file_name text',
             'file_hash' => 'ALTER TABLE uploaded ADD COLUMN file_hash text',
             'ip_address' => 'ALTER TABLE uploaded ADD COLUMN ip_address text',
+            'folder_id' => 'ALTER TABLE uploaded ADD COLUMN folder_id INTEGER',
+            'replace_key' => 'ALTER TABLE uploaded ADD COLUMN replace_key text',
+            'max_downloads' => 'ALTER TABLE uploaded ADD COLUMN max_downloads INTEGER',
+            'expires_at' => 'ALTER TABLE uploaded ADD COLUMN expires_at INTEGER',
             'created_at' => 'ALTER TABLE uploaded ADD COLUMN created_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))',
             'updated_at' => 'ALTER TABLE uploaded ADD COLUMN updated_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))'
         ];

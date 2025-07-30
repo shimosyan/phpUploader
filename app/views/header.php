@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./asset/css/responsive-cards.css">
     <link rel="stylesheet" href="./asset/css/share.css">
     <link rel="stylesheet" href="./asset/css/dragdrop.css">
+    <link rel="stylesheet" href="./asset/css/folders.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

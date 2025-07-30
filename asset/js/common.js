@@ -137,6 +137,12 @@ function file_upload()
   if (expiresDays && parseInt(expiresDays) > 0) {
     formdata.append('expires_days', parseInt(expiresDays));
   }
+  
+  // フォルダID設定を明示的に追加
+  var folderId = $('#folder-select').val();
+  if (folderId && folderId !== '') {
+    formdata.append('folder_id', folderId);
+  }
 
   // POSTでアップロード
   $.ajax({
