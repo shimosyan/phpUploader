@@ -16,13 +16,13 @@ class config {
             'master' => 'CHANGE_THIS_MASTER_KEY',
 
             // 暗号化・ハッシュ化用キー（必ず変更してください）
-            'key' => 'CHANGE_THIS_ENCRYPTION_KEY',,
+            'key' => 'CHANGE_THIS_ENCRYPTION_KEY',
 
             // セッション用ソルト（必ず変更してください）
             'session_salt' => 'CHANGE_THIS_SESSION_SALT',
 
             // アプリケーション設定
-            'title' => 'PHP Uploader Ver.2.0',
+            'title' => 'PHP Uploader',
             'save_max_files' => 500,
             'max_comment' => 80,
             'max_file_size' => 2, // MB
