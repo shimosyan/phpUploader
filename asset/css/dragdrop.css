@@ -1,0 +1,255 @@
+/**
+ * ドラッグ&ドロップアップロード機能のスタイル
+ * phpUploader - Drag & Drop Upload Styles
+ */
+
+/* ドラッグ&ドロップエリア */
+.drag-drop-area {
+  position: relative;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  background-color: #fafafa;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.drag-drop-area:hover {
+  border-color: #5bc0de;
+  background-color: #f0f9ff;
+}
+
+.drag-drop-area.drag-over {
+  border-color: #5cb85c;
+  background-color: #f0fff0;
+  border-style: solid;
+}
+
+.drag-drop-content {
+  position: relative;
+  z-index: 1;
+}
+
+.drag-drop-icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.drag-drop-area:hover .drag-drop-icon {
+  color: #5bc0de;
+}
+
+.drag-drop-area.drag-over .drag-drop-icon {
+  color: #5cb85c;
+}
+
+.drag-drop-area h4 {
+  color: #666;
+  margin-bottom: 10px;
+  font-weight: 300;
+}
+
+.drag-drop-area p {
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.drag-drop-area .btn {
+  margin: 0 5px;
+}
+
+/* ドラッグオーバーレイ */
+.drag-drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(92, 184, 92, 0.9);
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.drag-drop-area.drag-over .drag-drop-overlay {
+  display: flex;
+}
+
+.drag-drop-overlay-content {
+  text-align: center;
+  color: white;
+}
+
+.drag-drop-overlay-content .glyphicon {
+  font-size: 64px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.drag-drop-overlay-content p {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* 選択されたファイル一覧 */
+.selected-files-container {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.selected-files-container h5 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.selected-files-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  position: relative;
+}
+
+.file-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-item .file-icon {
+  font-size: 16px;
+  margin-right: 10px;
+  color: #666;
+}
+
+.file-item .file-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-item .file-name {
+  font-weight: 500;
+  color: #333;
+  word-break: break-all;
+}
+
+.file-item .file-size {
+  font-size: 12px;
+  color: #999;
+  margin-left: 10px;
+}
+
+.file-item .file-remove {
+  background: none;
+  border: none;
+  color: #d9534f;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.file-item .file-remove:hover {
+  color: #c9302c;
+}
+
+/* プログレスバー拡張 */
+.file-item .upload-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #e0e0e0;
+  border-radius: 0 0 4px 4px;
+}
+
+.file-item .upload-progress-bar {
+  height: 100%;
+  background-color: #5cb85c;
+  border-radius: 0 0 4px 4px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .drag-drop-area {
+    padding: 30px 15px;
+  }
+  
+  .drag-drop-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+  }
+  
+  .drag-drop-area h4 {
+    font-size: 18px;
+  }
+  
+  .drag-drop-area .btn {
+    font-size: 14px;
+    margin: 5px 2px;
+  }
+  
+  .drag-drop-overlay-content .glyphicon {
+    font-size: 48px;
+  }
+  
+  .drag-drop-overlay-content p {
+    font-size: 16px;
+  }
+  
+  .file-item {
+    padding: 6px 10px;
+  }
+  
+  .file-item .file-name {
+    font-size: 14px;
+  }
+  
+  .file-item .file-size {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .drag-drop-area {
+    padding: 20px 10px;
+  }
+  
+  .drag-drop-area .btn {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+  }
+  
+  .file-item .file-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .file-item .file-size {
+    margin-left: 0;
+    margin-top: 2px;
+  }
+}
