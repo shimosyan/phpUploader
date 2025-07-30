@@ -96,6 +96,23 @@ class config {
                 'json', 'xml', 'yaml', 'yml', 'ini', 'conf', 'cfg',
                 'sql', 'log', 'md', 'html', 'htm', 'css', 'js',
                 
+                // プログラミング言語
+                'php', 'py', 'rb', 'pl', 'sh', 'bat', 'cmd', 'ps1', 'vbs',
+                'c', 'cpp', 'cxx', 'cc', 'h', 'hpp', 'hxx', 'cs', 'java',
+                'go', 'rs', 'swift', 'kt', 'scala', 'dart', 'lua', 'r',
+                'ts', 'jsx', 'tsx', 'vue', 'svelte', 'm', 'mm',
+                
+                // 設定・データファイル
+                'toml', 'properties', 'env', 'gitignore', 'dockerfile',
+                'makefile', 'cmake', 'gradle', 'lock', 'sum', 'mod',
+                'editorconfig', 'eslintrc', 'prettierrc', 'babelrc',
+                
+                // シェル・スクリプト
+                'zsh', 'fish', 'awk', 'sed', 'vim', 'vimrc',
+                
+                // データベース
+                'sqlite', 'db', 'sqlite3',
+                
                 // その他
                 'epub', 'mobi', 'azw3', 'fb2'
             ],
