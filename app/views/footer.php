@@ -51,5 +51,6 @@
     <script src="./asset/js/modal.js"></script>
     <script src="./asset/js/file-manager.js"></script>
     <script src="./asset/js/common.js"></script>
+    <script src="./asset/js/share.js"></script>
   </body>
 </html>
