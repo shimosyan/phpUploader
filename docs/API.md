@@ -145,13 +145,3 @@ curl -X POST -H "Authorization: Bearer <API_KEY>" \
 ## 6. CHANGELOG (簡易)
 
 * **2.0.0** – 初回実装 (ファイル / フォルダ CRUD, システム情報, API キー認証, レート制限)
-
----
-
-## 7. 今後の予定
-
-* WebHook 連携 (アップロード完了通知)
-* OAuth2 / JWT 認証対応
-* Swagger / OpenAPI 3.0 スキーマ自動生成
-
-以上じゃ。これで `README.md` から参照しても 404 にならぬはずじゃ！
