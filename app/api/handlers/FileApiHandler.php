@@ -42,9 +42,8 @@ class FileApiHandler
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             
             $sql = "SELECT id, origin_file_name as original_name, origin_file_name as filename, 
-                           comment, dl_key as password_dl, del_key as password_del, 
-                           size as file_size, 'application/octet-stream' as mime_type, 
-                           input_date as upload_date, count as download_count, folder_id 
+                           comment, size as file_size, 'application/octet-stream' as mime_type, 
+                           input_date as upload_date, \"count\" as download_count, folder_id 
                     FROM uploaded WHERE 1=1";
             $params = array();
             
@@ -52,11 +51,12 @@ class FileApiHandler
                 $sql .= " AND folder_id = ?";
                 $params[] = $folder;
             }
-            
-            $sql .= " ORDER BY upload_date DESC LIMIT ? OFFSET ?";
-            $params[] = $limit;
-            $params[] = $offset;
-            
+
+            // LIMIT / OFFSET はSQLiteではプレースホルダーを使用できないため数値を直接埋め込む
+            $limit  = (int) $limit;
+            $offset = (int) $offset;
+            $sql .= " ORDER BY input_date DESC LIMIT {$limit} OFFSET {$offset}";
+
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -92,7 +92,7 @@ class FileApiHandler
             
         } catch (PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
-            $this->response->error('データベースエラーが発生しました', [], 500, 'DATABASE_ERROR');
+            $this->response->error('データベースエラー', [], 500, 'DATABASE_ERROR');
         }
     }
 
@@ -132,9 +132,8 @@ class FileApiHandler
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             
             $stmt = $pdo->prepare("SELECT id, origin_file_name as original_name, origin_file_name as filename, 
-                                          comment, dl_key as password_dl, del_key as password_del, 
-                                          size as file_size, 'application/octet-stream' as mime_type, 
-                                          input_date as upload_date, count as download_count, folder_id 
+                                          comment, size as file_size, 'application/octet-stream' as mime_type, 
+                                          input_date as upload_date, \"count\" as download_count, folder_id 
                                    FROM uploaded WHERE id = ?");
             $stmt->execute(array($fileId));
             $file = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -148,7 +147,7 @@ class FileApiHandler
             
         } catch (PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
-            $this->response->error('データベースエラーが発生しました', [], 500, 'DATABASE_ERROR');
+            $this->response->error('データベースエラー', [], 500, 'DATABASE_ERROR');
         }
     }
 
@@ -188,7 +187,7 @@ class FileApiHandler
             
         } catch (PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
-            $this->response->error('データベースエラーが発生しました', [], 500, 'DATABASE_ERROR');
+            $this->response->error('データベースエラー', [], 500, 'DATABASE_ERROR');
         }
     }
 
@@ -320,7 +319,7 @@ class FileApiHandler
 
         } catch (PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
-            $this->response->error('データベースエラーが発生しました', [], 500, 'DATABASE_ERROR');
+            $this->response->error('データベースエラー', [], 500, 'DATABASE_ERROR');
         } catch (Exception $e) {
             error_log('File replace error: ' . $e->getMessage());
             $this->response->error('サーバー内部エラーが発生しました', [], 500, 'INTERNAL_ERROR');
@@ -401,7 +400,7 @@ class FileApiHandler
 
         } catch (PDOException $e) {
             error_log('Database error: ' . $e->getMessage());
-            $this->response->error('データベースエラーが発生しました', [], 500, 'DATABASE_ERROR');
+            $this->response->error('データベースエラー', [], 500, 'DATABASE_ERROR');
         } catch (Exception $e) {
             error_log('Comment update error: ' . $e->getMessage());
             $this->response->error('サーバー内部エラーが発生しました', [], 500, 'INTERNAL_ERROR');
