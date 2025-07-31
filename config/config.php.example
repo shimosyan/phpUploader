@@ -34,8 +34,8 @@ class config {
 
             // アプリケーション設定
             'title' => 'PHP Uploader',
-            'save_max_files' => 500,
-            'max_comment' => 80,
+            'save_max_files' => 2000,  // 制限値を増加
+            'max_comment' => 1024,     // 制限値を増加
             'max_file_size' => 100, // MB
             
             // DLキー・DELキーの必須設定
