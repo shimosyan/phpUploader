@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="./asset/css/responsive.css">
     <link rel="stylesheet" href="./asset/css/responsive-extra.css">
     <link rel="stylesheet" href="./asset/css/file-manager.css">
-    <link rel="stylesheet" href="./asset/css/responsive-cards.css">
     <link rel="stylesheet" href="./asset/css/share.css">
     <link rel="stylesheet" href="./asset/css/dragdrop.css">
     <link rel="stylesheet" href="./asset/css/folders.css">

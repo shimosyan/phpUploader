@@ -232,7 +232,9 @@
 
 .file-list-item__actions {
   display: flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
   flex-shrink: 0;
 }
 
@@ -269,6 +271,59 @@
   color: white;
 }
 
+/* リストアクションボタン（新しいfile-list-item__actionクラス用） */
+.file-list-item__action {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #007bff;
+  background: white;
+  color: #007bff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-list-item__action:hover {
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+}
+
+.file-list-item__action.file-list-item__btn--share {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.file-list-item__action.file-list-item__btn--share:hover {
+  background: #17a2b8;
+  color: white;
+}
+
+.file-list-item__action.file-list-item__btn--edit {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.file-list-item__action.file-list-item__btn--edit:hover {
+  background: #28a745;
+  color: white;
+}
+
+.file-list-item__action.file-list-item__btn--replace {
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.file-list-item__action.file-list-item__btn--replace:hover {
+  background: #ffc107;
+  color: #856404;
+}
+
 .file-card-v2 {
   background: white;
   border: 1px solid #e9ecef;
@@ -287,6 +342,14 @@
   padding: 16px;
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
+  position: relative;
+}
+
+.file-card-v2__icon {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .file-card-v2__filename {
@@ -354,21 +417,24 @@
 
 .file-card-v2__actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   border-top: 1px solid #e9ecef;
-  padding-top: 12px;
+  /* 上 右/左 下 */
+  padding: 12px 8px 0;
 }
 
 .file-card-v2__btn {
   flex: 1;
-  padding: 8px 12px;
+  min-width: 80px;
+  padding: 6px 8px;
   border: 1px solid #007bff;
   background: white;
   color: #007bff;
   text-decoration: none;
   text-align: center;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -388,6 +454,41 @@
 .file-card-v2__btn--delete:hover {
   background: #dc3545;
   color: white;
+}
+
+.file-card-v2__btn--share {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.file-card-v2__btn--share:hover {
+  background: #17a2b8;
+  color: white;
+}
+
+.file-card-v2__btn--edit {
+  border-color: #28a745;
+  color: #28a745;
+}
+
+.file-card-v2__btn--edit:hover {
+  background: #28a745;
+  color: white;
+}
+
+.file-card-v2__btn--replace {
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.file-card-v2__btn--replace:hover {
+  background: #ffc107;
+  color: #856404;
+}
+
+.file-card-v2__btn-icon {
+  margin-right: 4px;
+  font-size: 14px;
 }
 
 /* === ページネーション === */
@@ -606,6 +707,98 @@
 /* === 隠しクラス（DataTables削除用） === */
 .file-table-container {
   display: none !important;
+}
+
+/* 新アクションボタン色 */
+.file-card-v2__btn--share,
+.file-list-item__btn--share{color:#337ab7;}
+.file-card-v2__btn--share:hover,
+.file-list-item__btn--share:hover{color:#23527c;}
+.file-card-v2__btn--edit,
+.file-list-item__btn--edit{color:#5cb85c;}
+.file-card-v2__btn--edit:hover,
+.file-list-item__btn--edit:hover{color:#3d8b40;}
+.file-card-v2__btn--move,
+.file-list-item__btn--move{color:#f0ad4e;}
+.file-card-v2__btn--move:hover,
+.file-list-item__btn--move:hover{color:#d58512;}
+
+/* 一括操作バー */
+.bulk-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.bulk-actions-bar__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-actions-bar__info label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.bulk-actions-bar__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bulk-action-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bulk-action-btn:hover {
+  background: #0056b3;
+}
+
+.bulk-action-btn--danger {
+  background: #dc3545;
+}
+
+.bulk-action-btn--danger:hover {
+  background: #c82333;
+}
+
+/* ファイルチェックボックス */
+.file-list-item__checkbox,
+.file-card-v2__checkbox {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.file-list-item__checkbox input,
+.file-card-v2__checkbox input {
+  margin: 0;
+  transform: scale(1.1);
+}
+
+.file-card-v2__checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
+  z-index: 2;
 }
 
 /* DataTablesスタイルの上書き */

@@ -47,7 +47,7 @@ if (!isset($config['api_keys'][$apiKey])) {
 try {
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $limit = isset($_GET['limit']) ? min(100, max(1, intval($_GET['limit']))) : 20;
-    $folder = isset($_GET['folder']) ? intval($_GET['folder']) : null;
+    $folder = (isset($_GET['folder']) && $_GET['folder'] !== '') ? intval($_GET['folder']) : null;
     
     $offset = ($page - 1) * $limit;
     

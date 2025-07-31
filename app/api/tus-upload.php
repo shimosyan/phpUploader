@@ -26,7 +26,8 @@ $tus_version = '1.0.0';
 header('Tus-Resumable: ' . $tus_version);
 
 //configをインクルード
-include(__DIR__ . '/../../config/config.php');
+include_once(__DIR__ . '/../../config/config.php');
+require_once(__DIR__ . '/../../src/Core/Utils.php');
 $config = new config();
 $ret = $config->index();
 if (!is_null($ret) && is_array($ret)) {
@@ -35,11 +36,11 @@ if (!is_null($ret) && is_array($ret)) {
 
 // データベース接続
 try {
-    $db = new PDO('sqlite:' . __DIR__ . '/../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Database connection failed']);
+    echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
     exit;
 }
 
@@ -343,49 +344,68 @@ function handleHead() {
 function completeUpload($uploadId, $upload) {
     global $db, $data_directory, $key, $encrypt_filename, $extension;
     
+    // デバッグログ開始
+    error_log("DEBUG completeUpload START - Upload ID: $uploadId");
+    
     $metadata = json_decode($upload['metadata'], true);
     $originalFileName = $metadata['filename'] ?? 'unknown';
     
+    error_log("DEBUG completeUpload - metadata: " . print_r($metadata, true));
+    error_log("DEBUG completeUpload - originalFileName: $originalFileName");
+    
     // 拡張子チェック
     $ext = pathinfo($originalFileName, PATHINFO_EXTENSION);
+    error_log("DEBUG completeUpload - extension: $ext, allowed: " . print_r($extension, true));
     if (!in_array(strtolower($ext), $extension)) {
         // 不正な拡張子の場合は削除
+        error_log("DEBUG completeUpload - REJECTED: Invalid extension $ext");
         unlink($upload['chunk_path']);
         $db->prepare("DELETE FROM tus_uploads WHERE id = ?")->execute([$uploadId]);
         return false;
     }
+    error_log("DEBUG completeUpload - Extension check passed");
     
     try {
+        error_log("DEBUG completeUpload - Starting database insert");
         // uploadedテーブルに移動
         $sql = $db->prepare("
             INSERT INTO uploaded (
                 origin_file_name, comment, size, count, input_date,
-                dl_key, del_key, replace_key, max_downloads, expires_at, folder_id
+                dl_key_hash, del_key_hash, replace_key, max_downloads, expires_at, folder_id
             ) VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)
         ");
         
-        $result = $sql->execute([
+        $insertData = [
             htmlspecialchars($originalFileName, ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($upload['comment'] ?? '', ENT_QUOTES, 'UTF-8'),
             $upload['file_size'],
             time(),
-            empty($upload['dl_key']) ? null : openssl_encrypt($upload['dl_key'], 'aes-256-ecb', $key),
-            empty($upload['del_key']) ? null : openssl_encrypt($upload['del_key'], 'aes-256-ecb', $key),
-            empty($upload['replace_key']) ? null : openssl_encrypt($upload['replace_key'], 'aes-256-ecb', $key),
+            empty($upload['dl_key']) ? null : SecurityUtils::hashPassword($upload['dl_key']),
+            empty($upload['del_key']) ? null : SecurityUtils::hashPassword($upload['del_key']),
+            empty($metadata['replacekey']) ? null : openssl_encrypt($metadata['replacekey'], 'aes-256-ecb', $key),
             $upload['max_downloads'],
             $upload['share_expires_at'],
             $upload['folder_id']
-        ]);
+        ];
+        
+        error_log("DEBUG completeUpload - Insert data: " . print_r($insertData, true));
+        $result = $sql->execute($insertData);
         
         if (!$result) {
-            throw new Exception('Failed to insert into uploaded table');
+            $errorInfo = $sql->errorInfo();
+            error_log("DEBUG completeUpload - SQL Error: " . print_r($errorInfo, true));
+            throw new Exception('Failed to insert into uploaded table: ' . $errorInfo[2]);
         }
+        error_log("DEBUG completeUpload - Database insert successful");
         
         $fileId = $db->lastInsertId();
         
         // 最終ファイルパスを決定
         if ($encrypt_filename) {
-            $finalPath = $data_directory . '/file_' . str_replace(['\\', '/', ':', '*', '?', '"', '<', '>', '|'], '', openssl_encrypt($fileId, 'aes-256-ecb', $key)) . '.' . $ext;
+            // セキュアなファイル名の生成（ハッシュ化）
+            $hashedFileName = SecurityUtils::generateSecureFileName($fileId, $originalFileName);
+            $storedFileName = SecurityUtils::generateStoredFileName($hashedFileName, $ext);
+            $finalPath = $data_directory . '/' . $storedFileName;
         } else {
             $finalPath = $data_directory . '/file_' . $fileId . '.' . $ext;
         }
@@ -393,6 +413,12 @@ function completeUpload($uploadId, $upload) {
         // チャンクファイルを最終的な場所に移動
         if (!rename($upload['chunk_path'], $finalPath)) {
             throw new Exception('Failed to move file');
+        }
+        
+        // encrypt_filenameが有効な場合は、データベースにハッシュ化されたファイル名を記録
+        if ($encrypt_filename && isset($storedFileName)) {
+            $updateStmt = $db->prepare("UPDATE uploaded SET stored_file_name = ? WHERE id = ?");
+            $updateStmt->execute([$storedFileName, $fileId]);
         }
         
         // tus_uploadsテーブルを更新
@@ -403,6 +429,8 @@ function completeUpload($uploadId, $upload) {
         
     } catch (Exception $e) {
         // エラー時はチャンクファイルを削除
+        error_log("DEBUG completeUpload - ERROR: " . $e->getMessage());
+        error_log("DEBUG completeUpload - ERROR trace: " . $e->getTraceAsString());
         if (file_exists($upload['chunk_path'])) {
             unlink($upload['chunk_path']);
         }

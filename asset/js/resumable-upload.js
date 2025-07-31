@@ -58,11 +58,39 @@ function uploadFileResumable(file, options) {
         var expiresDays = options.expiresDays || null;
         var folderId = options.folderId || null;
         
-        // Tus.ioが利用できない場合は従来方式にフォールバック
-        if (!isResumableAvailable) {
-            fallbackUpload(file, options).then(resolve).catch(reject);
+        // 設定に基づくアップロード方式の選択
+        const uploadPriority = window.config?.upload_method_priority || 'resumable';
+        const fallbackEnabled = window.config?.upload_fallback_enabled !== false;
+        
+        // 通常アップロード優先の場合
+        if (uploadPriority === 'normal') {
+            console.log('Using normal upload priority for:', file.name);
+            fallbackUpload(file, options).then(resolve).catch(function(error) {
+                if (fallbackEnabled && isResumableAvailable) {
+                    console.log('Fallback to resumable upload after normal failed:', file.name);
+                    proceedWithResumableUpload();
+                } else {
+                    reject(error);
+                }
+            });
             return;
         }
+        
+        // 再開可能アップロード優先（デフォルト）
+        // Tus.ioが利用できない場合はフォールバック
+        if (!isResumableAvailable) {
+            if (fallbackEnabled) {
+                console.log('Tus.io unavailable, using fallback for:', file.name);
+                fallbackUpload(file, options).then(resolve).catch(reject);
+            } else {
+                reject(new Error('Resumable upload not available and fallback disabled'));
+            }
+            return;
+        }
+        
+        proceedWithResumableUpload();
+        
+        function proceedWithResumableUpload() {
         
         // メタデータを準備
         var metadata = {
@@ -78,8 +106,8 @@ function uploadFileResumable(file, options) {
         if (folderId) metadata.folder_id = folderId.toString();
         if (options.replacekey) metadata.replacekey = options.replacekey.toString();
         
-        // Tus.ioアップロードを作成（Docker環境対応）
-        var upload = new tus.Upload(file, {
+            // Tus.ioアップロードを作成（Docker環境対応）
+            var upload = new tus.Upload(file, {
             endpoint: './app/api/tus-upload.php',
             retryDelays: [0, 1000, 3000, 5000],
             metadata: metadata,
@@ -94,9 +122,13 @@ function uploadFileResumable(file, options) {
                 // グローバルリストから削除
                 delete resumableUploads[file.name];
                 
-                // Tus.ioが失敗した場合は従来方式にフォールバック
-                console.log('Falling back to traditional upload for:', file.name);
-                fallbackUpload(file, options).then(resolve).catch(reject);
+                // Tus.ioが失敗した場合はフォールバック（設定で有効な場合）
+                if (fallbackEnabled) {
+                    console.log('Falling back to traditional upload for:', file.name);
+                    fallbackUpload(file, options).then(resolve).catch(reject);
+                } else {
+                    reject(error);
+                }
             },
             
             onProgress: function(bytesUploaded, bytesTotal) {
@@ -140,6 +172,7 @@ function uploadFileResumable(file, options) {
             options: options,
             progress: 0
         };
+      } // Close proceedWithResumableUpload
     });
 }
 
@@ -153,6 +186,11 @@ function fallbackUpload(file, options) {
         var formData = new FormData();
         formData.append('file', file);
         formData.append('comment', options.comment || '');
+        // CSRFトークンを追加
+        var csrfToken = $('#csrfToken').val();
+        if (csrfToken) {
+            formData.append('csrf_token', csrfToken);
+        }
         formData.append('dlkey', options.dlkey || '');
         formData.append('delkey', options.delkey || '');
         formData.append('replacekey', options.replacekey || '');
@@ -205,7 +243,7 @@ function fallbackUpload(file, options) {
         })
         .done(function(data) {
             console.log('Fallback upload response:', data);
-            if (data.status === 'ok') {
+            if (data.status === 'ok' || data.status === 'success') {
                 console.log('Fallback upload completed:', file.name);
                 onUploadComplete(file.name, 'fallback');
                 resolve();
@@ -404,15 +442,29 @@ function enhancedFileUpload() {
     console.log('Enhanced file upload called');
     
     // 差し替えキー必須チェック
-    var replaceKey = $('#replaceKeyInput').val();
+    var replaceKeyInput = $('#replaceKeyInput');
+    if (replaceKeyInput.length === 0) {
+        alert('差し替えキー入力フィールドが見つかりません。');
+        return;
+    }
+    
+    var replaceKey = replaceKeyInput.val();
     if (!replaceKey || replaceKey.trim() === '') {
         alert('差し替えキーの入力は必須です。');
         return;
     }
     
-    // 単一ファイルの場合
-    var singleFile = $('#lefile')[0].files[0];
-    if (singleFile) {
+    // デバッグ情報を出力
+    var fileInput = $('#multipleFileInput')[0];
+    var fileInputExists = fileInput ? true : false;
+    var fileInputHasFiles = fileInput && fileInput.files ? fileInput.files.length : 0;
+    var selectedFilesLength = typeof selectedFiles !== 'undefined' && selectedFiles ? selectedFiles.length : 0;
+    
+    console.log('Debug info - fileInputExists:', fileInputExists, 'fileInputHasFiles:', fileInputHasFiles, 'selectedFilesLength:', selectedFilesLength);
+    
+    // 単一ファイルの場合（multipleFileInputから最初のファイルを取得）
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        var singleFile = fileInput.files[0];
         console.log('Single file upload:', singleFile.name);
         var options = getUploadOptions();
         uploadFileResumable(singleFile, options);
@@ -427,7 +479,7 @@ function enhancedFileUpload() {
     }
     
     console.warn('No files selected for upload');
-    alert('ファイルが選択されていません。');
+    alert('ファイルが選択されていません。ファイルを選択してからアップロードボタンを押してください。');
 }
 
 /**
@@ -488,15 +540,26 @@ function getUploadOptions() {
  */
 function updateGlobalProgress() {
     var totalUploads = Object.keys(resumableUploads).length;
+
+    // 右上の小窓は常に非表示にする
+    $('.global-upload-status').removeClass('active').hide();
+
+    // フォーム内プログレスバー要素
+    var $progressContainer = $('#progressContainer');
+    var $progressBar       = $('#progressBar');
+    var $progressText      = $('#progressText');
+    var $uploadStatus      = $('#uploadStatus');
+
     if (totalUploads === 0) {
-        $('.global-upload-status').removeClass('active');
+        // すべて完了、またはアップロード未開始
+        $progressContainer.hide();
         return;
     }
-    
-    var totalProgress = 0;
+
+    var totalProgress  = 0;
     var completedCount = 0;
-    
-    Object.values(resumableUploads).forEach(function(uploadInfo) {
+
+    Object.values(resumableUploads).forEach(function (uploadInfo) {
         if (uploadInfo.progress !== undefined) {
             totalProgress += uploadInfo.progress;
         }
@@ -504,15 +567,14 @@ function updateGlobalProgress() {
             completedCount++;
         }
     });
-    
-    var averageProgress = totalUploads > 0 ? Math.round(totalProgress / totalUploads) : 0;
-    
-    $('.global-upload-status').addClass('active');
-    $('.global-upload-progress-bar').css('width', averageProgress + '%');
-    $('.global-upload-info').html(
-        '<span>完了: ' + completedCount + '/' + totalUploads + '</span>' +
-        '<span>' + averageProgress + '%</span>'
-    );
+
+    var averageProgress = Math.round(totalProgress / totalUploads);
+
+    // プログレスバーを表示・更新
+    $progressContainer.show();
+    $progressBar.css('width', averageProgress + '%');
+    $progressText.text(averageProgress + '%');
+    $uploadStatus.text('完了: ' + completedCount + '/' + totalUploads);
 }
 
 /**

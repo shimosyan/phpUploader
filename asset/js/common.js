@@ -37,9 +37,10 @@ $(document).ready(function(){
     });
   }
 
-  $('input[id=lefile]').change(function() {
-    $('#fileInput').val($(this).val().replace('C:\\fakepath\\', ''));
-  });
+  // 従来の単一ファイル入力は削除（multipleFileInputで統一）
+  // $('input[id=lefile]').change(function() {
+  //   $('#fileInput').val($(this).val().replace('C:\\fakepath\\', ''));
+  // });
 
   // ステータスメッセージの自動非表示
   if ($('#statusMessage').length > 0) {
@@ -346,6 +347,18 @@ function dl_certificat(id, key){
 
 // DELボタンを押すと実行
 function del_button(id){
+  // 削除確認ダイアログを表示
+  var html = '<div class="alert alert-warning">' +
+            '<strong>⚠️ 警告</strong><br>' +
+            'このファイルを削除しますか？<br>' +
+            '<small class="text-muted">この操作は取り消せません。</small>' +
+            '</div>';
+  openModal('okcansel', 'ファイル削除の確認', html, 'confirm_delete_button(' + id + ');');
+}
+
+// 削除確認後の処理
+function confirm_delete_button(id){
+  closeModal();
   // DLkey空白で投げる
   del_certificat(id ,'');
 }

@@ -6,7 +6,7 @@
  */
 
 //configをインクルード
-include(__DIR__ . '/../../config/config.php');
+include_once(__DIR__ . '/../../config/config.php');
 $config = new config();
 $ret = $config->index();
 if (!is_null($ret) && is_array($ret)) {
@@ -14,7 +14,7 @@ if (!is_null($ret) && is_array($ret)) {
 }
 
 try {
-    $db = new PDO('sqlite:' . __DIR__ . '/../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     
     $currentTime = time();

@@ -4,7 +4,7 @@
 ini_set('display_errors', 1);
 
 // configをインクルード
-include('../../config/config.php');
+include_once('../../config/config.php');
 $config = new config();
 $ret = $config->index();
 // 配列キーが設定されている配列なら展開
@@ -16,7 +16,7 @@ if (!is_null($ret)) {
 
 // データベースの作成・オープン
 try {
-    $db = new PDO('sqlite:../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
 } catch (Exception $e) {
     echo 'データベース接続エラー: ' . $e->getMessage();
     exit;

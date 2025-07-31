@@ -55,8 +55,9 @@ try {
     $tokenData = $tokenStmt->fetch();
 
     if (!$tokenData) {
-        $logger->warning('Invalid or expired download token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
-        header('Location: ./');
+        $logger->info('Token not found in access_tokens, trying legacy share link validation', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+        // 古い共有リンク処理にフォールバック
+        validateLegacyShareLink($fileId, $token, $config, $db, $logger);
         exit;
     }
 
@@ -160,94 +161,91 @@ try {
 
     header('Location: ./');
     exit;
-  }
+}
 
-  //configをインクルード
-  include('./config/config.php');
-  $config = new config();
-  $ret = $config->index();
-  //配列キーが設定されている配列なら展開
-  if (!is_null($ret)) {
-    if(is_array($ret)){
-      extract($ret);
-    }
-  }
-
-  //データベースの作成・オープン
-  try{
-    $db = new PDO("sqlite:".$db_directory."/uploader.db");
-  }catch (Exception $e){
-    exit;
-  }
-
-  // デフォルトのフェッチモードを連想配列形式に設定
-  // (毎回PDO::FETCH_ASSOCを指定する必要が無くなる)
-  $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-  // 選択 (プリペアドステートメント)
-  $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
-  $stmt->bindValue(':id', $id); //ID
-  $stmt->execute();
-  $result = $stmt->fetchAll();
-  foreach($result as $s){
-    $filename = $s['origin_file_name'];
-    $origin_dlkey = $s['dl_key'];
-    $current_count = $s['count'];
-    $max_downloads = $s['max_downloads'];
-    $expires_at = $s['expires_at'];
-  }
-
-  // DLキーがNULL（空）の場合は認証不要、そうでない場合は認証チェック
-  if ($origin_dlkey !== null) {
-    // トークンを照合して認証が通ればDL可
-    if ( PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
-      if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, true)) ){
-        header('location: ./');
+/**
+ * 古い共有リンクの検証とダウンロード処理
+ */
+function validateLegacyShareLink($id, $dlkey, $config, $db, $logger) {
+    // ファイル情報取得
+    $stmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
+    $stmt->bindValue(':id', $id);
+    $stmt->execute();
+    $result = $stmt->fetchAll();
+    
+    if (empty($result)) {
+        $logger->warning('File not found for legacy share link', ['file_id' => $id]);
+        header('Location: ./');
         exit;
-      }
-    }else{
-      if( $dlkey !== bin2hex(openssl_encrypt($origin_dlkey,'aes-256-ecb',$key, OPENSSL_RAW_DATA)) ){
-        header('location: ./');
+    }
+    
+    $fileData = $result[0];
+    $filename = $fileData['origin_file_name'];
+    $origin_dlkey = $fileData['dl_key_hash']; // 修正：dl_key_hashを使用
+    $current_count = $fileData['count'];
+    $max_downloads = $fileData['max_downloads'];
+    $expires_at = $fileData['expires_at'];
+    
+    // DLキーがNULL（空）の場合は認証不要、そうでない場合は認証チェック
+    if ($origin_dlkey !== null) {
+        // 共有リンクトークンの検証（暗号化されたDLキーと照合）
+        $expectedToken = '';
+        if (PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
+            $expectedToken = bin2hex(openssl_encrypt($origin_dlkey, 'aes-256-ecb', $config['key'], true));
+        } else {
+            $expectedToken = bin2hex(openssl_encrypt($origin_dlkey, 'aes-256-ecb', $config['key'], OPENSSL_RAW_DATA));
+        }
+        
+        if ($dlkey !== $expectedToken) {
+            $logger->warning('Invalid legacy share link token', ['file_id' => $id]);
+            header('Location: ./');
+            exit;
+        }
+    }
+    
+    // 制限チェック
+    // 有効期限チェック
+    if ($expires_at !== null && $expires_at < time()) {
+        $logger->warning('Share link expired', ['file_id' => $id, 'expires_at' => $expires_at]);
+        header('Location: ./?error=expired');
         exit;
-      }
     }
-  }
-
-  // 制限チェック
-  
-  // 有効期限チェック
-  if ($expires_at !== null && time() > $expires_at) {
-    header('location: ./?error=expired');
-    exit;
-  }
-  
-  // ダウンロード回数制限チェック
-  if ($max_downloads !== null && $current_count >= $max_downloads) {
-    header('location: ./?error=limit_exceeded');
-    exit;
-  }
-
-  // カウンターを増やす
-  $upd = $db->prepare("UPDATE uploaded SET count = count + 1 WHERE id = :id");
-  $upd->bindValue(':id', $id); //ID
-  $upd->execute();
-
-
-  $ext = substr( $filename, strrpos( $filename, '.') + 1);
-  if ($encrypt_filename) {
-    $path = $data_directory.'/' . 'file_' . str_replace(array('\\', '/', ':', '*', '?', '\"', '<', '>', '|'), '',openssl_encrypt($id,'aes-256-ecb',$key)) . '.'.$ext;
-    if (!file_exists ( $path )) {
-      $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
+    
+    // ダウンロード回数制限チェック
+    if ($max_downloads !== null && $current_count >= $max_downloads) {
+        $logger->warning('Download limit exceeded', ['file_id' => $id, 'count' => $current_count, 'max' => $max_downloads]);
+        header('Location: ./?error=limit_exceeded');
+        exit;
     }
-  } else {
-    $path = $data_directory.'/' . 'file_' . $id . '.'.$ext;
-  }
+    
+    // ファイルパス生成
+    $fileExtension = pathinfo($filename, PATHINFO_EXTENSION);
+    $filePath = $config['data_directory'] . '/file_' . $id . '.' . $fileExtension;
+    
+    // ファイル存在確認
+    if (!file_exists($filePath)) {
+        $logger->error('Physical file not found for legacy share link', ['file_id' => $id, 'path' => $filePath]);
+        header('Location: ./');
+        exit;
+    }
+    
+    // ダウンロード回数を増加
+    $updateStmt = $db->prepare("UPDATE uploaded SET count = count + 1 WHERE id = :id");
+    $updateStmt->execute(['id' => $id]);
+    
+    // ファイルダウンロード
+    header('Content-Description: File Transfer');
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize($filePath));
+    
+    $logger->info('Legacy share link download completed', ['file_id' => $id, 'filename' => $filename]);
+    
+    readfile($filePath);
+    exit;
+}
 
-  //var_dump($path);
 
-  header('Content-Type: application/force-download');
-  header('Content-Disposition: attachment; filename*=UTF-8\'\''.rawurlencode($filename));
-  header('Content-Length: ' . filesize($path));
-  ob_end_clean();//ファイル破損を防ぐ //出力バッファのゴミ捨て
-  readfile($path);
-?>

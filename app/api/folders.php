@@ -4,7 +4,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // configをインクルード
-include('../../config/config.php');
+include_once('../../config/config.php');
 $config = new config();
 $ret = $config->index();
 // 配列キーが設定されている配列なら展開
@@ -23,7 +23,7 @@ if (!isset($folders_enabled) || !$folders_enabled) {
 
 // データベースの作成・オープン
 try {
-    $db = new PDO('sqlite:../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (Exception $e) {
@@ -409,7 +409,20 @@ function handleDeleteFolder($db, $allow_deletion) {
         $stmt->execute([$id]);
         $fileCount = $stmt->fetch()['count'];
         
-        if ($childCount > 0 || $fileCount > 0) {
+        // チェック専用リクエストの場合は情報を返すだけ
+        if (isset($_GET['check']) && $_GET['check'] === 'true') {
+            echo json_encode([
+                'success' => true,
+                'file_count' => $fileCount,
+                'child_count' => $childCount
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+        
+        $moveFiles = isset($_GET['move_files']) && $_GET['move_files'] === 'true';
+        $movedFiles = 0;
+        
+        if (($childCount > 0 || $fileCount > 0) && !$moveFiles) {
             http_response_code(400);
             echo json_encode([
                 'error' => 'フォルダが空でないため削除できません',
@@ -421,13 +434,28 @@ function handleDeleteFolder($db, $allow_deletion) {
             return;
         }
         
+        // ファイル移動オプションが有効な場合、ファイルをルートに移動
+        if ($moveFiles && $fileCount > 0) {
+            $stmt = $db->prepare("UPDATE uploaded SET folder_id = NULL WHERE folder_id = ?");
+            $stmt->execute([$id]);
+            $movedFiles = $fileCount;
+        }
+        
+        // 子フォルダもルートに移動（再帰的な削除は行わない）
+        if ($moveFiles && $childCount > 0) {
+            $stmt = $db->prepare("UPDATE folders SET parent_id = NULL WHERE parent_id = ?");
+            $stmt->execute([$id]);
+        }
+        
         // フォルダ削除
         $stmt = $db->prepare("DELETE FROM folders WHERE id = ?");
         $stmt->execute([$id]);
         
         echo json_encode([
             'success' => true,
-            'message' => 'フォルダを削除しました'
+            'message' => 'フォルダを削除しました',
+            'moved_files' => $movedFiles,
+            'moved_folders' => $moveFiles ? $childCount : 0
         ], JSON_UNESCAPED_UNICODE);
         
     } catch (Exception $e) {

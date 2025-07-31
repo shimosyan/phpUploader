@@ -223,19 +223,51 @@ class SimpleFolderManager {
     }
     
     // フォルダ削除確認ダイアログ
-    showDeleteFolderDialog(folderId) {
+    async showDeleteFolderDialog(folderId) {
         const folderElement = document.querySelector(`[data-folder-id="${folderId}"] .folder-item`);
         const folderName = folderElement ? folderElement.textContent.trim().replace('📁', '').trim() : 'フォルダ';
         
-        if (!confirm(`フォルダ「${folderName}」を削除しますか？\n\n注意: 空のフォルダのみ削除できます。`)) return;
-        
-        this.deleteFolder(folderId);
+        try {
+            // フォルダ内のファイル数を確認
+            const response = await fetch(`./app/api/folders.php?id=${folderId}&check=true`);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'フォルダ情報の取得に失敗しました');
+            }
+            
+            const fileCount = data.file_count || 0;
+            const childCount = data.child_count || 0;
+            
+            if (fileCount === 0 && childCount === 0) {
+                // 空のフォルダの場合
+                if (confirm(`フォルダ「${folderName}」を削除しますか？`)) {
+                    this.deleteFolder(folderId, false);
+                }
+            } else {
+                // ファイルまたは子フォルダがある場合
+                let message = `フォルダ「${folderName}」には以下が含まれています：\n`;
+                if (fileCount > 0) message += `・ファイル: ${fileCount}個\n`;
+                if (childCount > 0) message += `・子フォルダ: ${childCount}個\n`;
+                message += '\n削除方法を選択してください：\n';
+                message += '「OK」= 中身をルートフォルダに移動して削除\n';
+                message += '「キャンセル」= 削除を中止';
+                
+                if (confirm(message)) {
+                    this.deleteFolder(folderId, true);
+                }
+            }
+        } catch (error) {
+            console.error('フォルダ削除確認エラー:', error);
+            alert('エラー: ' + error.message);
+        }
     }
     
     // フォルダ削除
-    async deleteFolder(folderId) {
+    async deleteFolder(folderId, moveFiles = false) {
         try {
-            const response = await fetch(`./app/api/folders.php?id=${folderId}`, {
+            const url = `./app/api/folders.php?id=${folderId}${moveFiles ? '&move_files=true' : ''}`;
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -246,7 +278,12 @@ class SimpleFolderManager {
                 throw new Error(data.error || 'フォルダ削除に失敗しました');
             }
             
-            alert('フォルダを削除しました');
+            if (moveFiles && data.moved_files > 0) {
+                alert(`フォルダを削除しました。\n${data.moved_files}個のファイルをルートフォルダに移動しました。`);
+            } else {
+                alert('フォルダを削除しました');
+            }
+            
             // 削除後は現在のページを適切にリロード
             window.location.href = window.location.href;
             

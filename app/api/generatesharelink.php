@@ -22,7 +22,7 @@ if ($expires_days && $expires_days > 0) {
 }
 
 // configをインクルード
-include('../../config/config.php');
+include_once('../../config/config.php');
 $config = new config();
 $ret = $config->index();
 // 配列キーが設定されている配列なら展開
@@ -34,7 +34,7 @@ if (!is_null($ret)) {
 
 // データベースの作成・オープン
 try {
-    $db = new PDO('sqlite:../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
 } catch (Exception $e) {
     $response = array('status' => 'sqlerror');
     // JSON形式で出力する
@@ -61,7 +61,7 @@ if (empty($result)) {
 $fileData = $result[0];
 $filename = $fileData['origin_file_name'];
 $comment = $fileData['comment'];
-$origin_dlkey = $fileData['dl_key'];
+$origin_dlkey = $fileData['dl_key_hash'];
 $current_max_downloads = $fileData['max_downloads'];
 $current_expires_at = $fileData['expires_at'];
 
@@ -97,7 +97,7 @@ if (PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
              || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'];
-$base_path = dirname(dirname($_SERVER['SCRIPT_NAME'])); // /app/api から2階層上へ
+$base_path = dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))); // /app/api から3階層上へ（ルートへ）
 if ($base_path === '/' || $base_path === '\\') {
     $base_path = '';
 }

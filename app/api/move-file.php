@@ -4,7 +4,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // configをインクルード
-include('../../config/config.php');
+include_once('../../config/config.php');
 $config = new config();
 $ret = $config->index();
 if (!is_null($ret)) {
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // データベースの作成・オープン
 try {
-    $db = new PDO('sqlite:../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (Exception $e) {

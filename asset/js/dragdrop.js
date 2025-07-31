@@ -53,12 +53,12 @@ function initializeDragDrop() {
     $multipleFileInput.click();
   });
   
-  // ドラッグ&ドロップエリア全体のクリック（単一ファイル選択のフォールバック）
+  // ドラッグ&ドロップエリア全体のクリック（ファイル選択のフォールバック）
   $dragDropArea.click(function(e) {
     if (isUploading) return;
     // ボタンクリック以外の場合のみ
     if (!$(e.target).is('button')) {
-      $('#lefile').click();
+      $multipleFileInput.click();
     }
   });
 
@@ -76,18 +76,18 @@ function initializeDragDrop() {
     handleFiles(this.files);
   });
   
-  // 従来の単一ファイル入力
-  $('#lefile').change(function() {
-    if (this.files.length > 0) {
-      var fileName = this.files[0].name;
-      $('#fileInput').val(fileName);
-      
-      // 複数ファイル選択をクリア
-      if (selectedFiles.length > 0) {
-        clearSelectedFiles();
-      }
-    }
-  });
+  // 従来の単一ファイル入力は削除（multipleFileInputで統一）
+  // $('#lefile').change(function() {
+  //   if (this.files.length > 0) {
+  //     var fileName = this.files[0].name;
+  //     $('#fileInput').val(fileName);
+  //     
+  //     // 複数ファイル選択をクリア
+  //     if (selectedFiles.length > 0) {
+  //       clearSelectedFiles();
+  //     }
+  //   }
+  // });
 
   // クリアボタン
   $clearFilesBtn.click(function() {
@@ -95,19 +95,12 @@ function initializeDragDrop() {
     clearSelectedFiles();
   });
 
-  // 送信ボタンのクリックイベントを上書き（再開可能アップロード統合）
-  $(document).on('click', 'button[onclick="file_upload()"]', function(e) {
+  // 送信ボタンのクリックイベント（再開可能アップロード統合）
+  $(document).on('click', '#uploadBtn', function(e) {
     e.preventDefault();
     e.stopPropagation();
     
     console.log('Upload button clicked, selectedFiles:', selectedFiles.length);
-    
-    // 差し替えキー必須チェック
-    var replaceKey = $('#replaceKeyInput').val();
-    if (!replaceKey || replaceKey.trim() === '') {
-      alert('差し替えキーの入力は必須です。');
-      return;
-    }
     
     // 再開可能アップロード機能が利用可能かチェック
     if (typeof enhancedFileUpload === 'function') {
@@ -119,7 +112,7 @@ function initializeDragDrop() {
       if (selectedFiles.length > 0) {
         uploadMultipleFiles();
       } else {
-        if ($('#lefile')[0].files.length > 0) {
+        if ($('#multipleFileInput')[0].files.length > 0) {
           file_upload();
         } else {
           alert('ファイルが選択されていません。');

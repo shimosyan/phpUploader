@@ -192,18 +192,27 @@ try {
     // ファイルハッシュの生成
     $fileHash = hash_file('sha256', $fileTmpPath);
 
+    // 差し替えキーの取得と検証
+    $replaceKey = $_POST['replacekey'] ?? '';
+    if (empty($replaceKey) || trim($replaceKey) === '') {
+        $responseHandler->error('差し替えキーは必須入力です。', [], 400);
+    }
+    
     // 認証キーのハッシュ化（空の場合はnull）
     $dlKeyHash = (!empty($dlKey) && trim($dlKey) !== '') ? SecurityUtils::hashPassword($dlKey) : null;
     $delKeyHash = (!empty($delKey) && trim($delKey) !== '') ? SecurityUtils::hashPassword($delKey) : null;
+    
+    // 差し替えキーの暗号化
+    $encryptedReplaceKey = openssl_encrypt($replaceKey, 'aes-256-ecb', $config['key']);
 
     // まず仮のデータベース登録（stored_file_nameは後で更新）
     $insertStmt = $db->prepare("
         INSERT INTO uploaded (
             origin_file_name, comment, size, count, input_date,
-            dl_key_hash, del_key_hash, file_hash, ip_address, folder_id
+            dl_key_hash, del_key_hash, replace_key, file_hash, ip_address, folder_id
         ) VALUES (
             :origin_file_name, :comment, :size, :count, :input_date,
-            :dl_key_hash, :del_key_hash, :file_hash, :ip_address, :folder_id
+            :dl_key_hash, :del_key_hash, :replace_key, :file_hash, :ip_address, :folder_id
         )
     ");
 
@@ -215,6 +224,7 @@ try {
         'input_date' => time(),
         'dl_key_hash' => $dlKeyHash,
         'del_key_hash' => $delKeyHash,
+        'replace_key' => $encryptedReplaceKey,
         'file_hash' => $fileHash,
         'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
         'folder_id' => $folder_id

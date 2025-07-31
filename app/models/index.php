@@ -15,7 +15,7 @@ class index {
     try{
       $db = new PDO('sqlite:'.$db_directory.'/uploader.db');
     }catch (Exception $e){
-      $error = '500 - データベースの接続に失敗しました。';
+      $error = '500 - データベースの接続に失敗しました: ' . $e->getMessage();
       include('./app/views/header.php');
       include('./app/views/error.php');
       include('./app/views/footer.php');
@@ -64,11 +64,30 @@ class index {
       $current_folder = $current_stmt->fetch();
     }
 
+    // パンくずリスト用にフォルダ階層を取得
+    $breadcrumb = [];
+    if ($current_folder) {
+      $folder = $current_folder;
+      $breadcrumb[] = $folder;
+      while ($folder && $folder['parent_id']) {
+        $stmt = $db->prepare("SELECT * FROM folders WHERE id = ?");
+        $stmt->execute([$folder['parent_id']]);
+        $folder = $stmt->fetch();
+        if ($folder) {
+          $breadcrumb[] = $folder;
+        } else {
+          break;
+        }
+      }
+      $breadcrumb = array_reverse($breadcrumb);
+    }
+
     return array(
       'data' => $r,
       'folders' => $folders,
       'current_folder' => $current_folder,
-      'current_folder_id' => $current_folder_id
+      'current_folder_id' => $current_folder_id,
+      'breadcrumb' => $breadcrumb
     );
   }
 }
