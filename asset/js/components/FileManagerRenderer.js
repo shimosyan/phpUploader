@@ -251,7 +251,7 @@ class FileManagerRenderer {
           ` : ''}
           ${this.getEditButtonList(file)}
           ${this.getReplaceButtonList(file)}
-          <button class="file-list-item__action" onclick="del_certificat(${file.id});" title="削除">
+          <button class="file-list-item__action" onclick="del_button(${file.id});" title="削除">
             🗑️
           </button>
         </div>
@@ -333,7 +333,7 @@ class FileManagerRenderer {
           ` : ''}
           ${this.getEditButton(file)}
           ${this.getReplaceButton(file)}
-          <button class="file-card-v2__btn file-card-v2__btn--delete" onclick="del_certificat(${file.id});" title="削除">
+          <button class="file-card-v2__btn file-card-v2__btn--delete" onclick="del_button(${file.id});" title="削除">
             <span class="file-card-v2__btn-icon">🗑️</span>
             削除
           </button>

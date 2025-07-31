@@ -84,7 +84,7 @@
                   <span class="glyphicon glyphicon-refresh"></span>
                 </button>
                 <?php endif; ?>
-                <button class="btn btn-danger btn-xs" onclick="del_certificat(<?php echo $file['id']; ?>);" title="削除">
+                <button class="btn btn-danger btn-xs" onclick="del_button(<?php echo $file['id']; ?>);" title="削除">
                   <span class="glyphicon glyphicon-trash"></span>
                 </button>
               </div>
