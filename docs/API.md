@@ -1,316 +1,157 @@
-# RESTful API ドキュメント
+# phpUploader RESTful API ドキュメント (v2.0+)
 
-phpUploaderのRESTful API仕様書です。
+> 本ドキュメントは phpUploader に同梱される RESTful API の使用方法をまとめたものです。
+> ベース URL はサーバー設置先を `https://example.com` とした場合、`https://example.com/app/api/router.php` 経由で自動ルーティングされます。
+> 以降の例では **相対パス** (`/api/...`) で表記します。
 
-## 認証
+---
 
-すべてのAPIエンドポイントにはAPIキーによる認証が必要です。
+## 目次
 
-### 認証方法
+1. 認証
+2. レート制限
+3. 共通レスポンス仕様
+4. エンドポイント一覧
+   1. ファイル API
+   2. フォルダ API
+   3. システム API
+5. 付録: 設定ファイル例
 
-以下のいずれかの方法でAPIキーを送信してください：
+---
 
-1. **Authorizationヘッダー** (推奨)
-   ```
-   Authorization: Bearer YOUR_API_KEY
-   ```
+## 1. 認証
 
-2. **クエリパラメータ**
-   ```
-   GET /api/files?api_key=YOUR_API_KEY
-   ```
+REST API を利用するには **API キー** もしくは **Bearer トークン** が必須です。
 
-3. **POSTパラメータ**
-   ```json
-   {
-     "api_key": "YOUR_API_KEY",
-     "other_data": "..."
-   }
-   ```
+| 方法 | ヘッダ / パラメータ | 例 |
+|--|--|--|
+| Bearer | `Authorization: Bearer <API_KEY>` | `Authorization: Bearer abcdEFGH1234` |
+| クエリ | `?api_key=<API_KEY>` | `/api/status?api_key=abcdEFGH1234` |
+| POST   | `api_key=<API_KEY>` (application/x-www-form-urlencoded) | |
 
-### APIキー設定
-
-`config/config.php`でAPIキーを設定してください：
+API キーは `config/config.php` で設定します。
 
 ```php
-'api_keys' => array(
-  'YOUR_API_KEY' => array(
-    'name' => 'API Key Name',
-    'permissions' => array('read', 'write', 'delete'),
-    'expires' => null  // null = 無期限
-  )
-)
-```
-
-## エンドポイント
-
-### ファイル操作
-
-#### ファイル一覧取得
-```
-GET /api/files
-```
-
-**パラメータ:**
-- `page` (optional): ページ番号 (デフォルト: 1)
-- `limit` (optional): 取得件数 (デフォルト: 20, 最大: 100)
-- `folder` (optional): フォルダID
-
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "files": [
-      {
-        "id": 1,
-        "original_name": "example.txt",
-        "filename": "hashed_filename.txt",
-        "comment": "サンプルファイル",
-        "file_size": 1024,
-        "mime_type": "text/plain",
-        "upload_date": "2025-01-XX XX:XX:XX",
-        "download_count": 5,
-        "folder_id": null
-      }
+'api_enabled'   => true,
+'api_rate_limit' => 100, // 1 時間あたりの最大リクエスト数 (0 で無制限)
+'api_keys' => [
+    // 任意のランダムキーを使用
+    'abcdEFGH1234' => [
+        'permissions' => ['read', 'write', 'delete'],
+        'expires'     => null, // 又は '2025-12-31 23:59:59'
     ],
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "total": 50,
-      "pages": 3
-    }
-  },
-  "timestamp": "2025-01-XX..."
-}
+],
 ```
 
-#### ファイルアップロード
-```
-POST /api/files
-```
+> **permissions** 列挙
+> * read   – 参照系エンドポイント
+> * write  – 追加 / 更新系エンドポイント
+> * delete – 削除系エンドポイント
 
-**パラメータ:**
-- `file`: アップロードファイル
-- `comment` (optional): コメント
-- `password_dl` (optional): ダウンロードパスワード
-- `password_del` (optional): 削除パスワード
-- `folder_id` (optional): フォルダID
+---
 
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "file_id": 123,
-    "download_url": "http://example.com/download.php?key=...",
-    "delete_url": "http://example.com/delete.php?key=...",
-    "message": "アップロードが完了しました"
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
+## 2. レート制限
 
-#### ファイル情報取得
-```
-GET /api/files/{id}
-```
+`api_rate_limit` に設定した回数を 1 時間単位でカウントします。上限を超えると `429 Too Many Requests` が返ります。
 
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "file": {
-      "id": 1,
-      "original_name": "example.txt",
-      "filename": "hashed_filename.txt",
-      "comment": "サンプルファイル",
-      "file_size": 1024,
-      "mime_type": "text/plain",
-      "upload_date": "2025-01-XX XX:XX:XX",
-      "download_count": 5,
-      "folder_id": null
-    }
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
+---
 
-#### ファイル削除
-```
-DELETE /api/files/{id}
-```
+## 3. 共通レスポンス仕様
 
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "ファイルを削除しました"
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
-
-### フォルダ操作
-
-#### フォルダ一覧取得
-```
-GET /api/folders
-```
-
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "folders": [
-      {
-        "id": 1,
-        "name": "ドキュメント",
-        "parent_id": null,
-        "created_at": "2025-01-XX XX:XX:XX"
-      }
-    ]
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
-
-#### フォルダ作成
-```
-POST /api/folders
-```
-
-**パラメータ:**
-```json
-{
-  "name": "フォルダ名",
-  "parent_id": 1  // optional: 親フォルダID
-}
-```
-
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "フォルダを作成しました",
-    "folder_id": 123
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
-
-#### フォルダ削除
-```
-DELETE /api/folders/{id}
-```
-
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "フォルダを削除しました"
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
-
-### システム情報
-
-#### システム状態取得
-```
-GET /api/status
-```
-
-**レスポンス例:**
-```json
-{
-  "success": true,
-  "data": {
-    "status": "ok",
-    "version": "1.0.0",
-    "api_enabled": true,
-    "folders_enabled": true,
-    "server_time": "2025-01-XX..."
-  },
-  "timestamp": "2025-01-XX..."
-}
-```
-
-## エラーレスポンス
-
-エラーが発生した場合は以下の形式でレスポンスが返されます：
+すべての JSON 応答は UTF-8 エンコードされ、以下のキーを最低限含みます。
 
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "エラーメッセージ",
-    "details": {}  // optional: 詳細情報
-  },
-  "timestamp": "2025-01-XX..."
+  "status": "success", // または "error"
+  "message": "説明文",
+  "data": { /* 任意 */ },
+  "timestamp": "2025-07-31T12:34:56+09:00"
 }
 ```
 
-### エラーコード一覧
+エラー時追加フィールド
 
-| コード | HTTPステータス | 説明 |
-|--------|----------------|------|
-| `API_DISABLED` | 503 | API機能が無効 |
-| `API_KEY_MISSING` | 401 | APIキーが未指定 |
-| `API_KEY_INVALID` | 401 | 無効なAPIキー |
-| `PERMISSION_DENIED` | 403 | 権限不足 |
-| `RATE_LIMIT_EXCEEDED` | 429 | レート制限超過 |
-| `ENDPOINT_NOT_FOUND` | 404 | エンドポイントが見つからない |
-| `VALIDATION_ERROR` | 400 | バリデーションエラー |
-| `FILE_NOT_FOUND` | 404 | ファイルが見つからない |
-| `FOLDER_NOT_EMPTY` | 409 | フォルダが空ではない |
-| `FOLDER_HAS_CHILDREN` | 409 | フォルダに子フォルダが存在 |
-| `DATABASE_ERROR` | 500 | データベースエラー |
-| `INTERNAL_ERROR` | 500 | サーバー内部エラー |
+* `error_code`   – アプリ固有のエラーコード
+* `validation_errors` – バリデーション失敗詳細 (配列)
 
-## 使用例
+一覧取得系では `pagination` オブジェクトが `data` 内に含まれます。
 
-### cURLでのファイルアップロード
+---
+
+## 4. エンドポイント
+
+### 4.1 ファイル API
+
+| メソッド | パス | 権限 | 説明 |
+|--|--|--|--|
+| GET    | `/api/files` | read | ファイル一覧取得 (ページネーション対応) |
+| POST   | `/api/files` | write | ファイルアップロード (multipart/form-data) |
+| GET    | `/api/files/{id}` | read | 単一ファイル情報取得 |
+| PUT/POST| `/api/files/{id}/replace` または `/api/files/{id}` | write | 既存ファイルの差し替え |
+| PATCH  | `/api/files/{id}` | write | コメント等メタデータ更新 |
+| DELETE | `/api/files/{id}` | delete | ファイル削除 |
+
+#### 4.1.1 例: ファイル一覧取得
 
 ```bash
-curl -X POST \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "file=@example.txt" \
-  -F "comment=APIからのアップロード" \
-  http://your-domain.com/app/api/files
+curl -H "Authorization: Bearer <API_KEY>" \
+  "https://example.com/api/files?page=1&limit=20&folder=3"
 ```
 
-### cURLでのファイル一覧取得
+#### 4.1.2 例: ファイルアップロード
 
 ```bash
-curl -X GET \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  "http://your-domain.com/app/api/files?page=1&limit=10"
+curl -X POST -H "Authorization: Bearer <API_KEY>" \
+     -F "file=@./report.pdf" \
+     -F "folder_id=3" \
+     -F "comment=月報" \
+     https://example.com/api/files
 ```
 
-### cURLでのファイル削除
+### 4.2 フォルダ API
 
-```bash
-curl -X DELETE \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  http://your-domain.com/app/api/files/123
-```
+| メソッド | パス | 権限 | 説明 |
+|--|--|--|--|
+| GET    | `/api/folders` | read | フォルダ一覧取得 |
+| POST   | `/api/folders` | write | フォルダ作成 (`name`, `parent_id`*) |
+| PATCH  | `/api/folders/{id}` | write | フォルダ名変更 (`name`) |
+| DELETE | `/api/folders/{id}` | delete | フォルダ削除 |
 
-## レート制限
+`parent_id` を省略するとルート直下に作成されます。
 
-APIキーごとに1時間あたりのリクエスト数制限を設定できます。制限に達した場合は`429 Too Many Requests`が返されます。
+### 4.3 システム API
 
-設定は`config/config.php`の`api_rate_limit`で調整できます（0で無制限）。
+| メソッド | パス | 権限 | 説明 |
+|--|--|--|--|
+| GET | `/api/status` | read | API バージョン・ルート数などの統計情報 |
+| GET | `/api/health` | read | ヘルスチェック (常に 200 OK / `{status: \"ok\"}`) |
 
-## セキュリティ
+---
 
-- APIキーは適切に管理し、外部に漏洩しないよう注意してください
-- HTTPSの使用を強く推奨します
-- 必要最小限の権限のみを付与してください
-- 定期的にAPIキーをローテーションすることを推奨します
+## 5. 付録: HTTP ステータスとエラーコード一覧 (抜粋)
+
+| HTTP | error_code | 意味 |
+|--|--|--|
+| 401 | `API_KEY_MISSING` | API キー未付与 |
+| 401 | `API_KEY_INVALID` | API キー不正 |
+| 403 | `PERMISSION_DENIED` | 権限不足 |
+| 404 | `ENDPOINT_NOT_FOUND` | ルート不明 |
+| 404 | `FILE_NOT_FOUND` / `FOLDER_NOT_FOUND` | リソース不在 |
+| 429 | `RATE_LIMIT_EXCEEDED` | レート制限超過 |
+| 503 | `API_DISABLED` | API 機能無効 |
+
+---
+
+## 6. CHANGELOG (簡易)
+
+* **2.0.0** – 初回実装 (ファイル / フォルダ CRUD, システム情報, API キー認証, レート制限)
+
+---
+
+## 7. 今後の予定
+
+* WebHook 連携 (アップロード完了通知)
+* OAuth2 / JWT 認証対応
+* Swagger / OpenAPI 3.0 スキーマ自動生成
+
+以上じゃ。これで `README.md` から参照しても 404 にならぬはずじゃ！
