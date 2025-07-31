@@ -23,9 +23,20 @@ class config {
 
             // アプリケーション設定
             'title' => 'PHP Uploader',
-            'save_max_files' => 500,
-            'max_comment' => 80,
+            'save_max_files' => 2000,
+            'max_comment' => 1024,
             'max_file_size' => 2, // MB
+            'max_folder_depth' => 5,      // 最大フォルダ階層深さ（1-10）
+            'max_folders_per_level' => 50,   // 各階層での最大フォルダ数
+            'allow_folder_creation' => true, // ユーザーによるフォルダ作成許可
+            'allow_folder_deletion' => true, // ユーザーによるフォルダ削除許可
+
+            // ファイル差し替え・編集機能
+            'allow_file_replace' => true,   // ファイル差し替え機能の有効/無効
+            'allow_comment_edit' => true,   // コメント編集機能の有効/無効
+            'file_edit_admin_only' => false, // true: 管理者のみ編集可能, false: 誰でも編集可能
+
+>>>>>>> d8b1d29 (config: Increase limits for better usability)
             // ディレクトリ設定
             'db_directory' => dirname(__DIR__) . '/db',
             'data_directory' => dirname(__DIR__) . '/data',
