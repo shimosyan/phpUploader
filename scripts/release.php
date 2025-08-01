@@ -49,13 +49,16 @@ class ReleaseManager
     }
 }
 
-// コマンドライン実行
-if (php_sapi_name() === 'cli') {
+/**
+ * メイン実行関数
+ */
+function main(): void
+{
     $manager = new ReleaseManager();
 
-    if (isset($argv[1])) {
+    if (isset($_SERVER['argv'][1])) {
         try {
-            $manager->updateVersion($argv[1]);
+            $manager->updateVersion($_SERVER['argv'][1]);
         } catch (Exception $e) {
             echo "Error: " . $e->getMessage() . "\n";
             exit(1);
@@ -65,4 +68,9 @@ if (php_sapi_name() === 'cli') {
         echo "Usage: php scripts/release.php <version>\n";
         echo "Example: php scripts/release.php 1.3.0\n";
     }
+}
+
+// CLIでの実行時のみメイン関数を呼び出し
+if (php_sapi_name() === 'cli' && isset($_SERVER['argv'])) {
+    main();
 }

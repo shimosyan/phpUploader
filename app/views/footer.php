@@ -1,3 +1,9 @@
+<?php
+/**
+ * フッターテンプレート
+ * モーダルダイアログとJavaScriptの読み込み
+ */
+?>
     <div class="modal" id="OKModal" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">

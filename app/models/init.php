@@ -247,8 +247,3 @@ function initializeApp(array $config): PDO
     $initializer = new \phpUploader\Models\AppInitializer($config);
     return $initializer->initialize();
 }
-
-// 従来のinit.phpとの互換性を保つため、直接実行された場合の処理
-if (isset($config) && is_array($config)) {
-    $db = initializeApp($config);
-}
