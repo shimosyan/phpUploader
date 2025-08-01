@@ -16,7 +16,11 @@
     <div class="col-sm-12">
       <p class="h2">ファイルを登録</p>
       <form id="upload" class="upload-form">
-        <input type="hidden" id="csrfToken" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8'); ?>">
+        <input
+          type="hidden"
+          id="csrfToken"
+          name="csrf_token"
+          value="<?php echo htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8'); ?>">
 
         <div class="form-section file-input-group">
           <input id="lefile" name="file" type="file" style="display:none">
@@ -122,7 +126,9 @@
       <!-- レガシーカード表示（非表示） -->
       <div class="file-cards-container" style="display: none;"></div>
     </div>
-    <p class="text-right">@<a href="https://github.com/shimosyan/phpUploader" target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
+    <p class="text-right">@<a
+      href="https://github.com/shimosyan/phpUploader"
+      target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
   </div>
 </div>
 

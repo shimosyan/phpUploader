@@ -117,7 +117,14 @@ try {
         ]);
     } else {
         // ログが利用できない場合はファイルに直接記録
-        $logMessage = date('Y-m-d H:i:s') . " [CRITICAL] " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . PHP_EOL;
+        $logMessage = date('Y-m-d H:i:s') .
+            " [CRITICAL] " .
+            $e->getMessage() .
+            " in " .
+            $e->getFile() .
+            " on line " .
+            $e->getLine() .
+            PHP_EOL;
         @file_put_contents('./logs/critical.log', $logMessage, FILE_APPEND | LOCK_EX);
     }
 

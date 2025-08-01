@@ -64,7 +64,10 @@ try {
         $tokenData = $tokenStmt->fetch();
 
         if (!$tokenData) {
-            $logger->warning('Invalid or expired delete token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+            $logger->warning(
+                'Invalid or expired delete token',
+                ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']
+            );
             $db->rollBack();
             header('Location: ./');
             exit;
