@@ -13,16 +13,16 @@ ini_set('display_errors', '0');
 ini_set('log_errors', '1'); // ログファイルにエラーを記録
 error_reporting(E_ALL);
 
+// 設定とユーティリティの読み込み
+require_once './config/config.php';
+require_once './src/Core/SecurityUtils.php';
+require_once './src/Core/Logger.php';
+require_once './src/Core/ResponseHandler.php';
+
+use phpUploader\Config\Config;
+use phpUploader\Core\Logger;
+
 try {
-    // 設定とユーティリティの読み込み
-    require_once './config/config.php';
-    require_once './src/Core/SecurityUtils.php';
-    require_once './src/Core/Logger.php';
-    require_once './src/Core/ResponseHandler.php';
-
-    use phpUploader\Config\Config;
-    use phpUploader\Core\Logger;
-
     $configInstance = new Config();
     $config = $configInstance->index();
 

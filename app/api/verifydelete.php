@@ -19,18 +19,18 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 設定とユーティリティの読み込み
+require_once '../../config/config.php';
+require_once '../../src/Core/SecurityUtils.php';
+require_once '../../src/Core/Logger.php';
+require_once '../../src/Core/ResponseHandler.php';
+
+use phpUploader\Config\Config;
+use phpUploader\Core\SecurityUtils;
+use phpUploader\Core\Logger;
+use phpUploader\Core\ResponseHandler;
+
 try {
-    // 設定とユーティリティの読み込み
-    require_once '../../config/config.php';
-    require_once '../../src/Core/SecurityUtils.php';
-    require_once '../../src/Core/Logger.php';
-    require_once '../../src/Core/ResponseHandler.php';
-
-    use phpUploader\Config\Config;
-    use phpUploader\Core\SecurityUtils;
-    use phpUploader\Core\Logger;
-    use phpUploader\Core\ResponseHandler;
-
     $configInstance = new Config();
     $config = $configInstance->index();
 

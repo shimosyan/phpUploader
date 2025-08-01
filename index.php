@@ -17,20 +17,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 設定ファイルの読み込み
+if (!file_exists('./config/config.php')) {
+    throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
+}
+
+require_once './config/config.php';
+require_once './src/Core/SecurityUtils.php';
+require_once './src/Core/Logger.php';
+require_once './src/Core/ResponseHandler.php';
+
+use phpUploader\Config\Config;
+use phpUploader\Core\SecurityUtils;
+
 try {
-    // 設定ファイルの読み込み
-    if (!file_exists('./config/config.php')) {
-        throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
-    }
-
-    require_once './config/config.php';
-    require_once './src/Core/SecurityUtils.php';
-    require_once './src/Core/Logger.php';
-    require_once './src/Core/ResponseHandler.php';
-
-    use phpUploader\Config\Config;
-    use phpUploader\Core\SecurityUtils;
-
     $configInstance = new Config();
     $config = $configInstance->index();
 

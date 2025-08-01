@@ -26,19 +26,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 設定とユーティリティの読み込み（絶対パスで修正）
+$baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
+require_once $baseDir . '/config/config.php';
+require_once $baseDir . '/src/Core/SecurityUtils.php';
+require_once $baseDir . '/src/Core/Logger.php';
+require_once $baseDir . '/src/Core/ResponseHandler.php';
+
+use phpUploader\Config\Config;
+use phpUploader\Core\SecurityUtils;
+use phpUploader\Core\Logger;
+use phpUploader\Core\ResponseHandler;
+
 try {
-    // 設定とユーティリティの読み込み（絶対パスで修正）
-    $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
-    require_once $baseDir . '/config/config.php';
-    require_once $baseDir . '/src/Core/SecurityUtils.php';
-    require_once $baseDir . '/src/Core/Logger.php';
-    require_once $baseDir . '/src/Core/ResponseHandler.php';
-
-    use phpUploader\Config\Config;
-    use phpUploader\Core\SecurityUtils;
-    use phpUploader\Core\Logger;
-    use phpUploader\Core\ResponseHandler;
-
     $configInstance = new Config();
     $config = $configInstance->index();
 
