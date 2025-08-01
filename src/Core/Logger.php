@@ -6,7 +6,7 @@ namespace phpUploader\Core;
 
 use Exception;
 use PDO;
-
+ 
 /**
  * ロガークラス
  * ファイルとデータベースの両方にログを記録
