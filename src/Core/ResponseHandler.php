@@ -41,7 +41,6 @@ class ResponseHandler
         int $httpCode = 400,
         ?string $errorCode = null
     ): void {
-    {
         $response = [
             'status' => 'error',
             'message' => $message,
