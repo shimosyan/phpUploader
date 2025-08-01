@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace phpUploader\Config;
+
 /**
  * PHP Uploader Ver.2.0 設定ファイル
  *
@@ -9,8 +11,10 @@ declare(strict_types=1);
  * .htaccess等で保護してください
  */
 
-class config {
-    public function index(): array {
+class Config
+{
+    public function index(): array
+    {
         return [
             // 管理者用マスターキー（必ず変更してください）
             'master' => 'CHANGE_THIS_MASTER_KEY',
@@ -57,7 +61,8 @@ class config {
     /**
      * セキュリティ設定の検証を行う
      */
-    public function validateSecurityConfig(): bool {
+    public function validateSecurityConfig(): bool
+    {
         $config = $this->index();
 
         // 基本的なセキュリティ設定をチェック
@@ -79,7 +84,8 @@ class config {
     /**
      * 設定の検証を行う
      */
-    public function validate(): array {
+    public function validate(): array
+    {
         $errors = [];
         $config = $this->index();
 
@@ -110,7 +116,8 @@ class config {
     /**
      * composer.jsonからバージョン情報を取得
      */
-    private function getVersion(): string {
+    private function getVersion(): string
+    {
         $composerPath = __DIR__ . '/../composer.json';
 
         if (file_exists($composerPath)) {
@@ -126,7 +133,8 @@ class config {
     /**
      * アプリケーションルートディレクトリを取得
      */
-    private function getAppRoot(): string {
+    private function getAppRoot(): string
+    {
         // config.phpの位置からアプリケーションルートを算出
         return dirname(__DIR__);
     }
