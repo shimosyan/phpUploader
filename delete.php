@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ファイル削除処理
  *
  * ワンタイムトークンによる安全なファイル削除
  */
+
+declare(strict_types=1);
 
 // エラー表示設定
 ini_set('display_errors', '0');

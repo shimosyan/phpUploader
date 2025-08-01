@@ -35,7 +35,12 @@ class ResponseHandler
     /**
      * エラー応答を送信
      */
-    public function error(string $message, array $validationErrors = [], int $httpCode = 400, ?string $errorCode = null): void
+    public function error(
+        string $message,
+        array $validationErrors = [],
+        int $httpCode = 400,
+        ?string $errorCode = null
+    ): void {
     {
         $response = [
             'status' => 'error',
