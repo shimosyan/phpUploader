@@ -37,23 +37,25 @@ jobs:
 
       - name: Validate composer.json
         run: |
-          echo "🔍 Validating composer.json..."
+          echo "🔍 composer.json検証中..."
 
           # まず基本的なJSONの妥当性をチェック
           if ! php -r "json_decode(file_get_contents('composer.json'), true); if (json_last_error() !== JSON_ERROR_NONE) exit(1);"; then
             echo "❌ composer.json contains invalid JSON"
+            echo "🔧 composer.jsonの構文を確認してください"
             exit 1
           fi
 
           # Composer validation実行
-          composer validate --no-check-publish || {
+          echo "📋 Composer validation実行中..."
+          if ! composer validate --no-check-publish; then
             echo "❌ composer.json validation failed"
             echo "🔍 詳細な診断情報:"
             composer validate --verbose
             echo "📋 composer.json の内容確認:"
             cat composer.json
             exit 1
-          }
+          fi
           echo "✅ composer.json validation passed"
 
       - name: Cache Composer packages
@@ -74,36 +76,76 @@ jobs:
       - name: Check PHP syntax
         run: |
           echo "🔍 PHP構文チェックを実行中..."
-          find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
-          echo "✅ PHP構文チェック完了"
+          SYNTAX_ERRORS=0
+          while IFS= read -r -d '' file; do
+            echo "📄 Checking: $file"
+            if ! php -l "$file"; then
+              echo "❌ 構文エラー: $file"
+              SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+            fi
+          done < <(find . -name "*.php" -not -path "./vendor/*" -print0)
+
+          if [ $SYNTAX_ERRORS -gt 0 ]; then
+            echo "❌ $SYNTAX_ERRORS 個のPHPファイルに構文エラーがあります"
+            exit 1
+          fi
+          echo "✅ PHP構文チェック完了 - エラーなし"
 
       - name: Run PHP CodeSniffer
         run: |
+          echo "🔍 PHP CodeSniffer実行中..."
           if [ -f "vendor/bin/phpcs" ]; then
-            vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ . || echo "⚠️ Coding standard violations found (non-blocking)"
+            echo "📋 PSR-12コーディング規約チェック開始"
+            if ! vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ .; then
+              echo "❌ コーディング規約違反が検出されました"
+              echo "🔧 修正方法: vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/ ."
+              exit 1
+            fi
+            echo "✅ コーディング規約チェック完了"
           else
-            echo "PHPCS not installed, skipping..."
+            echo "⚠️ PHPCS not installed, skipping..."
           fi
 
       - name: Run PHPStan
         run: |
+          echo "🔍 PHPStan静的解析実行中..."
           if [ -f "vendor/bin/phpstan" ]; then
-            vendor/bin/phpstan analyse --level=1 --no-progress . || echo "⚠️ Static analysis issues found (non-blocking)"
+            echo "📋 静的解析チェック開始 (Level 1)"
+            if ! vendor/bin/phpstan analyse --level=1 --no-progress .; then
+              echo "❌ 静的解析でエラーが検出されました"
+              echo "🔧 詳細は上記のエラーメッセージを確認してください"
+              exit 1
+            fi
+            echo "✅ 静的解析チェック完了"
           else
-            echo "PHPStan not installed, skipping..."
+            echo "⚠️ PHPStan not installed, skipping..."
           fi
 
       - name: Test configuration file creation
         run: |
+          echo "🔧 設定ファイルテスト実行中..."
           # 必要なディレクトリを作成
           mkdir -p data db config
+
+          # config.php.exampleの存在確認
+          if [ ! -f config/config.php.example ]; then
+            echo "❌ config/config.php.example が見つかりません"
+            exit 1
+          fi
+
           # config.php.exampleからconfig.phpを作成
           if [ ! -f config/config.php ]; then
             cp config/config.php.example config/config.php
             echo "✅ config.php.exampleからconfig.phpを作成しました"
           fi
+
           # 設定ファイルの構文チェック
-          php -l config/config.php
+          echo "📄 config.php構文チェック中..."
+          if ! php -l config/config.php; then
+            echo "❌ config.phpに構文エラーがあります"
+            exit 1
+          fi
+          echo "✅ 設定ファイルテスト完了"
 
       - name: Test version synchronization
         run: |
@@ -181,7 +223,15 @@ jobs:
         run: npm install -g markdownlint-cli
 
       - name: Lint README
-        run: markdownlint README.md CHANGELOG.md --ignore node_modules --config .markdownlint.json
+        run: |
+          echo "🔍 Markdown Linting実行中..."
+          echo "📋 README.md, CHANGELOG.md をチェック"
+          if ! markdownlint README.md CHANGELOG.md --ignore node_modules --config .markdownlint.json; then
+            echo "❌ Markdownファイルにlintエラーが検出されました"
+            echo "🔧 詳細は上記のエラーメッセージを確認してください"
+            exit 1
+          fi
+          echo "✅ Markdown linting完了"
 
       - name: Check links in README
         uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 #v1.10.17

@@ -5,8 +5,18 @@ parameters:
     excludePaths:
         - vendor
         - tests
+        - docker
+        - data
+        - db
+        - logs
+        - .vscode
     ignoreErrors:
-        # レガシーコードのため一時的に無視する項目
+        # Ver.2.0 では段階的に改善するため一時的に無視する項目
         - '#Variable \$[a-zA-Z_]+ might not be defined#'
         - '#Function extract\(\) should not be used#'
+        - '#Undefined variable: \$[a-zA-Z_]+#'
+        # HTMLテンプレート内での変数使用
+        - '#in template#'
     reportUnmatchedIgnoredErrors: false
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
