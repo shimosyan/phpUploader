@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace phpUploader\Core;
- 
+
 /**
  * レスポンスハンドラークラス
  * API応答を統一化

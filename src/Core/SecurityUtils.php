@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 namespace phpUploader\Core;
- 
+
 /**
  * セキュリティユーティリティクラス
  * Ver.2.0で追加されたセキュリティ機能
