@@ -98,12 +98,12 @@ class FileManager {
         const pageFiles = this.filteredFiles.slice(startIndex, endIndex);
 
         this.container.innerHTML = `
-        < div class = "file-manager" >
+        <div class="file-manager">
         ${this.renderHeader()}
         ${this.renderControls()}
         ${this.renderContent(pageFiles)}
         ${this.renderPagination()}
-        <  / div >
+        </div>
         `;
 
       // フォーカス状態を復元
@@ -122,70 +122,70 @@ class FileManager {
         const filteredCount = this.filteredFiles.length;
 
         return `
-        < div class = "file-manager__header" >
-        < h2 class = "file-manager__title" >
+        <div class="file-manager__header">
+        <h2 class="file-manager__title">
           📁 ファイル一覧
-        <  / h2 >
-        < div class = "file-manager__stats" >
+        </h2>
+        <div class="file-manager__stats">
           ${filteredCount !== totalFiles ?
             `${filteredCount}件(全${totalFiles}件中)` :
             `${totalFiles}件`
         }
-        <  / div >
-        <  / div >
+        </div>
+        </div>
         `;
     }
 
     renderControls()
     {
         return `
-        < div class = "file-controls" >
-        < div class = "file-search" >
-          < div class = "file-search__input" >
-            < input
-              type = "text"
-              placeholder = "🔍 ファイル名・コメントで検索..."
-              value = "${this.searchQuery}"
-              id = "fileSearchInput"
-            >
-          <  / div >
-          < div class = "file-search__sort" >
-            < label for = "fileSortSelect" > 並び順: < / label >
-            < select id = "fileSortSelect" >
-              < option value = "date_desc" ${this.sortBy === 'date_desc' ? 'selected' : ''} > 新しい順 < / option >
-              < option value = "date_asc" ${this.sortBy === 'date_asc' ? 'selected' : ''} > 古い順 < / option >
-              < option value = "name_asc" ${this.sortBy === 'name_asc' ? 'selected' : ''} > 名前 A - Z < / option >
-              < option value = "name_desc" ${this.sortBy === 'name_desc' ? 'selected' : ''} > 名前 Z - A < / option >
-              < option value = "size_desc" ${this.sortBy === 'size_desc' ? 'selected' : ''} > サイズ大順 < / option >
-              < option value = "size_asc" ${this.sortBy === 'size_asc' ? 'selected' : ''} > サイズ小順 < / option >
-              < option value = "downloads_desc" ${this.sortBy === 'downloads_desc' ? 'selected' : ''} > DL数多順 < / option >
-              < option value = "downloads_asc" ${this.sortBy === 'downloads_asc' ? 'selected' : ''} > DL数少順 < / option >
-            <  / select >
-          <  / div >
+        <div class="file-controls">
+        <div class="file-search">
+          <div class="file-search__input">
+            <input
+              type="text"
+              placeholder="🔍 ファイル名・コメントで検索..."
+              value="${this.searchQuery}"
+              id="fileSearchInput"
+           >
+          </div>
+          <div class="file-search__sort">
+            <label for="fileSortSelect">並び順:</label>
+            <select id="fileSortSelect">
+              <option value="date_desc" ${this.sortBy === 'date_desc' ? 'selected' : ''}>新しい順</option>
+              <option value="date_asc" ${this.sortBy === 'date_asc' ? 'selected' : ''}>古い順</option>
+              <option value="name_asc" ${this.sortBy === 'name_asc' ? 'selected' : ''}>名前 A-Z</option>
+              <option value="name_desc" ${this.sortBy === 'name_desc' ? 'selected' : ''}>名前 Z-A</option>
+              <option value="size_desc" ${this.sortBy === 'size_desc' ? 'selected' : ''}>サイズ大順</option>
+              <option value="size_asc" ${this.sortBy === 'size_asc' ? 'selected' : ''}>サイズ小順</option>
+              <option value="downloads_desc" ${this.sortBy === 'downloads_desc' ? 'selected' : ''}>DL数多順</option>
+              <option value="downloads_asc" ${this.sortBy === 'downloads_asc' ? 'selected' : ''}>DL数少順</option>
+            </select>
+          </div>
           ${this.searchQuery ? `
-                < button class = "file-search__clear" id = "fileSearchClear" >
+                <button class="file-search__clear" id="fileSearchClear">
                 クリア
-                <  / button >
+                </button>
                 ` : ''}
-        <  / div >
+        </div>
 
-        < div class = "file-view-toggle" >
-          < button
-            class = "file-view-toggle__btn ${this.viewMode === 'grid' ? 'file-view-toggle__btn--active' : ''}"
-            data - view = "grid"
-            title = "グリッドビュー"
-          >
+        <div class="file-view-toggle">
+          <button
+            class="file-view-toggle__btn ${this.viewMode === 'grid' ? 'file-view-toggle__btn--active' : ''}"
+            data-view="grid"
+            title="グリッドビュー"
+         >
             ⊞ グリッド
-          <  / button >
-          < button
-            class = "file-view-toggle__btn ${this.viewMode === 'list' ? 'file-view-toggle__btn--active' : ''}"
-            data - view = "list"
-            title = "リストビュー"
-          >
+          </button>
+          <button
+            class="file-view-toggle__btn ${this.viewMode === 'list' ? 'file-view-toggle__btn--active' : ''}"
+            data-view="list"
+            title="リストビュー"
+         >
             ☰ リスト
-          <  / button >
-        <  / div >
-        <  / div >
+          </button>
+        </div>
+        </div>
         `;
     }
 
@@ -200,34 +200,34 @@ class FileManager {
         if (files.length === 0) {
             if (this.filteredFiles.length === 0 && this.files.length === 0) {
                 return `
-                < div class = "file-empty" >
-                < div class = "file-empty__icon" > 📄 < / div >
-                < h3 class = "file-empty__title" > アップロードされたファイルはありません < / h3 >
-                < p class = "file-empty__message" > 上のフォームからファイルをアップロードしてください。 < / p >
-                <  / div >
+                <div class="file-empty">
+                <div class="file-empty__icon">📄</div>
+                <h3 class="file-empty__title">アップロードされたファイルはありません</h3>
+                <p class="file-empty__message">上のフォームからファイルをアップロードしてください。</p>
+                </div>
                 `;
             } else {
                 return `
-                < div class = "file-no-results" >
-                < div class = "file-empty__icon" > 🔍 < / div >
-                < h3 class = "file-empty__title" > 検索結果が見つかりません < / h3 >
-                < p class = "file-empty__message" > 検索条件を変更してお試しください。 < / p >
-                <  / div >
+                <div class="file-no-results">
+                <div class="file-empty__icon">🔍</div>
+                <h3 class="file-empty__title">検索結果が見つかりません</h3>
+                <p class="file-empty__message">検索条件を変更してお試しください。</p>
+                </div>
                 `;
             }
         }
 
         if (this.viewMode === 'list') {
             return `
-            < div class = "file-list" >
+            <div class="file-list">
             ${files.map(file => this.renderFileListItem(file)).join('')}
-            <  / div >
+            </div>
             `;
         } else {
             return `
-            < div class = "file-cards" >
+            <div class="file-cards">
             ${files.map(file => this.renderFileCard(file)).join('')}
-            <  / div >
+            </div>
             `;
         }
     }
@@ -247,64 +247,64 @@ class FileManager {
         const fileIcon = this.getFileIcon(fileExt);
 
         return `
-        < div class = "file-list-item" data - file - id = "${file.id}" >
-          < div class = "file-list-item__icon" >
+        <div class="file-list-item" data-file-id="${file.id}">
+          <div class="file-list-item__icon">
           ${fileIcon}
-          <  / div >
-          < div class = "file-list-item__main" >
-          < div class = "file-list-item__info" >
-            < a
-              href = "javascript:void(0);"
-        class = "file-list-item__filename"
-              onclick = "dl_button(${file.id});"
-              title = "${this.escapeHtml(file.origin_file_name)}"
-            >
+          </div>
+          <div class="file-list-item__main">
+          <div class="file-list-item__info">
+            <a
+              href="javascript:void(0);"
+              class="file-list-item__filename"
+              onclick="dl_button(${file.id});"
+              title="${this.escapeHtml(file.origin_file_name)}"
+           >
               ${this.escapeHtml(file.origin_file_name)}
-            <  / a >
+            </a>
             ${file.comment ? `
-              < p class = "file-list-item__comment" title = "${this.escapeHtml(file.comment)}" >
+              <p class="file-list-item__comment" title="${this.escapeHtml(file.comment)}">
                 ${this.escapeHtml(file.comment)}
-              <  / p >
+              </p>
               ` : ''}
-          <  / div >
-          < div class = "file-list-item__meta" >
-            < span class = "file-list-item__meta-item" >
-              < span class = "file-list-item__meta-label" > ID: < / span >
-              < span class = "file-list-item__meta-value" > #${file.id} < / span >
-            <  / span >
-            < span class = "file-list-item__meta-item" >
-              < span class = "file-list-item__meta-label" > サイズ: < / span >
-              < span class = "file-list-item__meta-value" > ${fileSize}MB < / span >
-            <  / span >
-            < span class = "file-list-item__meta-item" >
-              < span class = "file-list-item__meta-label" > 日付: < / span >
-              < span class = "file-list-item__meta-value" > ${formattedDate} < / span >
-            <  / span >
-            < span class = "file-list-item__meta-item" >
-              < span class = "file-list-item__meta-label" > DL: < / span >
-              < span class = "file-list-item__meta-value" > ${file.count}回 < / span >
-            <  / span >
-          <  / div >
-          <  / div >
-          < div class = "file-list-item__actions" >
-          < a
-            href = "javascript:void(0);"
-            class = "file-list-item__btn"
-            onclick = "dl_button(${file.id});"
-            title = "ダウンロード"
-          >
+          </div>
+          <div class="file-list-item__meta">
+            <span class="file-list-item__meta-item">
+              <span class="file-list-item__meta-label">ID:</span>
+              <span class="file-list-item__meta-value">#${file.id}</span>
+            </span>
+            <span class="file-list-item__meta-item">
+              <span class="file-list-item__meta-label">サイズ:</span>
+              <span class="file-list-item__meta-value">${fileSize}MB</span>
+            </span>
+            <span class="file-list-item__meta-item">
+              <span class="file-list-item__meta-label">日付:</span>
+              <span class="file-list-item__meta-value">${formattedDate}</span>
+            </span>
+            <span class="file-list-item__meta-item">
+              <span class="file-list-item__meta-label">DL:</span>
+              <span class="file-list-item__meta-value">${file.count}回</span>
+            </span>
+          </div>
+          </div>
+          <div class="file-list-item__actions">
+          <a
+            href="javascript:void(0);"
+            class="file-list-item__btn"
+            onclick="dl_button(${file.id});"
+            title="ダウンロード"
+         >
             ⬇️
-          <  / a >
-          < a
-            href = "javascript:void(0);"
-            class = "file-list-item__btn file-list-item__btn--delete"
-            onclick = "del_button(${file.id});"
-            title = "削除"
-          >
+          </a>
+          <a
+            href="javascript:void(0);"
+            class="file-list-item__btn file-list-item__btn--delete"
+            onclick="del_button(${file.id});"
+            title="削除"
+         >
             🗑️
-          <  / a >
-          <  / div >
-          <  / div >
+          </a>
+          </div>
+          </div>
           `;
     }
 
@@ -323,65 +323,65 @@ class FileManager {
         const fileIcon = this.getFileIcon(fileExt);
 
         return `
-        < div class = "file-card-v2" data - file - id = "${file.id}" >
-          < div class = "file-card-v2__header" >
-          < a
-            href = "javascript:void(0);"
-        class = "file-card-v2__filename"
-            onclick = "dl_button(${file.id});"
-            title = "${this.escapeHtml(file.origin_file_name)}"
-          >
+        <div class="file-card-v2" data-file-id="${file.id}">
+          <div class="file-card-v2__header">
+          <a
+            href="javascript:void(0);"
+            class="file-card-v2__filename"
+            onclick="dl_button(${file.id});"
+            title="${this.escapeHtml(file.origin_file_name)}"
+         >
             ${fileIcon} ${this.escapeHtml(file.origin_file_name)}
-          <  / a >
+          </a>
           ${file.comment ? `
-              < p class = "file-card-v2__comment" title = "${this.escapeHtml(file.comment)}" >
+              <p class="file-card-v2__comment" title="${this.escapeHtml(file.comment)}">
               ${this.escapeHtml(file.comment)}
-              <  / p >
+              </p>
             ` : ''}
-        <  / div >
+        </div>
 
-        < div class = "file-card-v2__body" >
-          < div class = "file-card-v2__meta" >
-            < div class = "file-card-v2__meta-item" >
-              < span class = "file-card-v2__meta-icon" > 🆔 < / span >
-              < span class = "file-card-v2__meta-label" > ID < / span >
-              < span class = "file-card-v2__meta-value" > #${file.id} < / span >
-            <  / div >
-            < div class = "file-card-v2__meta-item" >
-              < span class = "file-card-v2__meta-icon" > 💾 < / span >
-              < span class = "file-card-v2__meta-label" > サイズ < / span >
-              < span class = "file-card-v2__meta-value" > ${fileSize}MB < / span >
-            <  / div >
-            < div class = "file-card-v2__meta-item" >
-              < span class = "file-card-v2__meta-icon" > 📅 < / span >
-              < span class = "file-card-v2__meta-label" > 日付 < / span >
-              < span class = "file-card-v2__meta-value" > ${formattedDate} < / span >
-            <  / div >
-            < div class = "file-card-v2__meta-item" >
-              < span class = "file-card-v2__meta-icon" > ⬇️ < / span >
-              < span class = "file-card-v2__meta-label" > DL数 < / span >
-              < span class = "file-card-v2__meta-value" > ${file.count} < / span >
-            <  / div >
-          <  / div >
+        <div class="file-card-v2__body">
+          <div class="file-card-v2__meta">
+            <div class="file-card-v2__meta-item">
+              <span class="file-card-v2__meta-icon">🆔</span>
+              <span class="file-card-v2__meta-label">ID</span>
+              <span class="file-card-v2__meta-value">#${file.id}</span>
+            </div>
+            <div class="file-card-v2__meta-item">
+              <span class="file-card-v2__meta-icon">💾</span>
+              <span class="file-card-v2__meta-label">サイズ</span>
+              <span class="file-card-v2__meta-value">${fileSize}MB</span>
+            </div>
+            <div class="file-card-v2__meta-item">
+              <span class="file-card-v2__meta-icon">📅</span>
+              <span class="file-card-v2__meta-label">日付</span>
+              <span class="file-card-v2__meta-value">${formattedDate}</span>
+            </div>
+            <div class="file-card-v2__meta-item">
+              <span class="file-card-v2__meta-icon">⬇️</span>
+              <span class="file-card-v2__meta-label">DL数</span>
+              <span class="file-card-v2__meta-value">${file.count}</span>
+            </div>
+          </div>
 
-          < div class = "file-card-v2__actions" >
-            < a
-              href = "javascript:void(0);"
-              class = "file-card-v2__btn"
-              onclick = "dl_button(${file.id});"
-            >
+          <div class="file-card-v2__actions">
+            <a
+              href="javascript:void(0);"
+              class="file-card-v2__btn"
+              onclick="dl_button(${file.id});"
+           >
               ⬇️ ダウンロード
-            <  / a >
-            < a
-              href = "javascript:void(0);"
-              class = "file-card-v2__btn file-card-v2__btn--delete"
-              onclick = "del_button(${file.id});"
-            >
+            </a>
+            <a
+              href="javascript:void(0);"
+              class="file-card-v2__btn file-card-v2__btn--delete"
+              onclick="del_button(${file.id});"
+           >
               🗑️ 削除
-            <  / a >
-          <  / div >
-        <  / div >
-        <  / div >
+            </a>
+          </div>
+        </div>
+        </div>
         `;
     }
 
@@ -397,34 +397,34 @@ class FileManager {
         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.filteredFiles.length);
 
         let paginationHTML = `
-        < div class = "file-pagination" >
-        < div class = "file-pagination__info" >
+        <div class="file-pagination">
+        <div class="file-pagination__info">
           ${startItem} - ${endItem}件(全${this.filteredFiles.length}件)
-        <  / div >
+        </div>
 
-        < div class = "file-pagination__controls" >
-          < div class = "file-pagination__per-page" >
-            < label for = "itemsPerPageSelect" > 表示件数: < / label >
-            < select id = "itemsPerPageSelect" >
-              < option value = "6" ${this.itemsPerPage === 6 ? 'selected' : ''} > 6件 < / option >
-              < option value = "12" ${this.itemsPerPage === 12 ? 'selected' : ''} > 12件 < / option >
-              < option value = "24" ${this.itemsPerPage === 24 ? 'selected' : ''} > 24件 < / option >
-              < option value = "48" ${this.itemsPerPage === 48 ? 'selected' : ''} > 48件 < / option >
-            <  / select >
-          <  / div >
+        <div class="file-pagination__controls">
+          <div class="file-pagination__per-page">
+            <label for="itemsPerPageSelect"> 表示件数: </label>
+            <select id="itemsPerPageSelect">
+              <option value="6" ${this.itemsPerPage === 6 ? 'selected' : ''}> 6件 </option>
+              <option value="12" ${this.itemsPerPage === 12 ? 'selected' : ''}> 12件 </option>
+              <option value="24" ${this.itemsPerPage === 24 ? 'selected' : ''}> 24件 </option>
+              <option value="48" ${this.itemsPerPage === 48 ? 'selected' : ''}> 48件 </option>
+            < / select>
+          </div>
 
-          < div class = "file-pagination__nav" >
+          <div class="file-pagination__nav">
         `;
 
       // 前へボタン
         paginationHTML += `
-        < button
-        class = "file-pagination__btn"
-        data - page = "${this.currentPage - 1}"
+        <button
+        class="file-pagination__btn"
+        data-page="${this.currentPage - 1}"
         ${this.currentPage === 1 ? 'disabled' : ''}
-        >
+       >
         ←
-        <  / button >
+        </button>
         `;
 
       // ページ番号ボタン
@@ -432,50 +432,50 @@ class FileManager {
         let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-        if (endPage - startPage + 1 < maxVisiblePages) {
+        if (endPage - startPage + 1 <maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        if (startPage > 1) {
-            paginationHTML += ` < button class = "file-pagination__btn" data - page = "1" > 1 < / button > `;
-            if (startPage > 2) {
-                paginationHTML += ` < span class = "file-pagination__ellipsis" > ... < / span > `;
+        if (startPage> 1) {
+            paginationHTML += ` <button class="file-pagination__btn" data-page="1"> 1 </ button> `;
+            if (startPage> 2) {
+                paginationHTML += ` <span class="file-pagination__ellipsis"> ... </ span> `;
             }
         }
 
         for (let i = startPage; i <= endPage; i++) {
             paginationHTML += `
-            < button
-            class = "file-pagination__btn ${i === this.currentPage ? 'file-pagination__btn--active' : ''}"
-            data - page = "${i}"
-            >
+            <button
+            class="file-pagination__btn ${i === this.currentPage ? 'file-pagination__btn--active' : ''}"
+            data-page="${i}"
+           >
             ${i}
-            <  / button >
+            </button>
             `;
         }
 
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                paginationHTML += ` < span class = "file-pagination__ellipsis" > ... < / span > `;
+        if (endPage <totalPages) {
+            if (endPage <totalPages - 1) {
+                paginationHTML += ` <span class="file-pagination__ellipsis"> ... </ span> `;
             }
-            paginationHTML += ` < button class = "file-pagination__btn" data - page = "${totalPages}" > ${totalPages} < / button > `;
+            paginationHTML += ` <button class="file-pagination__btn" data-page="${totalPages}"> ${totalPages} </ button> `;
         }
 
       // 次へボタン
         paginationHTML += `
-        < button
-        class = "file-pagination__btn"
-        data - page = "${this.currentPage + 1}"
+        <button
+        class="file-pagination__btn"
+        data-page="${this.currentPage + 1}"
         ${this.currentPage === totalPages ? 'disabled' : ''}
-        >
+       >
         →
-        <  / button >
+        </button>
         `;
 
         paginationHTML += `
-          <  / div >
-        <  / div >
-        <  / div >
+          </div>
+        </div>
+        </div>
         `;
 
         return paginationHTML;

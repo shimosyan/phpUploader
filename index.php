@@ -8,9 +8,14 @@
 
 declare(strict_types=1);
 
-// エラー表示設定（本番環境用）
-ini_set('display_errors', '0'); // 本番環境では 0 に設定
+// デバッグ用の設定（一時的）
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
+
+// エラー表示設定（本番環境用）
+// ini_set('display_errors', '0'); // 本番環境では 0 に設定
+// error_reporting(E_ALL);
 
 // セッション開始
 if (session_status() === PHP_SESSION_NONE) {
@@ -22,16 +27,17 @@ if (!file_exists('./config/config.php')) {
     throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
 }
 
+// 必要なファイルを手動で読み込み
 require_once './config/config.php';
 require_once './src/Core/SecurityUtils.php';
 require_once './src/Core/Logger.php';
 require_once './src/Core/ResponseHandler.php';
 
-use phpUploader\Config\Config;
+// 名前空間を使用（src/Core/ のクラスのみ）
 use phpUploader\Core\SecurityUtils;
 
 try {
-    $configInstance = new Config();
+    $configInstance = new config(); // 名前空間なしのconfigクラス
     $config = $configInstance->index();
 
     // 設定の検証
@@ -45,7 +51,10 @@ try {
 
     // アプリケーション初期化
     require_once './app/models/init.php';
-    $db = initializeApp($config);
+    
+    // AppInitializerクラスを直接使用
+    $initializer = new \phpUploader\Models\AppInitializer($config);
+    $db = $initializer->initialize();
 
     // ログ機能の初期化
     $logger = new \phpUploader\Core\Logger(
@@ -67,8 +76,12 @@ try {
     if (file_exists($modelPath)) {
         require_once $modelPath;
 
-        if (class_exists($page)) {
-            $model = new $page();
+        // クラス名を大文字で開始し、namespaceを含む完全な名前を構築
+        $className = ucfirst($page);
+        $fullClassName = "\\phpUploader\\Models\\{$className}";
+        
+        if (class_exists($fullClassName)) {
+            $model = new $fullClassName($db, $config);
             if (method_exists($model, 'index')) {
                 $result = $model->index();
                 if (is_array($result)) {
@@ -86,6 +99,10 @@ try {
         'csrf_token' => SecurityUtils::generateCSRFToken(),
         'status_message' => $_GET['deleted'] ?? null
     ]);
+
+    // デバッグ: modelDataの内容を確認
+    // error_log("ModelData: " . print_r($modelData, true));
+    // error_log("ViewData keys: " . print_r(array_keys($viewData), true));
 
     // 変数の展開
     extract($viewData);
