@@ -9,7 +9,7 @@ class Index
 {
     public function index()
     {
-        $config = new config();
+        $config = new \config();
         $ret = $config->index();
         //配列キーが設定されている配列なら展開
         if (!is_null($ret)) {

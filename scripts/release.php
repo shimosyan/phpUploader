@@ -16,7 +16,7 @@ class ReleaseManager
     public function updateVersion($newVersion)
     {
         if (!$this->isValidVersion($newVersion)) {
-            throw new InvalidArgumentException("Invalid version format: $newVersion");
+            throw new \InvalidArgumentException("Invalid version format: $newVersion");
         }
 
         $this->updateComposerVersion($newVersion);
@@ -62,7 +62,7 @@ class ReleaseManager
         if (isset($_SERVER['argv'][1])) {
             try {
                 $manager->updateVersion($_SERVER['argv'][1]);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 echo "Error: " . $e->getMessage() . "\n";
                 exit(1);
             }

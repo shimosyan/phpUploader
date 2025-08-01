@@ -14,7 +14,7 @@ namespace phpUploader\Models;
 class AppInitializer
 {
     private array $config;
-    private ?PDO $db = null;
+    private ?\PDO $db = null;
 
     public function __construct(array $config)
     {
@@ -24,7 +24,7 @@ class AppInitializer
     /**
      * 初期化メイン処理
      */
-    public function initialize(): PDO
+    public function initialize(): \PDO
     {
         $this->validateConfig();
         $this->createDirectories();
@@ -93,14 +93,14 @@ class AppInitializer
     {
         try {
             $dsn = 'sqlite:' . $this->config['db_directory'] . '/uploader.db';
-            $this->db = new PDO($dsn);
+            $this->db = new \PDO($dsn);
 
             // エラーモードを例外に設定
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
             // デフォルトのフェッチモードを連想配列形式に設定
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
+            $this->db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
             $this->throwError('データベースの接続に失敗しました: ' . $e->getMessage());
         }
     }
@@ -166,7 +166,7 @@ class AppInitializer
 
             // 既存データの移行（必要に応じて）
             $this->migrateExistingData();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->throwError('データベースの初期化に失敗しました: ' . $e->getMessage());
         }
     }
@@ -212,7 +212,7 @@ class AppInitializer
             if (!in_array($columnName, $columnNames)) {
                 try {
                     $this->db->exec($alterQuery);
-                } catch (PDOException $e) {
+                } catch (\PDOException $e) {
                     // カラム追加に失敗した場合はログに記録するが処理は続行
                     error_log("Column migration failed for {$columnName}: " . $e->getMessage());
                 }
@@ -242,7 +242,7 @@ class AppInitializer
 }
 
 // 従来の処理との互換性のため、関数形式でのラッパーを提供
-function initializeApp(array $config): PDO
+function initializeApp(array $config): \PDO
 {
     $initializer = new \phpUploader\Models\AppInitializer($config);
     return $initializer->initialize();

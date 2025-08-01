@@ -48,14 +48,14 @@ try {
     $db = initializeApp($config);
 
     // ログ機能の初期化
-    $logger = new Logger(
+    $logger = new \phpUploader\Core\Logger(
         $config['log_directory'],
         $config['log_level'],
         $db
     );
 
     // レスポンスハンドラーの初期化
-    $responseHandler = new ResponseHandler($logger);
+    $responseHandler = new \phpUploader\Core\ResponseHandler($logger);
 
     // アクセスログの記録
     $logger->access(null, 'page_view', 'success');
