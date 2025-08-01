@@ -127,7 +127,6 @@ try {
         'expires_at' => $expiresAt,
         'file_name' => $fileData['origin_file_name']
     ]);
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     if (isset($logger)) {

@@ -241,7 +241,6 @@ try {
         'file_name' => $fileName,
         'file_size' => $fileSize
     ]);
-
 } catch (Exception $e) {
     // 出力バッファをクリア
     if (ob_get_level()) {

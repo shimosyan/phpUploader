@@ -147,7 +147,6 @@ try {
         $logger->error('Failed to open file for download', ['file_id' => $fileId, 'path' => $filePath]);
         header('Location: ./');
     }
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     if (isset($logger)) {
