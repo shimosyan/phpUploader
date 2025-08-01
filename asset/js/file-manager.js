@@ -513,14 +513,13 @@ class FileManager {
 
       // クリック イベント
         this.container.addEventListener('click', (e) => {
-            // 検索クリアボタン
             if (e.target.id === 'fileSearchClear') {
+                // 検索クリアボタン
                 this.searchQuery = '';
                 this.applyFilters();
                 this.render();
-            }
-            // ビュー切り替えボタン
-            else if (e.target.classList.contains('file-view-toggle__btn')) {
+            } else if (e.target.classList.contains('file-view-toggle__btn')) {
+                // ビュー切り替えボタン
                 const newView = e.target.dataset.view;
                 if (newView && newView !== this.viewMode) {
                     this.viewMode = newView;
@@ -533,14 +532,13 @@ class FileManager {
                   // localStorage が使用できない場合は無視
                     }
                 }
-            }
-        // ページネーションボタン
-            else if (e.target.classList.contains('file-pagination__btn') && !e.target.disabled) {
-                    const page = parseInt(e.target.dataset.page);
+            } else if (e.target.classList.contains('file-pagination__btn') && !e.target.disabled) {
+                // ページネーションボタン
+                const page = parseInt(e.target.dataset.page);
                 if (page && page !== this.currentPage) {
                     this.currentPage = page;
                     this.render();
-            // ページ変更時にトップへスクロール
+                    // ページ変更時にトップへスクロール
                     this.container.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
