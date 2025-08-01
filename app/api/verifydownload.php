@@ -22,9 +22,16 @@ if (session_status() === PHP_SESSION_NONE) {
 try {
     // 設定とユーティリティの読み込み
     require_once '../../config/config.php';
-    require_once '../../src/Core/Utils.php';
+    require_once '../../src/Core/SecurityUtils.php';
+    require_once '../../src/Core/Logger.php';
+    require_once '../../src/Core/ResponseHandler.php';
 
-    $configInstance = new config();
+    use phpUploader\Config\Config;
+    use phpUploader\Core\SecurityUtils;
+    use phpUploader\Core\Logger;
+    use phpUploader\Core\ResponseHandler;
+
+    $configInstance = new Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化

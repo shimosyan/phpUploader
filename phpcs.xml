@@ -43,6 +43,9 @@
         </properties>
     </rule>
 
+    <!-- Ver.2.0 特定ファイルの例外設定 -->
+    <!-- 必要に応じて個別の例外設定を追加 -->
+
     <!-- 設定 -->
     <ini name="memory_limit" value="256M"/>
 
