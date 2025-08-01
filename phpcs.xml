@@ -44,7 +44,11 @@
     </rule>
 
     <!-- Ver.2.0 特定ファイルの例外設定 -->
-    <!-- 必要に応じて個別の例外設定を追加 -->
+    <!-- スクリプトファイルはサイドエフェクトが必要なため例外扱い -->
+    <rule ref="PSR1.Files.SideEffects">
+        <exclude-pattern>scripts/*</exclude-pattern>
+        <exclude-pattern>app/models/init.php</exclude-pattern>
+    </rule>
 
     <!-- 設定 -->
     <ini name="memory_limit" value="256M"/>
