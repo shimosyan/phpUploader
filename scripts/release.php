@@ -47,30 +47,32 @@ class ReleaseManager
         $composer = json_decode(file_get_contents($this->composerFile), true);
         return $composer['version'] ?? 'unknown';
     }
-}
 
-/**
- * メイン実行関数
- */
-function main(): void
-{
-    $manager = new ReleaseManager();
-
-    if (isset($_SERVER['argv'][1])) {
-        try {
-            $manager->updateVersion($_SERVER['argv'][1]);
-        } catch (Exception $e) {
-            echo "Error: " . $e->getMessage() . "\n";
-            exit(1);
+    /**
+     * CLI実行のメインエントリーポイント
+     */
+    public static function cli(): void
+    {
+        if (php_sapi_name() !== 'cli') {
+            return;
         }
-    } else {
-        echo "Current version: " . $manager->getCurrentVersion() . "\n";
-        echo "Usage: php scripts/release.php <version>\n";
-        echo "Example: php scripts/release.php 1.3.0\n";
+
+        $manager = new self();
+
+        if (isset($_SERVER['argv'][1])) {
+            try {
+                $manager->updateVersion($_SERVER['argv'][1]);
+            } catch (Exception $e) {
+                echo "Error: " . $e->getMessage() . "\n";
+                exit(1);
+            }
+        } else {
+            echo "Current version: " . $manager->getCurrentVersion() . "\n";
+            echo "Usage: php scripts/release.php <version>\n";
+            echo "Example: php scripts/release.php 1.3.0\n";
+        }
     }
 }
 
-// CLIでの実行時のみメイン関数を呼び出し
-if (php_sapi_name() === 'cli' && isset($_SERVER['argv'])) {
-    main();
-}
+// 直接実行された場合のみCLI関数を呼び出し
+ReleaseManager::cli();
