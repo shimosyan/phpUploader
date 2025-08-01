@@ -31,7 +31,7 @@ use phpUploader\Core\Logger;
 use phpUploader\Core\ResponseHandler;
 
 try {
-    $configInstance = new Config();
+    $configInstance = new config();
     $config = $configInstance->index();
 
     // アプリケーション初期化

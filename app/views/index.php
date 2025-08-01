@@ -135,5 +135,6 @@
 <!-- ファイルデータをJavaScriptに渡す -->
 <script>
   // PHPからJavaScriptにファイルデータを渡す
-  window.fileData = <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>;
+  console.log('Data variable:', <?php echo json_encode(isset($data) ? $data : 'undefined', JSON_UNESCAPED_UNICODE); ?>);
+  window.fileData = <?php echo json_encode(isset($data) ? $data : [], JSON_UNESCAPED_UNICODE); ?>;
 </script>

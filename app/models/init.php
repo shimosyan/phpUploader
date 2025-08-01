@@ -240,10 +240,3 @@ class AppInitializer
         exit;
     }
 }
-
-// 従来の処理との互換性のため、関数形式でのラッパーを提供
-function initializeApp(array $config): \PDO
-{
-    $initializer = new \phpUploader\Models\AppInitializer($config);
-    return $initializer->initialize();
-}

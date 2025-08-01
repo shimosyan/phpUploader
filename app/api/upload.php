@@ -33,13 +33,12 @@ require_once $baseDir . '/src/Core/SecurityUtils.php';
 require_once $baseDir . '/src/Core/Logger.php';
 require_once $baseDir . '/src/Core/ResponseHandler.php';
 
-use phpUploader\Config\Config;
 use phpUploader\Core\SecurityUtils;
 use phpUploader\Core\Logger;
 use phpUploader\Core\ResponseHandler;
 
 try {
-    $configInstance = new Config();
+    $configInstance = new config();
     $config = $configInstance->index();
 
     // アプリケーション初期化

@@ -40,7 +40,7 @@ include('./config/config.php');
 ob_end_clean();
 
 // configクラスのインスタンス化
-$config = new \config();
+$config = new config();
 $configData = $config->index();
 
 $configVersion = $configData['version'] ?? 'N/A';
