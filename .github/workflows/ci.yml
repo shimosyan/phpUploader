@@ -73,6 +73,32 @@ jobs:
           composer install --prefer-dist --no-progress --no-interaction
           echo "✅ Dependencies installed successfully"
 
+      - name: Setup configuration file
+        run: |
+          echo "🔧 設定ファイルセットアップ実行中..."
+          # 必要なディレクトリを作成
+          mkdir -p data db config logs
+
+          # config.php.exampleの存在確認
+          if [ ! -f config/config.php.example ]; then
+            echo "❌ config/config.php.example が見つかりません"
+            exit 1
+          fi
+
+          # config.php.exampleからconfig.phpを作成
+          if [ ! -f config/config.php ]; then
+            cp config/config.php.example config/config.php
+            echo "✅ config.php.exampleからconfig.phpを作成しました"
+          fi
+
+          # 設定ファイルの構文チェック
+          echo "📄 config.php構文チェック中..."
+          if ! php -l config/config.php; then
+            echo "❌ config.phpに構文エラーがあります"
+            exit 1
+          fi
+          echo "✅ 設定ファイルセットアップ完了"
+
       - name: Check PHP syntax
         run: |
           echo "🔍 PHP構文チェックを実行中..."
@@ -124,32 +150,6 @@ jobs:
             echo "❌ PHPStan not installed..."
             exit 1
           fi
-
-      - name: Test configuration file creation
-        run: |
-          echo "🔧 設定ファイルテスト実行中..."
-          # 必要なディレクトリを作成
-          mkdir -p data db config
-
-          # config.php.exampleの存在確認
-          if [ ! -f config/config.php.example ]; then
-            echo "❌ config/config.php.example が見つかりません"
-            exit 1
-          fi
-
-          # config.php.exampleからconfig.phpを作成
-          if [ ! -f config/config.php ]; then
-            cp config/config.php.example config/config.php
-            echo "✅ config.php.exampleからconfig.phpを作成しました"
-          fi
-
-          # 設定ファイルの構文チェック
-          echo "📄 config.php構文チェック中..."
-          if ! php -l config/config.php; then
-            echo "❌ config.phpに構文エラーがあります"
-            exit 1
-          fi
-          echo "✅ 設定ファイルテスト完了"
 
       - name: Test version synchronization
         run: |
