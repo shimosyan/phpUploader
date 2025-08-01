@@ -26,7 +26,6 @@ function openModal(type, title, body, action){
 
 }
 
-
 function closeModal(){
   $('#OKCanselModal').modal('hide');
   $('#OKModal').modal('hide');

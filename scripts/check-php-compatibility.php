@@ -64,20 +64,20 @@ try {
     // configファイルの基本テスト
     if (file_exists('config/config.php.example')) {
         echo "✅ config.php.example が存在します\n";
-        
+
         // 一時的にconfig.phpを作成してテスト
         copy('config/config.php.example', 'config/config.php.test');
         include 'config/config.php.test';
-        
+
         $config = new config();
         $settings = $config->index();
-        
+
         if (isset($settings['version'])) {
             echo "✅ バージョン情報取得: " . $settings['version'] . "\n";
         }
-        
+
         unlink('config/config.php.test');
-        
+
     } else {
         echo "❌ config.php.example が見つかりません\n";
         $configTest = false;

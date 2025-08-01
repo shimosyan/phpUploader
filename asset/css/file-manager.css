@@ -525,61 +525,61 @@
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  
+
   .file-card-v2__meta {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  
+
   .file-manager__header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .file-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .file-search {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .file-search__input {
     max-width: none;
   }
-  
+
   .file-view-toggle {
     align-self: center;
   }
-  
+
   .file-pagination {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-  
+
   .file-pagination__controls {
     flex-direction: column;
     width: 100%;
   }
-  
+
   /* リストビューのレスポンシブ対応 */
   .file-list-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .file-list-item__main {
     width: 100%;
   }
-  
+
   .file-list-item__meta {
     justify-content: space-between;
   }
-  
+
   .file-list-item__actions {
     align-self: center;
     margin-top: 4px;
@@ -590,12 +590,12 @@
   .file-card-v2__actions {
     flex-direction: column;
   }
-  
+
   .file-pagination__nav {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .file-list-item__meta {
     flex-direction: column;
     align-items: flex-start;

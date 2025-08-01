@@ -7,24 +7,24 @@
   .container {
     padding: 10px 5px;
   }
-  
+
   .form-section {
     padding: 15px;
   }
-  
+
   .btn-submit {
     font-size: 16px;
     padding: 12px 20px;
   }
-  
+
   .file-card {
     margin-bottom: 10px;
   }
-  
+
   .file-card__header {
     padding: 12px 15px;
   }
-  
+
   .file-card__details {
     padding: 15px;
   }
@@ -35,7 +35,7 @@
   .file-cards-container {
     display: none;
   }
-  
+
   .file-table-container {
     display: block;
   }
@@ -46,7 +46,7 @@
   .btn, .file-card__toggle, .upload-progress {
     display: none !important;
   }
-  
+
   .file-card {
     border: 1px solid #000;
     break-inside: avoid;
@@ -67,12 +67,12 @@
   .file-card {
     border: 2px solid #000;
   }
-  
+
   .file-card__header {
     background: #fff;
     color: #000;
   }
-  
+
   .btn-success {
     background: #000;
     border-color: #000;
@@ -86,12 +86,12 @@
     border-color: #4a5568;
     color: #e2e8f0;
   }
-  
+
   .file-card__header {
     background: #4a5568;
     color: #e2e8f0;
   }
-  
+
   .upload-progress {
     background: #2d3748;
     border-color: #4a5568;

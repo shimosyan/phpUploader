@@ -295,7 +295,7 @@ class FileManager {
       </div>
     `;
   }
-  
+
   renderFileCard(file) {
     const fileSize = (file.size / (1024 * 1024)).toFixed(1);
     const uploadDate = new Date(file.input_date * 1000);
@@ -308,7 +308,7 @@ class FileManager {
     });
     const fileExt = this.getFileExtension(file.origin_file_name);
     const fileIcon = this.getFileIcon(fileExt);
-    
+
     return `
       <div class="file-card-v2" data-file-id="${file.id}">
         <div class="file-card-v2__header">
@@ -326,7 +326,7 @@ class FileManager {
             </p>
           ` : ''}
         </div>
-        
+
         <div class="file-card-v2__body">
           <div class="file-card-v2__meta">
             <div class="file-card-v2__meta-item">
@@ -350,7 +350,7 @@ class FileManager {
               <span class="file-card-v2__meta-value">${file.count}</span>
             </div>
           </div>
-          
+
           <div class="file-card-v2__actions">
             <a 
               href="javascript:void(0);" 
@@ -371,23 +371,23 @@ class FileManager {
       </div>
     `;
   }
-  
+
   renderPagination() {
     const totalPages = Math.ceil(this.filteredFiles.length / this.itemsPerPage);
-    
+
     if (totalPages <= 1) {
       return '';
     }
-    
+
     const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
     const endItem = Math.min(this.currentPage * this.itemsPerPage, this.filteredFiles.length);
-    
+
     let paginationHTML = `
       <div class="file-pagination">
         <div class="file-pagination__info">
           ${startItem}-${endItem}件 (全${this.filteredFiles.length}件)
         </div>
-        
+
         <div class="file-pagination__controls">
           <div class="file-pagination__per-page">
             <label for="itemsPerPageSelect">表示件数:</label>
@@ -398,10 +398,10 @@ class FileManager {
               <option value="48" ${this.itemsPerPage === 48 ? 'selected' : ''}>48件</option>
             </select>
           </div>
-          
+
           <div class="file-pagination__nav">
     `;
-    
+
     // 前へボタン
     paginationHTML += `
       <button 
@@ -412,23 +412,23 @@ class FileManager {
         ←
       </button>
     `;
-    
+
     // ページ番号ボタン
     const maxVisiblePages = 5;
     let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     if (startPage > 1) {
       paginationHTML += `<button class="file-pagination__btn" data-page="1">1</button>`;
       if (startPage > 2) {
         paginationHTML += `<span class="file-pagination__ellipsis">...</span>`;
       }
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       paginationHTML += `
         <button 
@@ -439,14 +439,14 @@ class FileManager {
         </button>
       `;
     }
-    
+
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         paginationHTML += `<span class="file-pagination__ellipsis">...</span>`;
       }
       paginationHTML += `<button class="file-pagination__btn" data-page="${totalPages}">${totalPages}</button>`;
     }
-    
+
     // 次へボタン
     paginationHTML += `
       <button 
@@ -457,16 +457,16 @@ class FileManager {
         →
       </button>
     `;
-    
+
     paginationHTML += `
           </div>
         </div>
       </div>
     `;
-    
+
     return paginationHTML;
   }
-  
+
   bindEvents() {
     // 検索イベント（デバウンス付き）
     let searchTimeout;
@@ -474,7 +474,7 @@ class FileManager {
       if (e.target.id === 'fileSearchInput') {
         clearTimeout(searchTimeout);
         this.searchQuery = e.target.value;
-        
+
         // デバウンス処理（300ms）でパフォーマンス向上
         searchTimeout = setTimeout(() => {
           this.applyFilters();
@@ -482,7 +482,7 @@ class FileManager {
         }, 300);
       }
     });
-    
+
     // ソート・表示件数変更イベント
     this.container.addEventListener('change', (e) => {
       if (e.target.id === 'fileSortSelect') {
@@ -495,7 +495,7 @@ class FileManager {
         this.render();
       }
     });
-    
+
     // クリック イベント
     this.container.addEventListener('click', (e) => {
       // 検索クリアボタン
@@ -510,7 +510,7 @@ class FileManager {
         if (newView && newView !== this.viewMode) {
           this.viewMode = newView;
           this.render();
-          
+
           // ビュー切り替えを localStorage に保存
           try {
             localStorage.setItem('fileManager_viewMode', this.viewMode);
@@ -531,12 +531,12 @@ class FileManager {
       }
     });
   }
-  
+
   // ユーティリティメソッド
   getFileExtension(filename) {
     return filename.split('.').pop() || '';
   }
-  
+
   getFileIcon(extension) {
     const iconMap = {
       // 画像
@@ -556,33 +556,33 @@ class FileManager {
       // その他
       'exe': '⚙️', 'msi': '⚙️', 'dmg': '💽', 'iso': '💽'
     };
-    
+
     return iconMap[extension.toLowerCase()] || '📄';
   }
-  
+
   escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-  
+
   // 外部から呼び出し可能なメソッド
   refresh() {
     this.render();
   }
-  
+
   search(query) {
     this.searchQuery = query;
     this.applyFilters();
     this.render();
   }
-  
+
   sort(sortBy) {
     this.sortBy = sortBy;
     this.applyFilters();
     this.render();
   }
-  
+
   goToPage(page) {
     this.currentPage = page;
     this.render();

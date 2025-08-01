@@ -331,7 +331,7 @@ class Logger
                     INSERT INTO access_logs (file_id, action, ip_address, user_agent, status, created_at) 
                     VALUES (?, ?, ?, ?, ?, ?)
                 ');
-                
+
                 if ($stmt) {
                     $stmt->execute([
                         null, // file_id は通常のログでは null

@@ -9,10 +9,10 @@ $(document).ready(function(){
         defaultSort: 'date_desc'
       }
     );
-    
+
     // PHPから渡されたファイルデータを設定
     fileManager.setFiles(window.fileData);
-    
+
     // グローバルに公開（デバッグ・外部操作用）
     window.fileManagerInstance = fileManager;
   }
@@ -21,7 +21,7 @@ $(document).ready(function(){
   if(document.getElementById('fileList') != null && !window.fileData){
     // Ver.1.x互換性のための緊急フォールバック
     console.warn('FileManager initialization failed, falling back to DataTables');
-    
+
     $.extend( $.fn.dataTable.defaults, {
       language: {
         url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
@@ -108,7 +108,7 @@ $(window).resize(function() {
   if (window.fileManagerInstance) {
     window.fileManagerInstance.refresh();
   }
-  
+
   // レガシー DataTables 対応（フォールバック用）
   if ($(window).width() > 768 && $.fn.DataTable && $.fn.DataTable.isDataTable('#fileList')) {
     $('#fileList').DataTable().columns.adjust();
@@ -385,7 +385,7 @@ function del_certificat(id, key){
   })
   .fail(function(jqXHR, textStatus, errorThrown){
     var errorMsg = '削除処理でサーバーエラーが発生しました。';
-    
+
     // レスポンスがJSONの場合は詳細情報を取得
     if (jqXHR.responseJSON) {
       if (jqXHR.responseJSON.message) {
@@ -404,7 +404,7 @@ function del_certificat(id, key){
         errorMsg += '<br><small class="text-muted">(HTTP ' + jqXHR.status + ': ' + errorThrown + ')</small>';
       }
     }
-    
+
     showError(errorMsg);
   })
   .always(function( jqXHR, textStatus ) {

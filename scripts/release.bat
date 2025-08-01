@@ -24,12 +24,12 @@ if "%~1"=="" (
 ) else (
     echo 🔄 バージョンを %~1 に更新中...
     docker-compose exec php-cli php scripts/release.php %~1
-    
+
     if errorlevel 1 (
         echo ❌ バージョン更新に失敗しました
         exit /b 1
     )
-    
+
     echo ✅ バージョン更新完了！
     echo.
     echo 次の手順:
@@ -38,7 +38,7 @@ if "%~1"=="" (
     echo   3. git tag v%~1
     echo   4. git push origin main --tags
     echo.
-    
+
     REM --push オプションが指定された場合、自動でGitプッシュまで実行
     if "%~2"=="--push" (
         echo 🚀 Gitに変更をプッシュ中...

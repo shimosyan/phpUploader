@@ -100,7 +100,7 @@
     <div class="col-sm-12">
       <!-- 新しいファイル管理システム (DataTables完全廃止版) -->
       <div id="fileManagerContainer"></div>
-      
+
       <!-- レガシーテーブル表示（非表示） -->
       <div class="file-table-container" style="display: none;">
         <table id="fileList" class="table table-striped" cellspacing="0" width="100%">

@@ -8,21 +8,21 @@
   .file-table-container {
     display: none !important;
   }
-  
+
   .file-cards-container {
     display: block !important;
   }
-  
+
   /* アップロードフォームの調整 */
   .upload-form .row .col-sm-6 {
     margin-bottom: 15px;
   }
-  
+
   .upload-form .col-sm-offset-10 {
     margin-left: 0 !important;
     width: 100% !important;
   }
-  
+
   .upload-form .btn-submit {
     width: 100%;
     margin-top: 10px;
@@ -34,7 +34,7 @@
   .file-table-container {
     display: block !important;
   }
-  
+
   .file-cards-container {
     display: none !important;
   }
