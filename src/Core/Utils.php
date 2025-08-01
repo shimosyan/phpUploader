@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace phpUploader\Core;
+
 /**
  * セキュリティユーティリティクラス
  * Ver.2.0で追加されたセキュリティ機能
@@ -350,14 +352,44 @@ class Logger
     }
 
     // 各ログレベルのショートカットメソッド
-    public function emergency(string $message, array $context = []): void { $this->log(self::LOG_EMERGENCY, $message, $context); }
-    public function alert(string $message, array $context = []): void { $this->log(self::LOG_ALERT, $message, $context); }
-    public function critical(string $message, array $context = []): void { $this->log(self::LOG_CRITICAL, $message, $context); }
-    public function error(string $message, array $context = []): void { $this->log(self::LOG_ERROR, $message, $context); }
-    public function warning(string $message, array $context = []): void { $this->log(self::LOG_WARNING, $message, $context); }
-    public function notice(string $message, array $context = []): void { $this->log(self::LOG_NOTICE, $message, $context); }
-    public function info(string $message, array $context = []): void { $this->log(self::LOG_INFO, $message, $context); }
-    public function debug(string $message, array $context = []): void { $this->log(self::LOG_DEBUG, $message, $context); }
+    public function emergency(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_EMERGENCY, $message, $context);
+    }
+
+    public function alert(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_ALERT, $message, $context);
+    }
+
+    public function critical(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_CRITICAL, $message, $context);
+    }
+
+    public function error(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_ERROR, $message, $context);
+    }
+
+    public function warning(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_WARNING, $message, $context);
+    }
+
+    public function notice(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_NOTICE, $message, $context);
+    }
+
+    public function info(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_INFO, $message, $context);
+    }
+    public function debug(string $message, array $context = []): void
+    {
+        $this->log(self::LOG_DEBUG, $message, $context);
+    }
 
     /**
      * アクセスログ専用メソッド

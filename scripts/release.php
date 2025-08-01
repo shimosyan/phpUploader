@@ -1,4 +1,5 @@
 <?php
+
 /**
  * リリース管理スクリプト
  * composer.jsonとconfig.phpのバージョンを同期します

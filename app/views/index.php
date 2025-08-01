@@ -1,15 +1,15 @@
 
 <div class="container">
-  <?php if (isset($status_message)): ?>
-    <?php if ($status_message === 'success'): ?>
+  <?php if (isset($status_message)) : ?>
+      <?php if ($status_message === 'success') : ?>
       <div id="statusMessage" class="alert alert-success" role="alert">
         <strong>削除完了！</strong> ファイルが正常に削除されました。
       </div>
-    <?php elseif ($status_message === 'error'): ?>
+      <?php elseif ($status_message === 'error') : ?>
       <div id="statusMessage" class="alert alert-danger" role="alert">
         <strong>エラー</strong> ファイルの削除に失敗しました。
       </div>
-    <?php endif; ?>
+      <?php endif; ?>
   <?php endif; ?>
 
   <div class="row bg-white radius box-shadow">

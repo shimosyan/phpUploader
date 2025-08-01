@@ -99,7 +99,6 @@ try {
 
     // フッターの出力
     require './app/views/footer.php';
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     $errorMessage = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
