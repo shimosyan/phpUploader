@@ -95,15 +95,18 @@ jobs:
         run: |
           echo "🔍 PHP CodeSniffer実行中..."
           if [ -f "vendor/bin/phpcs" ]; then
-            echo "📋 PSR-12コーディング規約チェック開始"
-            if ! vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ .; then
+            echo "📋 プロジェクト設定によるコーディング規約チェック開始"
+            # phpcs.xmlを使用してチェック
+            if ! vendor/bin/phpcs; then
               echo "❌ コーディング規約違反が検出されました"
-              echo "🔧 修正方法: vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/ ."
+              echo "🔧 修正方法: vendor/bin/phpcbf"
+              echo "📋 設定ファイル: phpcs.xml"
               exit 1
             fi
             echo "✅ コーディング規約チェック完了"
           else
-            echo "⚠️ PHPCS not installed, skipping..."
+            echo "❌ PHPCS not installed..."
+            exit 1
           fi
 
       - name: Run PHPStan
@@ -118,7 +121,8 @@ jobs:
             fi
             echo "✅ 静的解析チェック完了"
           else
-            echo "⚠️ PHPStan not installed, skipping..."
+            echo "❌ PHPStan not installed..."
+            exit 1
           fi
 
       - name: Test configuration file creation
