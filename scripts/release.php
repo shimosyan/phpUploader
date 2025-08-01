@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace phpUploader\Scripts;
+
 /**
  * リリース管理スクリプト
  * composer.jsonとconfig.phpのバージョンを同期します
