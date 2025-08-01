@@ -210,7 +210,7 @@ try {
 
     if (!$insertStmt->execute($insertData)) {
         $errorInfo = $insertStmt->errorInfo();
-        error_log('Database insert failed: ' . print_r($errorInfo, true));
+        error_log('Database insert failed: ' . json_encode($errorInfo));
         $responseHandler->error('データベースへの保存に失敗しました。', [], 500);
     }
 

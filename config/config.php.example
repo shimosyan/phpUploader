@@ -74,7 +74,9 @@ class config {
         }
 
         return true;
-    }    /**
+    }
+
+    /**
      * 設定の検証を行う
      */
     public function validate(): array {
