@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace phpUploader\Models;
+
 /**
  * アプリケーション初期化スクリプト
  *
@@ -242,7 +244,7 @@ class AppInitializer
 // 従来の処理との互換性のため、関数形式でのラッパーを提供
 function initializeApp(array $config): PDO
 {
-    $initializer = new AppInitializer($config);
+    $initializer = new \phpUploader\Models\AppInitializer($config);
     return $initializer->initialize();
 }
 
