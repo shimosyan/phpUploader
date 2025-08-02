@@ -55,7 +55,13 @@ try {
     $tokenData = $tokenStmt->fetch();
 
     if (!$tokenData) {
-        $logger->warning('Invalid or expired download token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+        $logger->warning(
+            'Invalid or expired download token',
+            [
+                'file_id' => $fileId,
+                'token' => substr($token, 0, 8) . '...'
+            ]
+        );
         header('Location: ./');
         exit;
     }
@@ -67,7 +73,7 @@ try {
             $logger->warning('IP address mismatch for download', [
                 'file_id' => $fileId,
                 'token_ip' => $tokenData['ip_address'],
-                'current_ip' => $currentIP
+                'current_ip' => $currentIP,
             ]);
             // IPアドレスが異なる場合は警告ログのみで、ダウンロードは継続
         }
@@ -107,14 +113,14 @@ try {
     }
 
     // ダウンロード回数の更新
-    $updateStmt = $db->prepare("UPDATE uploaded SET count = count + 1, updated_at = :updated_at WHERE id = :id");
+    $updateStmt = $db->prepare('UPDATE uploaded SET count = count + 1, updated_at = :updated_at WHERE id = :id');
     $updateStmt->execute([
         'id' => $fileId,
-        'updated_at' => time()
+        'updated_at' => time(),
     ]);
 
     // 使用済みトークンの削除（ワンタイム）
-    $deleteTokenStmt = $db->prepare("DELETE FROM access_tokens WHERE token = :token");
+    $deleteTokenStmt = $db->prepare('DELETE FROM access_tokens WHERE token = :token');
     $deleteTokenStmt->execute(['token' => $token]);
 
     // アクセスログの記録
@@ -147,14 +153,13 @@ try {
         $logger->error('Failed to open file for download', ['file_id' => $fileId, 'path' => $filePath]);
         header('Location: ./');
     }
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     if (isset($logger)) {
         $logger->error('Download Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
+            'file_id' => $fileId ?? null,
         ]);
     }
 
