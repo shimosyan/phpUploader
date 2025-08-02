@@ -38,7 +38,9 @@ try {
 
     // アプリケーション初期化
     require_once $baseDir . '/app/models/init.php';
-    $db = initializeApp($config);
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
     $logger = new Logger($config['log_directory'], $config['log_level'], $db);

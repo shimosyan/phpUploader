@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * アプリケーション初期化スクリプト
  *
@@ -7,12 +9,12 @@
  * セキュリティチェックを行います。
  */
 
-declare(strict_types=1);
+namespace PHPUploader\Model;
 
-class AppInitializer {
+class Init {
 
     private array $config;
-    private ?PDO $db = null;
+    private ?\PDO $db = null;
 
     public function __construct(array $config) {
         $this->config = $config;
@@ -21,7 +23,7 @@ class AppInitializer {
     /**
      * 初期化メイン処理
      */
-    public function initialize(): PDO {
+    public function initialize(): \PDO {
         $this->validateConfig();
         $this->createDirectories();
         $this->initializeDatabase();
@@ -94,7 +96,7 @@ class AppInitializer {
             // デフォルトのフェッチモードを連想配列形式に設定
             $this->db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->throwError('データベースの接続に失敗しました: ' . $e->getMessage());
         }
     }
@@ -160,7 +162,7 @@ class AppInitializer {
             // 既存データの移行（必要に応じて）
             $this->migrateExistingData();
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->throwError('データベースの初期化に失敗しました: ' . $e->getMessage());
         }
     }
@@ -204,7 +206,7 @@ class AppInitializer {
             if (!in_array($columnName, $columnNames)) {
                 try {
                     $this->db->exec($alterQuery);
-                } catch (PDOException $e) {
+                } catch (\PDOException $e) {
                     // カラム追加に失敗した場合はログに記録するが処理は続行
                     error_log("Column migration failed for {$columnName}: " . $e->getMessage());
                 }
@@ -230,15 +232,4 @@ class AppInitializer {
         include('./app/views/footer.php');
         exit;
     }
-}
-
-// 従来の処理との互換性のため、関数形式でのラッパーを提供
-function initializeApp(array $config): PDO {
-    $initializer = new AppInitializer($config);
-    return $initializer->initialize();
-}
-
-// 従来のinit.phpとの互換性を保つため、直接実行された場合の処理
-if (isset($config) && is_array($config)) {
-    $db = initializeApp($config);
 }
