@@ -48,6 +48,13 @@ class config {
 
             // トークン設定
             'token_expiry_minutes' => 10,
+            
+            // 共有リンク機能設定
+            'share_links_enabled' => true,        // 共有リンク機能の有効/無効
+            'share_default_max_downloads' => 100, // デフォルト最大ダウンロード数
+            'share_default_expiry_days' => 30,    // デフォルト有効期限（日数）
+            'share_max_downloads_limit' => 1000,  // 最大ダウンロード数の上限
+            'share_max_expiry_days' => 365,       // 最大有効期限の上限（日数）
 
             // バージョン情報（composer.jsonから自動取得）
             'version' => $this->getVersion()
