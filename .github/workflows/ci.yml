@@ -232,7 +232,7 @@ jobs:
               echo "❌ コーディング規約違反が検出されました"
               echo "🔧 修正方法: vendor/bin/phpcbf"
               echo "📋 設定ファイル: phpcs.xml"
-              github-comment exec -k common-error --var title:"Check PHP CodeSniffer Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpcs
+              github-comment exec -k common-error --var title:"Check PHP CodeSniffer Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpcs .
               exit 1
             fi
             echo "✅ コーディング規約チェック完了"
