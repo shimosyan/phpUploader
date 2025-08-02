@@ -22,7 +22,7 @@ if ($expires_days && $expires_days > 0) {
 }
 
 // configをインクルード
-include('../../config/config.php');
+include_once(__DIR__ . '/../../config/config.php');
 $config = new config();
 $ret = $config->index();
 // 配列キーが設定されている配列なら展開
@@ -34,9 +34,9 @@ if (!is_null($ret)) {
 
 // データベースの作成・オープン
 try {
-    $db = new PDO('sqlite:../../' . $db_directory . '/uploader.db');
+    $db = new PDO('sqlite:' . $db_directory . '/uploader.db');
 } catch (Exception $e) {
-    $response = array('status' => 'sqlerror');
+    $response = array('status' => 'sqlerror', 'error' => $e->getMessage(), 'path' => $db_directory . '/uploader.db');
     // JSON形式で出力する
     echo json_encode($response);
     exit;
