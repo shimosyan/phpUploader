@@ -21,7 +21,7 @@ config/config.php
 
 # Keep directory structure
 !data/.gitkeep
-!db/.gitkeep  
+!db/.gitkeep
 !logs/.gitkeep
 
 # OS files
@@ -32,7 +32,7 @@ Thumbs.db
 *.tmp
 *.temp
 
-# PHP specific  
+# PHP specific
 *.php~
 
 # Logs
