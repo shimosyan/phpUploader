@@ -25,7 +25,7 @@ class config {
             'title' => 'PHP Uploader',
             'save_max_files' => 2000,
             'max_comment' => 1024,
-            'max_file_size' => 2, // MB
+            'max_file_size' => 100, // MB
             'max_folder_depth' => 5,      // 最大フォルダ階層深さ（1-10）
             'max_folders_per_level' => 50,   // 各階層での最大フォルダ数
             'allow_folder_creation' => true, // ユーザーによるフォルダ作成許可
