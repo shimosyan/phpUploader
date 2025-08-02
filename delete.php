@@ -43,12 +43,13 @@ try {
 
     try {
     // トークンの検証
-    $tokenStmt = $db->prepare("
-        SELECT t.*, u.origin_file_name, u.stored_file_name, u.file_hash
-        FROM access_tokens t
-        JOIN uploaded u ON t.file_id = u.id
-        WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
-    ");        $tokenStmt->execute([
+        $tokenStmt = $db->prepare("
+            SELECT t.*, u.origin_file_name, u.stored_file_name, u.file_hash
+            FROM access_tokens t
+            JOIN uploaded u ON t.file_id = u.id
+            WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
+        ");
+        $tokenStmt->execute([
             'token' => $token,
             'file_id' => $fileId,
             'now' => time()
@@ -57,7 +58,13 @@ try {
         $tokenData = $tokenStmt->fetch();
 
         if (!$tokenData) {
-            $logger->warning('Invalid or expired delete token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+            $logger->warning(
+                'Invalid or expired delete token',
+                [
+                    'file_id' => $fileId,
+                    'token' => substr($token, 0, 8) . '...'
+                ]
+            );
             $db->rollBack();
             header('Location: ./');
             exit;
@@ -70,7 +77,7 @@ try {
                 $logger->warning('IP address mismatch for delete', [
                     'file_id' => $fileId,
                     'token_ip' => $tokenData['ip_address'],
-                    'current_ip' => $currentIP
+                    'current_ip' => $currentIP,
                 ]);
                 // IPアドレスが異なる場合は警告ログのみで、削除は継続
             }
@@ -116,13 +123,13 @@ try {
         }
 
         // データベースからファイル情報を削除
-        $deleteStmt = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+        $deleteStmt = $db->prepare('DELETE FROM uploaded WHERE id = :id');
         if (!$deleteStmt->execute(['id' => $fileId])) {
             throw new Exception('Failed to delete file record from database');
         }
 
         // 関連するアクセストークンを削除
-        $deleteTokensStmt = $db->prepare("DELETE FROM access_tokens WHERE file_id = :file_id");
+        $deleteTokensStmt = $db->prepare('DELETE FROM access_tokens WHERE file_id = :file_id');
         $deleteTokensStmt->execute(['file_id' => $fileId]);
 
         // トランザクションコミット
@@ -134,20 +141,18 @@ try {
         // 成功時のリダイレクト
         header('Location: ./?deleted=success');
         exit;
-
     } catch (Exception $e) {
         // トランザクションロールバック
         $db->rollBack();
         throw $e;
     }
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     if (isset($logger)) {
         $logger->error('Delete Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
+            'file_id' => $fileId ?? null,
         ]);
     }
 
