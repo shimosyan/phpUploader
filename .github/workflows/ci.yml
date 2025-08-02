@@ -203,17 +203,17 @@ jobs:
           SYNTAX_LOGS=""
           while IFS= read -r -d '' file; do
             echo "📄 Checking: $file"
-            echo "📄 Checking: $file" >> $SYNTAX_LOGS
+            SYNTAX_LOGS="$SYNTAX_LOGS\n📄 Checking: $file"
             if ! php -l "$file"; then
               echo "❌ 構文エラー: $file"
-              echo "❌ 構文エラー: $file" >> $SYNTAX_LOGS
+            SYNTAX_LOGS="$SYNTAX_LOGS\n❌ 構文エラー: $file"
               SYNTAX_ERRORS_COUNT=$((SYNTAX_ERRORS_COUNT + 1))
             fi
           done < <(find . -name "*.php" -not -path "./vendor/*" -print0)
 
           if [ $SYNTAX_ERRORS_COUNT -gt 0 ]; then
             echo "❌ $SYNTAX_ERRORS_COUNT 個のPHPファイルに構文エラーがあります"
-            echo "❌ $SYNTAX_ERRORS_COUNT 個のPHPファイルに構文エラーがあります" >> $SYNTAX_LOGS
+            SYNTAX_LOGS="$SYNTAX_LOGS\n❌ $SYNTAX_ERRORS_COUNT 個のPHPファイルに構文エラーがあります"
             github-comment post -k common-error --var title:"Check PHP Syntax Failed" --var body:"$SYNTAX_LOGS"
 
             exit 1
