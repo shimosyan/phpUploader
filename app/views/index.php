@@ -37,3 +37,6 @@
     </div>
   </div>
 </div>
+
+<!-- JavaScript部分 -->
+<?php include __DIR__ . '/partials/page-scripts.php'; ?>
