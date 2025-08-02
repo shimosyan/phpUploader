@@ -17,25 +17,7 @@ $(document).ready(function(){
     window.fileManagerInstance = fileManager;
   }
 
-  // === レガシー DataTables 処理（Ver.2.0では無効化） ===
-  if(document.getElementById('fileList') != null && !window.fileData){
-    // Ver.1.x互換性のための緊急フォールバック
-    console.warn('FileManager initialization failed, falling back to DataTables');
-    
-    $.extend( $.fn.dataTable.defaults, {
-      language: {
-        url: 'https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Japanese.json'
-      }
-    });
 
-    $('#fileList').DataTable({
-      "order": [ [0, "desc"] ],
-      "columnDefs": [ {
-        "ordered": false,
-        "targets": [6]
-      } ]
-    });
-  }
 
   $('input[id=lefile]').change(function() {
     $('#fileInput').val($(this).val().replace('C:\\fakepath\\', ''));
@@ -109,10 +91,7 @@ $(window).resize(function() {
     window.fileManagerInstance.refresh();
   }
   
-  // レガシー DataTables 対応（フォールバック用）
-  if ($(window).width() > 768 && $.fn.DataTable && $.fn.DataTable.isDataTable('#fileList')) {
-    $('#fileList').DataTable().columns.adjust();
-  }
+
 });
 
 function file_upload()
