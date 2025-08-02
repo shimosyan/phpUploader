@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - 'v*'
+concurrency:
+  group: release # repo レベルの排他制御
+  cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
 
 jobs:
   release:
