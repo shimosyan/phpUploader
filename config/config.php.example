@@ -46,13 +46,6 @@ class config {
             'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
             'log_retention_days' => 30,
 
-            // フォルダ構造管理機能
-            'folders_enabled' => true,   // フォルダ機能の有効/無効
-            'max_folder_depth' => 5,      // 最大フォルダ階層深さ（1-10）
-            'max_folders_per_level' => 50,   // 各階層での最大フォルダ数
-            'allow_folder_creation' => true, // ユーザーによるフォルダ作成許可
-            'allow_folder_deletion' => true, // ユーザーによるフォルダ削除許可
-
             // トークン設定
             'token_expiry_minutes' => 10,
 

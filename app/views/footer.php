@@ -49,16 +49,7 @@
     <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
     
     <script src="./asset/js/modal.js"></script>
-    
-    <!-- FileManager リファクタリング版コンポーネント -->
-    <script src="./asset/js/components/FileManagerUtils.js"></script>
-    <script src="./asset/js/components/FileManagerCore.js"></script>
-    <script src="./asset/js/components/FileManagerRenderer.js"></script>
-    <script src="./asset/js/components/FileManagerEvents.js"></script>
-    <script src="./asset/js/components/FileManagerBulkActions.js"></script>
     <script src="./asset/js/file-manager.js"></script>
-    
-    <script src="./asset/js/folder-manager.js"></script>
     <script src="./asset/js/common.js"></script>
   </body>
 </html>

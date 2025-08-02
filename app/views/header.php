@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="./asset/css/responsive.css">
     <link rel="stylesheet" href="./asset/css/responsive-extra.css">
     <link rel="stylesheet" href="./asset/css/file-manager.css">
-    <link rel="stylesheet" href="./asset/css/folders.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
