@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 // エラー表示設定（本番環境用）
-ini_set('display_errors', '0'); // 本番環境では 0 に設定
+ini_set('display_errors', '1'); // 本番環境では 0 に設定
 error_reporting(E_ALL);
 
 // セッション開始
@@ -26,7 +26,7 @@ try {
     require_once './config/config.php';
     require_once './src/Core/Utils.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // 設定の検証
@@ -58,14 +58,15 @@ try {
     // モデルの読み込みと実行
     $modelData = [];
     $modelPath = "./app/models/{$page}.php";
+    $modelQueriedName = '\\PHPUploader\\Model\\' . ucfirst($page);
 
     if (file_exists($modelPath)) {
         require_once $modelPath;
 
-        if (class_exists($page)) {
-            $model = new $page();
+        if (class_exists($modelQueriedName)) {
+            $model = new $modelQueriedName;
             if (method_exists($model, 'index')) {
-                $result = $model->index();
+                $result = $model -> index();
                 if (is_array($result)) {
                     $modelData = $result;
                 }

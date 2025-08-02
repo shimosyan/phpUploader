@@ -33,7 +33,7 @@ try {
     require_once $baseDir . '/config/config.php';
     require_once $baseDir . '/src/Core/Utils.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化

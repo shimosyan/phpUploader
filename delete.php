@@ -18,7 +18,7 @@ try {
     require_once './config/config.php';
     require_once './src/Core/Utils.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化

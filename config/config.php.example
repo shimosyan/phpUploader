@@ -9,7 +9,9 @@ declare(strict_types=1);
  * .htaccess等で保護してください
  */
 
-class config {
+namespace PHPUploader;
+
+class Config {
     public function index(): array {
         return [
             // 管理者用マスターキー（必ず変更してください）
@@ -74,7 +76,9 @@ class config {
         }
 
         return true;
-    }    /**
+    }
+
+    /**
      * 設定の検証を行う
      */
     public function validate(): array {

@@ -45,7 +45,7 @@ echo "\n";
 
 // PDOドライバーのチェック
 if (extension_loaded('pdo')) {
-    $drivers = PDO::getAvailableDrivers();
+    $drivers = \PDO::getAvailableDrivers();
     if (in_array('sqlite', $drivers)) {
         echo "✅ PDO SQLiteドライバが利用可能\n";
     } else {
@@ -69,7 +69,7 @@ try {
         copy('config/config.php.example', 'config/config.php.test');
         include 'config/config.php.test';
         
-        $config = new config();
+        $config = new \PHPUploader\Config();
         $settings = $config->index();
         
         if (isset($settings['version'])) {

@@ -86,13 +86,13 @@ class AppInitializer {
     private function initializeDatabase(): void {
         try {
             $dsn = 'sqlite:' . $this->config['db_directory'] . '/uploader.db';
-            $this->db = new PDO($dsn);
+            $this->db = new \PDO($dsn);
 
             // エラーモードを例外に設定
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
             // デフォルトのフェッチモードを連想配列形式に設定
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
             $this->throwError('データベースの接続に失敗しました: ' . $e->getMessage());
