@@ -150,8 +150,8 @@
         </table>
       </div>
 
-      <!-- カード表示用（モバイル） -->
-      <div id="fileListCards">
+      <!-- カード表示用（モバイル）（非表示） -->
+      <div id="fileListCards" style="display: none;">
                 <?php
         foreach ($data as $s) {
             echo '<div class="file-card">';

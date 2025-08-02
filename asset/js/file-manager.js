@@ -285,6 +285,14 @@ class FileManager {
           </a>
           <a 
             href="javascript:void(0);" 
+            class="file-list-item__btn file-list-item__btn--share"
+            onclick="share_button(${file.id});"
+            title="共有リンク生成"
+          >
+            🔗
+          </a>
+          <a 
+            href="javascript:void(0);" 
             class="file-list-item__btn file-list-item__btn--delete"
             onclick="del_button(${file.id});"
             title="削除"
@@ -358,6 +366,13 @@ class FileManager {
               onclick="dl_button(${file.id});"
             >
               ⬇️ ダウンロード
+            </a>
+            <a 
+              href="javascript:void(0);" 
+              class="file-card-v2__btn file-card-v2__btn--share"
+              onclick="share_button(${file.id});"
+            >
+              🔗 共有
             </a>
             <a 
               href="javascript:void(0);" 
