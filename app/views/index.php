@@ -64,8 +64,19 @@
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="delkeyInput">削除キー <small class="text-muted">(任意)</small></label>
-                <input type="text" class="form-control" id="deleyInput" name="delkey" placeholder="削除キーを入力... (空白時は削除不可)">
+                <label for="delkeyInput">
+                  🗑️ 削除キー
+                  <?php if (isset($delkey_required) && $delkey_required) : ?>
+                    <span class="text-danger">*必須</span>
+                  <?php else : ?>
+                    <small class="text-muted">(任意)</small>
+                  <?php endif; ?>
+                </label>
+                <input type="text" class="form-control" id="deleyInput" name="delkey"
+                       placeholder="<?php echo (isset($delkey_required) && $delkey_required) ?
+                                      '削除キーを入力してください' :
+                                      '削除キーを入力... (空白時は削除不可)'; ?>"
+                       <?php echo (isset($delkey_required) && $delkey_required) ? 'required' : ''; ?>>
                 <p class="help-block">ファイル削除時に必要なキーです</p>
               </div>
             </div>

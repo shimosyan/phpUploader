@@ -46,8 +46,9 @@ class config {
             'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
             'log_retention_days' => 30,
 
-            // DLキーの必須設定
+            // DLキー・DELキーの必須設定
             'dlkey_required' => false,  // true: 必須, false: 任意
+            'delkey_required' => false,  // true: 必須, false: 任意
 
             // トークン設定
             'token_expiry_minutes' => 10,

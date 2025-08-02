@@ -140,9 +140,19 @@ try {
         }
     }
 
-    // 削除キーの処理（常に任意）
-    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    // 削除キーの処理
+    if (isset($config['delkey_required']) && $config['delkey_required']) {
+        // 必須の場合
+        if (empty($delKey)) {
+            $validationErrors[] = "削除キーは必須です。";
+        } elseif (mb_strlen($delKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
+    } else {
+        // 任意の場合、空白はそのまま保存（削除不可として処理）
+        if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
     }
 
     if (!empty($validationErrors)) {
