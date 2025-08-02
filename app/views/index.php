@@ -12,9 +12,6 @@
     <?php endif; ?>
   <?php endif; ?>
 
-  <!-- フォルツナビゲーション -->
-  <?php include __DIR__ . '/partials/folder-navigation.php'; ?>
-
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
       <p class="h2">ファイルを登録</p>
@@ -101,6 +98,9 @@
 
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
+      <!-- フォルダナビゲーション部分 -->
+      <?php include __DIR__ . '/partials/folder-navigation.php'; ?>
+      
       <!-- 新しいファイル管理システム (DataTables完全廃止版) -->
       <div id="fileManagerContainer"></div>
       
