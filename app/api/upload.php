@@ -117,7 +117,7 @@ try {
     // 拡張子チェック
     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     if (!in_array($fileExtension, $config['extension'])) {
-        $validationErrors[] = "許可されていない拡張子です。(" . implode(', ', $config['extension']) . "のみ)";
+        $validationErrors[] = '許可されていない拡張子です。(' . implode(', ', $config['extension']) . 'のみ)';
     }
 
     // コメント文字数チェック
@@ -139,13 +139,13 @@ try {
     }
 
     // ファイル数制限チェックと古いファイルの削除
-    $fileCountStmt = $db->prepare("SELECT COUNT(id) as count, MIN(id) as min_id FROM uploaded");
+    $fileCountStmt = $db->prepare('SELECT COUNT(id) as count, MIN(id) as min_id FROM uploaded');
     $fileCountStmt->execute();
     $countResult = $fileCountStmt->fetch();
 
     if ($countResult['count'] >= $config['save_max_files']) {
         // 古いファイルを削除
-        $oldFileStmt = $db->prepare("SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id");
+        $oldFileStmt = $db->prepare('SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id');
         $oldFileStmt->execute(['id' => $countResult['min_id']]);
         $oldFile = $oldFileStmt->fetch();
 
@@ -165,7 +165,7 @@ try {
             }
 
             // データベースから削除
-            $deleteStmt = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+            $deleteStmt = $db->prepare('DELETE FROM uploaded WHERE id = :id');
             $deleteStmt->execute(['id' => $oldFile['id']]);
 
             $logger->info('Old file deleted due to storage limit', ['deleted_file_id' => $oldFile['id']]);
@@ -180,7 +180,7 @@ try {
     $delKeyHash = (!empty($delKey) && trim($delKey) !== '') ? SecurityUtils::hashPassword($delKey) : null;
 
     // まず仮のデータベース登録（stored_file_nameは後で更新）
-    $insertStmt = $db->prepare("
+    $insertStmt = $db->prepare('
         INSERT INTO uploaded (
             origin_file_name, comment, size, count, input_date,
             dl_key_hash, del_key_hash, file_hash, ip_address
@@ -188,7 +188,7 @@ try {
             :origin_file_name, :comment, :size, :count, :input_date,
             :dl_key_hash, :del_key_hash, :file_hash, :ip_address
         )
-    ");
+    ');
 
     $insertData = [
         'origin_file_name' => $fileName,
@@ -199,7 +199,7 @@ try {
         'dl_key_hash' => $dlKeyHash,
         'del_key_hash' => $delKeyHash,
         'file_hash' => $fileHash,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
     ];
 
     if (!$insertStmt->execute($insertData)) {
@@ -218,18 +218,18 @@ try {
     // ファイル保存
     if (!move_uploaded_file($fileTmpPath, $saveFilePath)) {
         // データベースからも削除
-        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $db->prepare('DELETE FROM uploaded WHERE id = :id')->execute(['id' => $fileId]);
         $responseHandler->error('ファイルの保存に失敗しました。', [], 500);
     }
 
     // データベースにハッシュ化されたファイル名を記録
-    $updateStmt = $db->prepare("UPDATE uploaded SET stored_file_name = :stored_file_name WHERE id = :id");
+    $updateStmt = $db->prepare('UPDATE uploaded SET stored_file_name = :stored_file_name WHERE id = :id');
     if (!$updateStmt->execute(['stored_file_name' => $storedFileName, 'id' => $fileId])) {
         // ファイルを削除してデータベースからも削除
         if (file_exists($saveFilePath)) {
             unlink($saveFilePath);
         }
-        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $db->prepare('DELETE FROM uploaded WHERE id = :id')->execute(['id' => $fileId]);
         $responseHandler->error('ファイル情報の更新に失敗しました。', [], 500);
     }
 
@@ -240,9 +240,8 @@ try {
     $responseHandler->success('ファイルのアップロードが完了しました。', [
         'file_id' => $fileId,
         'file_name' => $fileName,
-        'file_size' => $fileSize
+        'file_size' => $fileSize,
     ]);
-
 } catch (Exception $e) {
     // 出力バッファをクリア
     if (ob_get_level()) {
@@ -253,7 +252,7 @@ try {
     if (isset($logger)) {
         $logger->error('Upload API Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'line' => $e->getLine(),
         ]);
     }
 
@@ -265,7 +264,7 @@ try {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'システムエラーが発生しました。'
+            'message' => 'システムエラーが発生しました。',
         ], JSON_UNESCAPED_UNICODE);
     }
 }
