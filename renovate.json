@@ -30,10 +30,10 @@
     }
   ],
   "schedule": [
-    "every day"
+    "* 1 * * *"
   ],
   "automergeSchedule": [
-    "every day"
+    "* 0 * * *"
   ],
   "timezone": "Asia/Tokyo",
   "dependencyDashboard": false
