@@ -46,10 +46,12 @@ jobs:
             -x "vender/*" \
             -x ".gitignore" \
             -x ".markdownlint.json" \
+            -x "aqua.yaml" \
             -x "composer.lock" \
+            -x "cspell.json" \
+            -x "github-comment.yaml" \
             -x "phpunit.xml" \
             -x "phpstan.neon" \
-            -x "cspell.json" \
             -x "*.md" \
 
       - name: Create Release

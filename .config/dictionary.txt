@@ -11,3 +11,4 @@ codesniffer
 phpunit
 softprops
 classmap
+aquaproj

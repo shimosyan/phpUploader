@@ -1,0 +1,44 @@
+vars:
+  title: "Example"
+  body: "Example"
+templates:
+  base: |
+    {{template "link" .}}
+
+    {{template "join_command" .}}
+
+    {{template "hidden_combined_output" .}}
+post:
+  common-error: |
+    ## :x: {{.Vars.title}}
+
+    ```text
+    {{.Vars.body}}
+    ```
+
+exec:
+  common-error:
+    - when: ExitCode != 0
+      template: |
+        ## {{template "status" .}} {{.Vars.title}}
+
+        {{template "base" .}}
+
+  php-syntax-check:
+    - when: ExitCode != 0
+      template: |
+        ## {{template "status" .}} Build Failed
+
+        {{template "base" .}}
+
+  php-lint-check:
+    - when: ExitCode == 0
+      template: |
+        ## {{template "status" .}} Lint Succeeded
+
+        {{template "base" .}}
+    - when: ExitCode != 0
+      template: |
+        ## {{template "status" .}} Deploy Failed
+
+        {{template "base" .}}
