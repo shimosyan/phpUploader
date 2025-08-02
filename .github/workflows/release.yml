@@ -47,6 +47,7 @@ jobs:
             -x "phpcs.xml" \
             -x "phpunit.xml" \
             -x "phpstan.neon" \
+            -x "renovate.json" \
             -x "*.md" \
 
       - name: Create Release
