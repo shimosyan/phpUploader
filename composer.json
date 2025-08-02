@@ -1,9 +1,13 @@
 {
     "name": "shimosyan/php-uploader",
     "description": "Simple PHP file uploader with download/delete authentication",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "type": "project",
-    "keywords": ["php", "uploader", "file-sharing"],
+    "keywords": [
+        "php",
+        "uploader",
+        "file-sharing"
+    ],
     "license": "MIT",
     "authors": [
         {
