@@ -1,6 +1,40 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    "github>aquaproj/aqua-renovate-config#2.8.2"
+  ],
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "matchFileNames": ["docker/Dockerfile"],
+      "enabled": false
+    },
+    {
+      "matchDepTypes": ["action"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "pinDigests": true,
+      "labels": ["action"],
+      "automerge": true
+    },
+    {
+      "matchManagers": ["composer"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "labels": ["composer"],
+      "automerge": true
+    }
+  ],
+  "schedule": [
+    "every day"
+  ],
+  "automergeSchedule": [
+    "every day"
+  ],
+  "timezone": "Asia/Tokyo",
+  "dependencyDashboard": false
 }
