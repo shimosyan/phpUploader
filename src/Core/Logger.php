@@ -96,7 +96,7 @@ class Logger
                         time(),
                     ]);
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // データベースログに失敗してもファイルログは残す
                 error_log('Database logging failed: ' . $e->getMessage());
             }
@@ -183,7 +183,7 @@ class Logger
                         time(),
                     ]);
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 error_log('Access log to database failed: ' . $e->getMessage());
             }
         }
