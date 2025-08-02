@@ -61,7 +61,7 @@ cp config/config.php.example config/config.php
 - データ設置用のディレクトリ(既定値 `./data`)
 - ログファイル用のディレクトリ(既定値 `./logs`)
 
-⑤ configディレクトリとDBファイル設置用のディレクトリ(既定値 `./db`)、ログファイル用のディレクトリ(既定値 `./logs`)には`.htaccess`などを用いて外部からの接続を遮断させて下さい。
+⑤ configディレクトリとDBファイル設置用のディレクトリ(既定値 `./db`)とデータ設置用のディレクトリ(既定値 `./data`)、ログファイル用のディレクトリ(既定値 `./logs`)には`.htaccess`などを用いて外部からの接続を遮断させて下さい。
 
 **セキュリティ設定例（Apache）:**
 
@@ -72,6 +72,11 @@ cp config/config.php.example config/config.php
 </Files>
 
 # db/.htaccess
+<Files "*">
+    Deny from all
+</Files>
+
+# data/.htaccess
 <Files "*">
     Deny from all
 </Files>
@@ -112,9 +117,13 @@ docker-compose down web
 
 **設定ファイルのセキュリティ**:
 
-- `config/config.php`は機密情報を含むため、必ず外部アクセスを遮断してください
-- `master`と`key`には推測困難なランダムな値を設定してください
-- 本番環境では`config`と`db`、`logs`ディレクトリへの直接アクセスを禁止してください
+- `./config/config.php`は機密情報を含むため、必ず外部アクセスを遮断してください
+- `master`と`key`、`sessionSalt`には推測困難なランダムな値を設定してください
+- 本番環境では下記ディレクトリへの直接アクセスを禁止してください
+  - `config`
+  - `data`
+  - `db`
+  - `logs`
 
 **推奨セキュリティ設定**:
 
