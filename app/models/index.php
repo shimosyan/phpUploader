@@ -18,7 +18,7 @@ class Index
         //データベースの作成・オープン
         try {
             $db = new \PDO('sqlite:' . $ret['dbDirectoryPath'] . '/uploader.db');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $error = '500 - データベースの接続に失敗しました。';
             exit;
         }

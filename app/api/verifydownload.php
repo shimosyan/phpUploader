@@ -133,23 +133,11 @@ try {
     ]);
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Download verify API Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'file_id' => $fileId ?? null,
-        ]);
-    }
+    $logger->error('Download verify API Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'file_id' => $fileId,
+    ]);
 
-    if (isset($responseHandler)) {
-        $responseHandler->error('システムエラーが発生しました。', [], 500);
-    } else {
-        // 最低限のエラーレスポンス
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'システムエラーが発生しました。',
-        ], JSON_UNESCAPED_UNICODE);
-    }
+    $responseHandler->error('システムエラーが発生しました。', [], 500);
 }

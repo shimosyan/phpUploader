@@ -151,13 +151,11 @@ try {
     }
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Delete Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'file_id' => $fileId ?? null,
-        ]);
-    }
+    $logger->error('Delete Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'file_id' => $fileId,
+    ]);
 
     header('Location: ./?deleted=error');
     exit;
