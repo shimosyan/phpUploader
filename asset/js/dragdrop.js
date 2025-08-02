@@ -343,8 +343,10 @@ function uploadFilesSequentially(index) {
     }
   })
   .done(function(data) {
+    console.log('Upload response:', data);
     switch (data.status) {
-      case 'ok':
+      case 'success':  // 新しいAPIレスポンス形式に対応
+      case 'ok':       // 旧形式との互換性維持
         $progressBar.css({width: '100%'});
         $fileItem.css('background-color', '#d4edda');
         
@@ -356,9 +358,10 @@ function uploadFilesSequentially(index) {
         
       default:
         // エラー処理
+        console.log('Upload error:', data);
         handleUploadError(data, file.name);
         isUploading = false;
-        $('#uploadContainer').hide();
+        $('#progressContainer').hide();
         break;
     }
   })
@@ -368,7 +371,7 @@ function uploadFilesSequentially(index) {
       message: 'ネットワークエラー: ' + textStatus
     }, file.name);
     isUploading = false;
-    $('#uploadContainer').hide();
+    $('#progressContainer').hide();
   });
 }
 
