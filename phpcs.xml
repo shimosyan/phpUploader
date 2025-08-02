@@ -1,28 +1,128 @@
 <?xml version="1.0"?>
 <ruleset name="phpUploader Coding Standard">
     <description>Coding standard for phpUploader project</description>
-    
-    <!-- 対象ファイル -->
-    <file>.</file>
-    
+
+    <!-- 拡張子が php のものにだけ適用 -->
+    <arg name="extensions" value="php" />
+
     <!-- 除外パス -->
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>tests/*</exclude-pattern>
     <exclude-pattern>docker/*</exclude-pattern>
-    
+
     <!-- 基本規則 -->
-    <rule ref="PSR12">
-        <!-- レガシーコードのため一時的に無視 -->
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
-        <exclude name="PSR12.Files.FileHeader.IncorrectOrder"/>
+    <rule ref="PSR12"/>
+
+    <!-- メソッド名のキャメルケース -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <!-- ルールを除外 -->
+        <exclude-pattern>*/tests/*</exclude-pattern>
     </rule>
-    
+
+    <!-- 配列要素のインデントを4つにする -->
+    <rule ref="Generic.Arrays.ArrayIndent" />
+
+    <!-- メソッドチェーンやプロパティのインデントを4つにする -->
+    <rule ref="PEAR.WhiteSpace.ObjectOperatorIndent"/>
+
+    <!-- 短い配列構文にする -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax" />
+
+    <!-- 制御構造の条件内での変数の代入を検出する（三項演算以外） -->
+    <rule ref="Generic.CodeAnalysis.AssignmentInCondition" />
+
+    <!-- 常にtrue/falseになる制御構造を検出する -->
+    <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement" />
+
+    <!-- ヨーダ条件式を検出する -->
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions" />
+
+    <!-- 非推奨のPHP関数を使わない -->
+    <rule ref="Generic.PHP.DeprecatedFunctions" />
+
+    <!-- コメントがフォーマットされているか -->
+    <rule ref="Generic.Commenting.DocComment" />
+    <rule ref="Generic.Commenting.DocComment.NonParamGroup">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.ShortNotCapital">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.TagValueIndent">
+        <severity>0</severity>
+    </rule>
+    <rule ref="Generic.Commenting.DocComment.MissingShort">
+        <severity>0</severity>
+    </rule>
+
+    <!-- 変数とメンバー変数の名前を検査する -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName" />
+
+    <!-- メンバー変数のキャメルケース以外を許可する -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps">
+        <severity>0</severity>
+    </rule>
+
+    <!-- private変数のアンダースコアなしを許可する -->
+    <rule ref="Squiz.NamingConventions.ValidVariableName.PrivateNoUnderscore">
+        <severity>0</severity>
+    </rule>
+
+    <!-- 論理演算子and/orを検出する -->
+    <rule ref="Squiz.Operators.ValidLogicalOperators" />
+
+    <!-- メソッド同士の間隔を設定する -->
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
+        <properties>
+            <property name="spacing" value="1" />
+            <property name="spacingBeforeFirst" value="0" />
+            <property name="spacingAfterLast" value="0" />
+        </properties>
+    </rule>
+
+    <!-- セミコロン前の空白を検出する -->
+    <rule ref="Squiz.WhiteSpace.SemicolonSpacing" />
+
+    <!-- ""が不要な場合は''に統一する -->
+    <rule ref="Squiz.Strings.DoubleQuoteUsage" />
+
+    <!-- ""内に変数があることを許可する -->
+    <rule ref="Squiz.Strings.DoubleQuoteUsage.ContainsVar">
+        <severity>0</severity>
+    </rule>
+
+    <!-- 配列のフォーマット -->
+    <rule ref="Squiz.Arrays.ArrayDeclaration" />
+    <rule ref="Squiz.Arrays.ArrayDeclaration.KeyNotAligned">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Arrays.ArrayDeclaration.MultiLineNotAllowed">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Arrays.ArrayDeclaration.ValueNotAligned">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Arrays.ArrayDeclaration.CloseBraceNotAligned">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Arrays.ArrayDeclaration.CloseBraceNewLine">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Arrays.ArrayDeclaration.DoubleArrowNotAligned">
+        <severity>0</severity>
+    </rule>
+
     <!-- ファイルエンコーディング -->
     <rule ref="Generic.Files.ByteOrderMark"/>
-    
+
     <!-- セキュリティ関連 -->
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
-    
+
     <!-- 設定 -->
     <ini name="memory_limit" value="256M"/>
 </ruleset>
