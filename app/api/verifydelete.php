@@ -34,7 +34,7 @@ try {
     $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
     $responseHandler = new ResponseHandler($logger);
 
     // 入力データの取得
@@ -99,7 +99,7 @@ try {
 
     // ワンタイムトークンの生成
     $token = SecurityUtils::generateRandomToken(32);
-    $expiresAt = time() + ($config['token_expiry_minutes'] * 60);
+    $expiresAt = time() + ($config['tokenExpiryMinutes'] * 60);
 
     // トークンをデータベースに保存
     $tokenStmt = $db->prepare('

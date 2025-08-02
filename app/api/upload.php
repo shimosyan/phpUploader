@@ -43,7 +43,7 @@ try {
     $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
     $responseHandler = new ResponseHandler($logger);
 
     // リクエストメソッドの確認
@@ -74,7 +74,7 @@ try {
                 $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ini_get('upload_max_filesize') . '以下)';
                 break;
             case UPLOAD_ERR_FORM_SIZE:
-                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ($_POST['MAX_FILE_SIZE'] / 1024) . 'KB以下)';
+                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ($_POST['maxFileSize'] / 1024) . 'KB以下)';
                 break;
             case UPLOAD_ERR_PARTIAL:
                 $uploadErrors[] = 'アップロードが途中で中断されました。もう一度お試しください。';
@@ -112,8 +112,8 @@ try {
     $validationErrors = [];
 
     // ファイルサイズチェック
-    if ($fileSize > $config['max_file_size'] * 1024 * 1024) {
-        $validationErrors[] = "ファイルサイズが上限({$config['max_file_size']}MB)を超えています。";
+    if ($fileSize > $config['maxFileSize'] * 1024 * 1024) {
+        $validationErrors[] = "ファイルサイズが上限({$config['maxFileSize']}MB)を超えています。";
     }
 
     // 拡張子チェック
@@ -123,17 +123,17 @@ try {
     }
 
     // コメント文字数チェック
-    if (mb_strlen($comment) > $config['max_comment']) {
-        $validationErrors[] = "コメントが長すぎます。({$config['max_comment']}文字以下)";
+    if (mb_strlen($comment) > $config['maxComment']) {
+        $validationErrors[] = "コメントが長すぎます。({$config['maxComment']}文字以下)";
     }
 
     // キーの長さチェック
-    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['minKeyLength']) {
+        $validationErrors[] = "ダウンロードキーは{$config['security']['minKeyLength']}文字以上で設定してください。";
     }
 
-    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['minKeyLength']) {
+        $validationErrors[] = "削除キーは{$config['security']['minKeyLength']}文字以上で設定してください。";
     }
 
     if (!empty($validationErrors)) {
@@ -145,7 +145,7 @@ try {
     $fileCountStmt->execute();
     $countResult = $fileCountStmt->fetch();
 
-    if ($countResult['count'] >= $config['save_max_files']) {
+    if ($countResult['count'] >= $config['saveMaxFiles']) {
         // 古いファイルを削除
         $oldFileStmt = $db->prepare('SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id');
         $oldFileStmt->execute(['id' => $countResult['min_id']]);
@@ -155,10 +155,10 @@ try {
             // 物理ファイルの削除（ハッシュ化されたファイル名または旧形式に対応）
             if (!empty($oldFile['stored_file_name'])) {
                 // 新形式（ハッシュ化されたファイル名）
-                $oldFilePath = $config['data_directory'] . '/' . $oldFile['stored_file_name'];
+                $oldFilePath = $config['dataDirectoryPath'] . '/' . $oldFile['stored_file_name'];
             } else {
                 // 旧形式（互換性のため）
-                $oldFilePath = $config['data_directory'] . '/file_' . $oldFile['id'] .
+                $oldFilePath = $config['dataDirectoryPath'] . '/file_' . $oldFile['id'] .
                              '.' . pathinfo($oldFile['origin_file_name'], PATHINFO_EXTENSION);
             }
 
@@ -215,7 +215,7 @@ try {
     // セキュアなファイル名の生成（ハッシュ化）
     $hashedFileName = SecurityUtils::generateSecureFileName($fileId, $fileName);
     $storedFileName = SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
-    $saveFilePath = $config['data_directory'] . '/' . $storedFileName;
+    $saveFilePath = $config['dataDirectoryPath'] . '/' . $storedFileName;
 
     // ファイル保存
     if (!move_uploaded_file($fileTmpPath, $saveFilePath)) {

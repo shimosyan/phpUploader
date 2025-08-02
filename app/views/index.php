@@ -1,22 +1,26 @@
 
 <div class="container">
-  <?php if (isset($status_message)): ?>
-    <?php if ($status_message === 'success'): ?>
+  <?php if (isset($statusMessage)) : ?>
+      <?php if ($statusMessage === 'success') : ?>
       <div id="statusMessage" class="alert alert-success" role="alert">
         <strong>削除完了！</strong> ファイルが正常に削除されました。
       </div>
-    <?php elseif ($status_message === 'error'): ?>
+      <?php elseif ($statusMessage === 'error') : ?>
       <div id="statusMessage" class="alert alert-danger" role="alert">
         <strong>エラー</strong> ファイルの削除に失敗しました。
       </div>
-    <?php endif; ?>
+      <?php endif; ?>
   <?php endif; ?>
 
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
       <p class="h2">ファイルを登録</p>
       <form id="upload" class="upload-form">
-        <input type="hidden" id="csrfToken" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8'); ?>">
+        <input
+          type="hidden"
+          id="csrfToken"
+          name="csrf_token"
+          value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
 
         <div class="form-section file-input-group">
           <input id="lefile" name="file" type="file" style="display:none">
@@ -29,7 +33,7 @@
             </span>
           </div>
           <p class="help-block">
-            📊 最大<?php echo $max_file_size; ?>MBまでアップロード可能<br>
+            📊 最大<?php echo $maxFileSize; ?>MBまでアップロード可能<br>
             📎 対応拡張子: <?php echo implode(', ', $extension); ?>
           </p>
         </div>
@@ -38,7 +42,7 @@
           <div class="form-group">
             <label for="commentInput">💬 コメント</label>
             <input type="text" class="form-control" id="commentInput" name="comment" placeholder="ファイルの説明を入力...">
-            <p class="help-block"><?php echo $max_comment; ?>文字まで入力可能</p>
+            <p class="help-block"><?php echo $maxComment; ?>文字まで入力可能</p>
           </div>
         </div>
 
@@ -100,7 +104,7 @@
     <div class="col-sm-12">
       <!-- 新しいファイル管理システム (DataTables完全廃止版) -->
       <div id="fileManagerContainer"></div>
-      
+
       <!-- レガシーテーブル表示（非表示） -->
       <div class="file-table-container" style="display: none;">
         <table id="fileList" class="table table-striped" cellspacing="0" width="100%">

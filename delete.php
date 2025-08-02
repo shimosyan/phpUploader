@@ -28,7 +28,7 @@ try {
     $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
 
     // パラメータの取得
     $fileId = (int)($_GET['id'] ?? 0);
@@ -73,7 +73,7 @@ try {
         }
 
         // IPアドレスの検証（設定で有効な場合）
-        if ($config['security']['log_ip_address'] && !empty($tokenData['ip_address'])) {
+        if ($config['security']['logIpAddress'] && !empty($tokenData['ip_address'])) {
             $currentIP = $_SERVER['REMOTE_ADDR'] ?? '';
             if ($currentIP !== $tokenData['ip_address']) {
                 $logger->warning('IP address mismatch for delete', [
@@ -90,11 +90,11 @@ try {
 
         if (!empty($tokenData['stored_file_name'])) {
             // 新形式（ハッシュ化されたファイル名）
-            $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
+            $filePath = $config['dataDirectoryPath'] . '/' . $tokenData['stored_file_name'];
         } else {
             // 旧形式（互換性のため）
             $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $filePath = $config['data_directory'] . '/file_' . $fileId . '.' . $fileExtension;
+            $filePath = $config['dataDirectoryPath'] . '/file_' . $fileId . '.' . $fileExtension;
         }
 
         // 物理ファイルの削除

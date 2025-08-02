@@ -21,35 +21,31 @@ class Config {
             'key' => 'CHANGE_THIS_ENCRYPTION_KEY',
 
             // セッション用ソルト（必ず変更してください）
-            'session_salt' => 'CHANGE_THIS_SESSION_SALT',
+            'sessionSalt' => 'CHANGE_THIS_sessionSalt',
 
             // アプリケーション設定
             'title' => 'PHP Uploader',
-            'save_max_files' => 500,
-            'max_comment' => 80,
-            'max_file_size' => 2, // MB
+            'saveMaxFiles' => 500,
+            'maxComment' => 80,
+            'maxFileSize' => 2, // MB
             'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
 
             // ディレクトリ設定
-            'db_directory' => dirname(__DIR__) . '/db',
-            'data_directory' => dirname(__DIR__) . '/data',
-            'log_directory' => dirname(__DIR__) . '/logs',
+            'dbDirectoryPath' => dirname(__DIR__) . '/db',
+            'dataDirectoryPath' => dirname(__DIR__) . '/data',
+            'logDirectoryPath' => dirname(__DIR__) . '/logs',
 
             // セキュリティ設定
             'security' => [
-                'csrf_token_expiry' => 30, // 分
-                'min_key_length' => 4,
-                'log_ip_address' => true,
-                'max_login_attempts' => 5,
-                'lockout_duration' => 900 // 15分
+                'minKeyLength' => 4,
+                'logIpAddress' => true,
             ],
 
             // ログ設定
-            'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
-            'log_retention_days' => 30,
+            'logLevel' => 'INFO', // DEBUG, INFO, WARNING, ERROR
 
             // トークン設定
-            'token_expiry_minutes' => 10,
+            'tokenExpiryMinutes' => 10,
 
             // バージョン情報（composer.jsonから自動取得）
             'version' => $this->getVersion()
@@ -71,7 +67,7 @@ class Config {
             return false;
         }
 
-        if (strpos($config['session_salt'], 'CHANGE_THIS') !== false) {
+        if (strpos($config['sessionSalt'], 'CHANGE_THIS') !== false) {
             return false;
         }
 
@@ -94,12 +90,12 @@ class Config {
             $errors[] = '暗号化キーを変更してください';
         }
 
-        if ($config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+        if ($config['sessionSalt'] === 'CHANGE_THIS_sessionSalt') {
             $errors[] = 'セッションソルトを変更してください';
         }
 
         // ディレクトリの存在確認
-        $directories = ['db_directory', 'data_directory', 'log_directory'];
+        $directories = ['dbDirectoryPath', 'dataDirectoryPath', 'logDirectoryPath'];
         foreach ($directories as $dir) {
             if (!is_dir($config[$dir])) {
                 $errors[] = "{$dir} ディレクトリが存在しません: {$config[$dir]}";

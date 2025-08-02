@@ -48,7 +48,7 @@ class Init
             $this->throwError('暗号化キーが設定されていません。config.phpを確認してください。');
         }
 
-        if ($this->config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+        if ($this->config['sessionSalt'] === 'CHANGE_THIS_sessionSalt') {
             $this->throwError('セッションソルトが設定されていません。config.phpを確認してください。');
         }
 
@@ -72,9 +72,9 @@ class Init
     private function createDirectories(): void
     {
         $directories = [
-            $this->config['db_directory'],
-            $this->config['data_directory'],
-            $this->config['log_directory'],
+            $this->config['dbDirectoryPath'],
+            $this->config['dataDirectoryPath'],
+            $this->config['logDirectoryPath'],
         ];
 
         foreach ($directories as $dir) {
@@ -97,7 +97,7 @@ class Init
     private function initializeDatabase(): void
     {
         try {
-            $dsn = 'sqlite:' . $this->config['db_directory'] . '/uploader.db';
+            $dsn = 'sqlite:' . $this->config['dbDirectoryPath'] . '/uploader.db';
             $this->db = new \PDO($dsn);
 
             // エラーモードを例外に設定
@@ -231,8 +231,8 @@ class Init
     private function throwError(string $message): void
     {
         // ログディレクトリが存在する場合はエラーログを記録
-        if (isset($this->config['log_directory']) && is_dir($this->config['log_directory'])) {
-            $logFile = $this->config['log_directory'] . '/error.log';
+        if (isset($this->config['logDirectoryPath']) && is_dir($this->config['logDirectoryPath'])) {
+            $logFile = $this->config['logDirectoryPath'] . '/error.log';
             $logMessage = date('Y-m-d H:i:s') . ' [ERROR] ' . $message . PHP_EOL;
             file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
         }

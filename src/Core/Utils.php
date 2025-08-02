@@ -76,9 +76,9 @@ class SecurityUtils
         }
 
         // ファイルサイズのチェック
-        $maxSize = ($config['max_file_size'] ?? 10) * 1024 * 1024; // MB to bytes
+        $maxSize = ($config['maxFileSize'] ?? 10) * 1024 * 1024; // MB to bytes
         if ($file['size'] > $maxSize) {
-            $errors[] = "ファイルサイズが制限を超えています。最大: " . ($config['max_file_size'] ?? 10) . "MB";
+            $errors[] = "ファイルサイズが制限を超えています。最大: " . ($config['maxFileSize'] ?? 10) . "MB";
         }
 
         // 拡張子のチェック
@@ -274,7 +274,7 @@ class Logger
     public const LOG_INFO = 'info';
     public const LOG_DEBUG = 'debug';
 
-    private const LOG_LEVELS = [
+    private const logLevelS = [
         self::LOG_EMERGENCY => 0,
         self::LOG_ALERT => 1,
         self::LOG_CRITICAL => 2,
@@ -302,8 +302,8 @@ class Logger
      */
     private function shouldLog(string $level): bool
     {
-        $currentLevel = self::LOG_LEVELS[$this->logLevel] ?? 6;
-        $messageLevel = self::LOG_LEVELS[$level] ?? 6;
+        $currentLevel = self::logLevelS[$this->logLevel] ?? 6;
+        $messageLevel = self::logLevelS[$level] ?? 6;
 
         return $messageLevel <= $currentLevel;
     }

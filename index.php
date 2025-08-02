@@ -46,8 +46,8 @@ try {
 
     // ログ機能の初期化
     $logger = new Logger(
-        $config['log_directory'],
-        $config['log_level'],
+        $config['logDirectoryPath'],
+        $config['logLevel'],
         $db
     );
 
@@ -81,8 +81,8 @@ try {
         'logger' => $logger,
         'responseHandler' => $responseHandler,
         'db' => $db,
-        'csrf_token' => SecurityUtils::generateCSRFToken(),
-        'status_message' => $_GET['deleted'] ?? null
+        'csrfToken' => SecurityUtils::generateCSRFToken(),
+        'statusMessage' => $_GET['deleted'] ?? null
     ]);
 
     // 変数の展開
