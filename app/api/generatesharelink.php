@@ -61,22 +61,44 @@ if (empty($result)) {
 $fileData = $result[0];
 $filename = $fileData['origin_file_name'];
 $comment = $fileData['comment'];
-$origin_dlkey = $fileData['dl_key'];
+$origin_dlkey = $fileData['dl_key_hash'];
 
-// 制限情報を更新（もし新しい制限が設定されている場合）
-if ($max_downloads !== null || $expires_at !== null) {
-    $updateStmt = $db->prepare("UPDATE uploaded SET max_downloads = :max_downloads, expires_at = :expires_at WHERE id = :id");
-    $updateStmt->bindValue(':max_downloads', $max_downloads);
-    $updateStmt->bindValue(':expires_at', $expires_at);
-    $updateStmt->bindValue(':id', $id);
-    $updateStmt->execute();
-}
+// 既存の共有リンクをチェック
+$stmt = $db->prepare("SELECT * FROM shared_links WHERE file_id = :file_id");
+$stmt->bindValue(':file_id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$existing_link = $stmt->fetch();
 
-// 共有用のトークンを生成（DLキーなしで直接ダウンロード可能にする）
-if (PHP_MAJOR_VERSION == '5' and PHP_MINOR_VERSION == '3') {
-    $share_key = bin2hex(openssl_encrypt($origin_dlkey, 'aes-256-ecb', $key, true));
+$current_time = time();
+
+if ($existing_link) {
+    // 既存のリンクを更新
+    $share_token = $existing_link['share_token'];
+    
+    if ($max_downloads !== null || $expires_at !== null) {
+        $updateStmt = $db->prepare("UPDATE shared_links SET max_downloads = :max_downloads, expires_at = :expires_at, updated_at = :updated_at WHERE file_id = :file_id");
+        $updateStmt->bindValue(':max_downloads', $max_downloads, PDO::PARAM_INT);
+        $updateStmt->bindValue(':expires_at', $expires_at, PDO::PARAM_INT);
+        $updateStmt->bindValue(':updated_at', $current_time, PDO::PARAM_INT);
+        $updateStmt->bindValue(':file_id', $id, PDO::PARAM_INT);
+        $updateStmt->execute();
+    }
 } else {
-    $share_key = bin2hex(openssl_encrypt($origin_dlkey, 'aes-256-ecb', $key, OPENSSL_RAW_DATA));
+    // 新しい共有リンクを作成
+    $share_token = bin2hex(random_bytes(32));
+    
+    $insertStmt = $db->prepare("INSERT INTO shared_links (file_id, share_token, max_downloads, current_downloads, expires_at, created_at, updated_at) VALUES (:file_id, :share_token, :max_downloads, 0, :expires_at, :created_at, :updated_at)");
+    $insertStmt->bindValue(':file_id', $id, PDO::PARAM_INT);
+    $insertStmt->bindValue(':share_token', $share_token, PDO::PARAM_STR);
+    $insertStmt->bindValue(':max_downloads', $max_downloads, PDO::PARAM_INT);
+    $insertStmt->bindValue(':expires_at', $expires_at, PDO::PARAM_INT);
+    $insertStmt->bindValue(':created_at', $current_time, PDO::PARAM_INT);
+    $insertStmt->bindValue(':updated_at', $current_time, PDO::PARAM_INT);
+    
+    if (!$insertStmt->execute()) {
+        echo json_encode(array('status' => 'sqlerror'));
+        exit;
+    }
 }
 
 // 現在のプロトコルとホストを取得してベースURLを構築
@@ -88,7 +110,7 @@ if ($base_path === '/' || $base_path === '\\') {
     $base_path = '';
 }
 
-$share_url = $protocol . $host . $base_path . '/download.php?id=' . $id . '&key=' . $share_key;
+$share_url = $protocol . $host . $base_path . '/download.php?share=' . $share_token;
 
 // JSON形式で出力する
 echo json_encode(array(
@@ -97,5 +119,7 @@ echo json_encode(array(
     'filename' => $filename,
     'comment' => $comment,
     'share_url' => $share_url,
-    'share_url_with_comment' => $comment . "\n" . $share_url
+    'share_url_with_comment' => $comment . "\n" . $share_url,
+    'max_downloads' => $max_downloads,
+    'expires_at' => $expires_at
 ));
