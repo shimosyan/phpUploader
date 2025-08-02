@@ -48,8 +48,10 @@
     <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
     
-    <script src="./asset/js/modal.js"></script>
-    <script src="./asset/js/file-manager.js"></script>
+    <!-- Tus.io resumable upload client -->
+    <script src="https://cdn.jsdelivr.net/npm/tus-js-client@3.1.1/dist/tus.min.js"></script>
+    
     <script src="./asset/js/common.js"></script>
+    <script src="./asset/js/dragdrop.js"></script>
   </body>
 </html>
