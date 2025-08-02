@@ -50,6 +50,7 @@
     
     <script src="./asset/js/modal.js"></script>
     <script src="./asset/js/file-manager.js"></script>
+    <script src="./asset/js/folder-manager.js"></script>
     <script src="./asset/js/common.js"></script>
   </body>
 </html>
