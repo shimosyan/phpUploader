@@ -124,13 +124,39 @@ try {
         $validationErrors[] = "コメントが長すぎます。({$config['max_comment']}文字以下)";
     }
 
-    // キーの長さチェック
-    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    // DL/DELキーの必須チェックと自動生成
+    // DLキーの処理
+    if (isset($config['dlkey_required']) && $config['dlkey_required']) {
+        // 必須の場合
+        if (empty($dlKey)) {
+            $validationErrors[] = "ダウンロードキーは必須です。";
+        } elseif (mb_strlen($dlKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
+    } else {
+        // 任意の場合、空白時16文字自動生成
+        if (empty($dlKey)) {
+            $dlKey = bin2hex(random_bytes(8)); // 16文字のランダムキー生成
+        } elseif (mb_strlen($dlKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
     }
 
-    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    // 削除キーの処理
+    if (isset($config['delkey_required']) && $config['delkey_required']) {
+        // 必須の場合
+        if (empty($delKey)) {
+            $validationErrors[] = "削除キーは必須です。";
+        } elseif (mb_strlen($delKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
+    } else {
+        // 任意の場合、空白時16文字自動生成
+        if (empty($delKey)) {
+            $delKey = bin2hex(random_bytes(8)); // 16文字のランダムキー生成
+        } elseif (mb_strlen($delKey) < $config['security']['min_key_length']) {
+            $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+        }
     }
 
     if (!empty($validationErrors)) {
