@@ -12,6 +12,9 @@
     <?php endif; ?>
   <?php endif; ?>
 
+  <!-- フォルツナビゲーション -->
+  <?php include __DIR__ . '/partials/folder-navigation.php'; ?>
+
   <div class="row bg-white radius box-shadow">
     <div class="col-sm-12">
       <p class="h2">ファイルを登録</p>
