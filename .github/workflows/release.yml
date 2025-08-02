@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
 
 permissions:
-  contents: read
+  contents: write # Release ページの書き込みに必要
 
 jobs:
   release:
