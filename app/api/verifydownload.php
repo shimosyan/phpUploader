@@ -50,7 +50,7 @@ try {
     }
 
     // ファイル情報の取得
-    $fileStmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
+    $fileStmt = $db->prepare('SELECT * FROM uploaded WHERE id = :id');
     $fileStmt->execute(['id' => $fileId]);
     $fileData = $fileStmt->fetch();
 
@@ -92,7 +92,7 @@ try {
     }
 
     // 既存の期限切れトークンをクリーンアップ
-    $cleanupStmt = $db->prepare("DELETE FROM access_tokens WHERE expires_at < :now");
+    $cleanupStmt = $db->prepare('DELETE FROM access_tokens WHERE expires_at < :now');
     $cleanupStmt->execute(['now' => time()]);
 
     // ワンタイムトークンの生成
@@ -100,17 +100,17 @@ try {
     $expiresAt = time() + ($config['token_expiry_minutes'] * 60);
 
     // トークンをデータベースに保存
-    $tokenStmt = $db->prepare("
+    $tokenStmt = $db->prepare('
         INSERT INTO access_tokens (file_id, token, token_type, expires_at, ip_address)
         VALUES (:file_id, :token, :token_type, :expires_at, :ip_address)
-    ");
+    ');
 
     $tokenData = [
         'file_id' => $fileId,
         'token' => $token,
         'token_type' => 'download',
         'expires_at' => $expiresAt,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
     ];
 
     if (!$tokenStmt->execute($tokenData)) {
@@ -127,14 +127,13 @@ try {
         'expires_at' => $expiresAt,
         'file_name' => $fileData['origin_file_name']
     ]);
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     if (isset($logger)) {
         $logger->error('Download verify API Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
+            'file_id' => $fileId ?? null,
         ]);
     }
 
@@ -146,7 +145,7 @@ try {
         http_response_code(500);
         echo json_encode([
             'status' => 'error',
-            'message' => 'システムエラーが発生しました。'
+            'message' => 'システムエラーが発生しました。',
         ], JSON_UNESCAPED_UNICODE);
     }
 }
