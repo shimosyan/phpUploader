@@ -289,9 +289,8 @@ function uploadMultipleFiles() {
   
   isUploading = true;
   
-  // エラーコンテナを非表示
-  $('#errorContainer').fadeOut();
-  $('#uploadContainer').fadeIn();
+  // プログレスコンテナを表示
+  $('#progressContainer').show();
   
   // 各ファイルのプログレスバーを表示
   $('.file-item .upload-progress').show();
@@ -304,7 +303,8 @@ function uploadFilesSequentially(index) {
   if (index >= selectedFiles.length) {
     // 全ファイルのアップロード完了
     isUploading = false;
-    $('#uploadContainer').hide();
+    $('#progressContainer').hide();
+    alert('ファイルのアップロードが完了しました。');
     location.reload();
     return;
   }
