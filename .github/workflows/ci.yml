@@ -252,7 +252,7 @@ jobs:
             if ! vendor/bin/phpstan analyse --level=1 --no-progress .; then
               echo "❌ 静的解析でエラーが検出されました"
               echo "🔧 詳細は上記のエラーメッセージを確認してください"
-              github-comment exec -k common-error -var title:"Check PHPStan Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpstan analyse --level=1 --no-progress
+              github-comment exec -k common-error -var title:"Check PHPStan Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpstan analyse --level=1 --no-progress .
               exit 1
             fi
             echo "✅ 静的解析チェック完了"
