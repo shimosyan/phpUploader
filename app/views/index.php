@@ -126,7 +126,9 @@
       <!-- レガシーカード表示（非表示） -->
       <div class="file-cards-container" style="display: none;"></div>
     </div>
-    <p class="text-right">@<a href="https://github.com/shimosyan/phpUploader" target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
+    <p class="text-right">@<a
+      href="https://github.com/shimosyan/phpUploader"
+      target="_blank">shimosyan/phpUploader</a> v<?php echo $version; ?> (GitHub)</p>
   </div>
 </div>
 
