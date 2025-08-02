@@ -1,4 +1,5 @@
 <?php
+
 /**
  * リリース管理スクリプト
  * composer.jsonとconfig.phpのバージョンを同期します
@@ -52,11 +53,11 @@ if (php_sapi_name() === 'cli') {
         try {
             $manager->updateVersion($argv[1]);
         } catch (Exception $e) {
-            echo "Error: " . $e->getMessage() . "\n";
+            echo 'Error: ' . $e->getMessage() . "\n";
             exit(1);
         }
     } else {
-        echo "Current version: " . $manager->getCurrentVersion() . "\n";
+        echo 'Current version: ' . $manager->getCurrentVersion() . "\n";
         echo "Usage: php scripts/release.php <version>\n";
         echo "Example: php scripts/release.php 1.3.0\n";
     }

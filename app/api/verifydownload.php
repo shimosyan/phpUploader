@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ダウンロード検証API
  *
  * ハッシュ化された認証キーの検証とワンタイムトークンの生成
  */
+
+declare(strict_types=1);
 
 // エラー表示設定
 ini_set('display_errors', '0');
@@ -20,20 +20,24 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    // 設定とユーティリティの読み込み
-    require_once '../../config/config.php';
-    require_once '../../src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
-    require_once '../../app/models/init.php';
-    $db = initializeApp($config);
+    require_once $baseDir . '/app/models/init.php';
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
-    $responseHandler = new ResponseHandler($logger);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // 入力データの取得
     $fileId = (int)($_POST['id'] ?? 0);
@@ -44,13 +48,13 @@ try {
     }
 
     // CSRFトークンの検証
-    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    if (!\PHPUploader\Core\SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $logger->warning('CSRF token validation failed in download verify', ['file_id' => $fileId]);
         $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
     }
 
     // ファイル情報の取得
-    $fileStmt = $db->prepare("SELECT * FROM uploaded WHERE id = :id");
+    $fileStmt = $db->prepare('SELECT * FROM uploaded WHERE id = :id');
     $fileStmt->execute(['id' => $fileId]);
     $fileData = $fileStmt->fetch();
 
@@ -71,7 +75,7 @@ try {
         } else {
             // ハッシュ化されたキーとの照合
             if (!empty($inputKey)) {
-                $isValidAuth = SecurityUtils::verifyPassword($inputKey, $fileData['dl_key_hash']);
+                $isValidAuth = \PHPUploader\Core\SecurityUtils::verifyPassword($inputKey, $fileData['dl_key_hash']);
             } else {
                 // キーが設定されているが、入力されていない場合
                 $isValidAuth = false;
@@ -92,25 +96,25 @@ try {
     }
 
     // 既存の期限切れトークンをクリーンアップ
-    $cleanupStmt = $db->prepare("DELETE FROM access_tokens WHERE expires_at < :now");
+    $cleanupStmt = $db->prepare('DELETE FROM access_tokens WHERE expires_at < :now');
     $cleanupStmt->execute(['now' => time()]);
 
     // ワンタイムトークンの生成
-    $token = SecurityUtils::generateRandomToken(32);
-    $expiresAt = time() + ($config['token_expiry_minutes'] * 60);
+    $token = \PHPUploader\Core\SecurityUtils::generateRandomToken(32);
+    $expiresAt = time() + ($config['tokenExpiryMinutes'] * 60);
 
     // トークンをデータベースに保存
-    $tokenStmt = $db->prepare("
+    $tokenStmt = $db->prepare('
         INSERT INTO access_tokens (file_id, token, token_type, expires_at, ip_address)
         VALUES (:file_id, :token, :token_type, :expires_at, :ip_address)
-    ");
+    ');
 
     $tokenData = [
         'file_id' => $fileId,
         'token' => $token,
         'token_type' => 'download',
         'expires_at' => $expiresAt,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
     ];
 
     if (!$tokenStmt->execute($tokenData)) {
@@ -127,26 +131,13 @@ try {
         'expires_at' => $expiresAt,
         'file_name' => $fileData['origin_file_name']
     ]);
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Download verify API Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
-        ]);
-    }
+    $logger->error('Download verify API Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'file_id' => $fileId,
+    ]);
 
-    if (isset($responseHandler)) {
-        $responseHandler->error('システムエラーが発生しました。', [], 500);
-    } else {
-        // 最低限のエラーレスポンス
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'システムエラーが発生しました。'
-        ], JSON_UNESCAPED_UNICODE);
-    }
+    $responseHandler->error('システムエラーが発生しました。', [], 500);
 }

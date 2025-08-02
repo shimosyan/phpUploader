@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ファイルアップロードAPI
  *
@@ -9,6 +7,9 @@ declare(strict_types=1);
  */
 
 // 出力バッファリング開始
+
+declare(strict_types=1);
+
 ob_start();
 
 // エラー表示設定（デバッグ用）
@@ -30,18 +31,21 @@ try {
     // 設定とユーティリティの読み込み（絶対パスで修正）
     $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
     require_once $baseDir . '/config/config.php';
-    require_once $baseDir . '/src/Core/Utils.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
     require_once $baseDir . '/app/models/init.php';
-    $db = initializeApp($config);
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
-    $responseHandler = new ResponseHandler($logger);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // リクエストメソッドの確認
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -54,7 +58,7 @@ try {
     }
 
     // CSRFトークンの検証
-    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? null)) {
+    if (!\PHPUploader\Core\SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? null)) {
         $logger->warning('CSRF token validation failed', ['ip' => $_SERVER['REMOTE_ADDR'] ?? '']);
         $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
     }
@@ -71,7 +75,7 @@ try {
                 $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ini_get('upload_max_filesize') . '以下)';
                 break;
             case UPLOAD_ERR_FORM_SIZE:
-                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ($_POST['MAX_FILE_SIZE'] / 1024) . 'KB以下)';
+                $uploadErrors[] = 'アップロードされたファイルが大きすぎます。(' . ($_POST['maxFileSize'] / 1024) . 'KB以下)';
                 break;
             case UPLOAD_ERR_PARTIAL:
                 $uploadErrors[] = 'アップロードが途中で中断されました。もう一度お試しください。';
@@ -109,28 +113,28 @@ try {
     $validationErrors = [];
 
     // ファイルサイズチェック
-    if ($fileSize > $config['max_file_size'] * 1024 * 1024) {
-        $validationErrors[] = "ファイルサイズが上限({$config['max_file_size']}MB)を超えています。";
+    if ($fileSize > $config['maxFileSize'] * 1024 * 1024) {
+        $validationErrors[] = "ファイルサイズが上限({$config['maxFileSize']}MB)を超えています。";
     }
 
     // 拡張子チェック
     $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     if (!in_array($fileExtension, $config['extension'])) {
-        $validationErrors[] = "許可されていない拡張子です。(" . implode(', ', $config['extension']) . "のみ)";
+        $validationErrors[] = '許可されていない拡張子です。(' . implode(', ', $config['extension']) . 'のみ)';
     }
 
     // コメント文字数チェック
-    if (mb_strlen($comment) > $config['max_comment']) {
-        $validationErrors[] = "コメントが長すぎます。({$config['max_comment']}文字以下)";
+    if (mb_strlen($comment) > $config['maxComment']) {
+        $validationErrors[] = "コメントが長すぎます。({$config['maxComment']}文字以下)";
     }
 
     // キーの長さチェック
-    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "ダウンロードキーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    if (!empty($dlKey) && mb_strlen($dlKey) < $config['security']['minKeyLength']) {
+        $validationErrors[] = "ダウンロードキーは{$config['security']['minKeyLength']}文字以上で設定してください。";
     }
 
-    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['min_key_length']) {
-        $validationErrors[] = "削除キーは{$config['security']['min_key_length']}文字以上で設定してください。";
+    if (!empty($delKey) && mb_strlen($delKey) < $config['security']['minKeyLength']) {
+        $validationErrors[] = "削除キーは{$config['security']['minKeyLength']}文字以上で設定してください。";
     }
 
     if (!empty($validationErrors)) {
@@ -138,13 +142,13 @@ try {
     }
 
     // ファイル数制限チェックと古いファイルの削除
-    $fileCountStmt = $db->prepare("SELECT COUNT(id) as count, MIN(id) as min_id FROM uploaded");
+    $fileCountStmt = $db->prepare('SELECT COUNT(id) as count, MIN(id) as min_id FROM uploaded');
     $fileCountStmt->execute();
     $countResult = $fileCountStmt->fetch();
 
-    if ($countResult['count'] >= $config['save_max_files']) {
+    if ($countResult['count'] >= $config['saveMaxFiles']) {
         // 古いファイルを削除
-        $oldFileStmt = $db->prepare("SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id");
+        $oldFileStmt = $db->prepare('SELECT id, origin_file_name, stored_file_name FROM uploaded WHERE id = :id');
         $oldFileStmt->execute(['id' => $countResult['min_id']]);
         $oldFile = $oldFileStmt->fetch();
 
@@ -152,10 +156,10 @@ try {
             // 物理ファイルの削除（ハッシュ化されたファイル名または旧形式に対応）
             if (!empty($oldFile['stored_file_name'])) {
                 // 新形式（ハッシュ化されたファイル名）
-                $oldFilePath = $config['data_directory'] . '/' . $oldFile['stored_file_name'];
+                $oldFilePath = $config['dataDirectoryPath'] . '/' . $oldFile['stored_file_name'];
             } else {
                 // 旧形式（互換性のため）
-                $oldFilePath = $config['data_directory'] . '/file_' . $oldFile['id'] .
+                $oldFilePath = $config['dataDirectoryPath'] . '/file_' . $oldFile['id'] .
                              '.' . pathinfo($oldFile['origin_file_name'], PATHINFO_EXTENSION);
             }
 
@@ -164,7 +168,7 @@ try {
             }
 
             // データベースから削除
-            $deleteStmt = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+            $deleteStmt = $db->prepare('DELETE FROM uploaded WHERE id = :id');
             $deleteStmt->execute(['id' => $oldFile['id']]);
 
             $logger->info('Old file deleted due to storage limit', ['deleted_file_id' => $oldFile['id']]);
@@ -175,11 +179,13 @@ try {
     $fileHash = hash_file('sha256', $fileTmpPath);
 
     // 認証キーのハッシュ化（空の場合はnull）
-    $dlKeyHash = (!empty($dlKey) && trim($dlKey) !== '') ? SecurityUtils::hashPassword($dlKey) : null;
-    $delKeyHash = (!empty($delKey) && trim($delKey) !== '') ? SecurityUtils::hashPassword($delKey) : null;
+    $dlKeyHash =
+        (!empty($dlKey) && trim($dlKey) !== '') ? \PHPUploader\Core\SecurityUtils::hashPassword($dlKey) : null;
+    $delKeyHash =
+        (!empty($delKey) && trim($delKey) !== '') ? \PHPUploader\Core\SecurityUtils::hashPassword($delKey) : null;
 
     // まず仮のデータベース登録（stored_file_nameは後で更新）
-    $insertStmt = $db->prepare("
+    $insertStmt = $db->prepare('
         INSERT INTO uploaded (
             origin_file_name, comment, size, count, input_date,
             dl_key_hash, del_key_hash, file_hash, ip_address
@@ -187,7 +193,7 @@ try {
             :origin_file_name, :comment, :size, :count, :input_date,
             :dl_key_hash, :del_key_hash, :file_hash, :ip_address
         )
-    ");
+    ');
 
     $insertData = [
         'origin_file_name' => $fileName,
@@ -198,7 +204,7 @@ try {
         'dl_key_hash' => $dlKeyHash,
         'del_key_hash' => $delKeyHash,
         'file_hash' => $fileHash,
-        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
+        'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
     ];
 
     if (!$insertStmt->execute($insertData)) {
@@ -210,25 +216,25 @@ try {
     $fileId = (int)$db->lastInsertId();
 
     // セキュアなファイル名の生成（ハッシュ化）
-    $hashedFileName = SecurityUtils::generateSecureFileName($fileId, $fileName);
-    $storedFileName = SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
-    $saveFilePath = $config['data_directory'] . '/' . $storedFileName;
+    $hashedFileName = \PHPUploader\Core\SecurityUtils::generateSecureFileName($fileId, $fileName);
+    $storedFileName = \PHPUploader\Core\SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
+    $saveFilePath = $config['dataDirectoryPath'] . '/' . $storedFileName;
 
     // ファイル保存
     if (!move_uploaded_file($fileTmpPath, $saveFilePath)) {
         // データベースからも削除
-        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $db->prepare('DELETE FROM uploaded WHERE id = :id')->execute(['id' => $fileId]);
         $responseHandler->error('ファイルの保存に失敗しました。', [], 500);
     }
 
     // データベースにハッシュ化されたファイル名を記録
-    $updateStmt = $db->prepare("UPDATE uploaded SET stored_file_name = :stored_file_name WHERE id = :id");
+    $updateStmt = $db->prepare('UPDATE uploaded SET stored_file_name = :stored_file_name WHERE id = :id');
     if (!$updateStmt->execute(['stored_file_name' => $storedFileName, 'id' => $fileId])) {
         // ファイルを削除してデータベースからも削除
         if (file_exists($saveFilePath)) {
             unlink($saveFilePath);
         }
-        $db->prepare("DELETE FROM uploaded WHERE id = :id")->execute(['id' => $fileId]);
+        $db->prepare('DELETE FROM uploaded WHERE id = :id')->execute(['id' => $fileId]);
         $responseHandler->error('ファイル情報の更新に失敗しました。', [], 500);
     }
 
@@ -239,9 +245,8 @@ try {
     $responseHandler->success('ファイルのアップロードが完了しました。', [
         'file_id' => $fileId,
         'file_name' => $fileName,
-        'file_size' => $fileSize
+        'file_size' => $fileSize,
     ]);
-
 } catch (Exception $e) {
     // 出力バッファをクリア
     if (ob_get_level()) {
@@ -249,22 +254,10 @@ try {
     }
 
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Upload API Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ]);
-    }
+    $logger->error('Upload API Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+    ]);
 
-    if (isset($responseHandler)) {
-        $responseHandler->error('システムエラーが発生しました。', [], 500);
-    } else {
-        // 最低限のエラーレスポンス
-        header('Content-Type: application/json; charset=utf-8');
-        http_response_code(500);
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'システムエラーが発生しました。'
-        ], JSON_UNESCAPED_UNICODE);
-    }
+    $responseHandler->error('システムエラーが発生しました。', [], 500);
 }

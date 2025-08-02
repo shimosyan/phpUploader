@@ -6,6 +6,14 @@ on:
       - opened
       - synchronize
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   label:
     runs-on: ubuntu-latest

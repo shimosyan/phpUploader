@@ -6,8 +6,93 @@ on:
       - master
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  cancel-in-progress: true # PR の更新があった場合は前のジョブをキャンセルする
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
+        with:
+          aqua_version: v2.53.7
+
+      - run: github-comment exec -- github-comment hide
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli2
+
+      - name: Lint Markdown Files
+        run: github-comment exec -k common-error -var title:"Check Markdown Failed" -- markdownlint-cli2 "**/*.md" --config ".markdownlint.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-scan:
+    needs: documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
+        with:
+          aqua_version: v2.53.7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
+        with:
+          php-version: '8.1'
+          extensions: pdo, pdo_sqlite
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Security audit
+        run: |
+          # Composerセキュリティ監査
+          composer audit
+
+      - name: Check for sensitive files
+        run: |
+          # 機密ファイルがコミットされていないかチェック
+          if [ -f "config/config.php" ]; then
+            echo "Error: config.php should not be committed"
+            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: config.php should not be committed"
+            exit 1
+          fi
+
+          # .envファイルのチェック
+          if [ -f ".env" ]; then
+            echo "Error: .env should not be committed"
+            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: .env should not be committed"
+            exit 1
+          fi
+
+          echo "✅ No sensitive files found"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   lint-and-test:
+    needs: documentation
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,6 +106,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
+        with:
+          aqua_version: v2.53.7
 
       - name: Display PHP version info
         run: |
@@ -37,24 +126,30 @@ jobs:
 
       - name: Validate composer.json
         run: |
-          echo "🔍 Validating composer.json..."
+          echo "🔍 composer.json検証中..."
 
           # まず基本的なJSONの妥当性をチェック
           if ! php -r "json_decode(file_get_contents('composer.json'), true); if (json_last_error() !== JSON_ERROR_NONE) exit(1);"; then
             echo "❌ composer.json contains invalid JSON"
+            echo "🔧 composer.jsonの構文を確認してください"
+            github-comment post -k common-error -var title:"composer.json contains invalid JSON (PHP: ${{ matrix.php-version }})" -var body:"composer.jsonの構文を確認してください"
             exit 1
           fi
 
           # Composer validation実行
-          composer validate --no-check-publish || {
+          echo "📋 Composer validation実行中..."
+          if ! composer validate --no-check-publish; then
             echo "❌ composer.json validation failed"
             echo "🔍 詳細な診断情報:"
             composer validate --verbose
             echo "📋 composer.json の内容確認:"
             cat composer.json
+            github-comment exec -k common-error -var title:"Check Validation composer.json Failed (PHP: ${{ matrix.php-version }})" -- composer validate --verbose
             exit 1
-          }
+          fi
           echo "✅ composer.json validation passed"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Composer packages
         id: composer-cache
@@ -71,39 +166,103 @@ jobs:
           composer install --prefer-dist --no-progress --no-interaction
           echo "✅ Dependencies installed successfully"
 
-      - name: Check PHP syntax
+      - name: Setup configuration file
         run: |
-          echo "🔍 PHP構文チェックを実行中..."
-          find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
-          echo "✅ PHP構文チェック完了"
-
-      - name: Run PHP CodeSniffer
-        run: |
-          if [ -f "vendor/bin/phpcs" ]; then
-            vendor/bin/phpcs --standard=PSR12 --ignore=vendor/ . || echo "⚠️ Coding standard violations found (non-blocking)"
-          else
-            echo "PHPCS not installed, skipping..."
-          fi
-
-      - name: Run PHPStan
-        run: |
-          if [ -f "vendor/bin/phpstan" ]; then
-            vendor/bin/phpstan analyse --level=1 --no-progress . || echo "⚠️ Static analysis issues found (non-blocking)"
-          else
-            echo "PHPStan not installed, skipping..."
-          fi
-
-      - name: Test configuration file creation
-        run: |
+          echo "🔧 設定ファイルセットアップ実行中..."
           # 必要なディレクトリを作成
-          mkdir -p data db config
+          mkdir -p data db config logs
+
+          # config.php.exampleの存在確認
+          if [ ! -f config/config.php.example ]; then
+            echo "❌ config/config.php.example が見つかりません"
+            github-comment post -k common-error -var title:"'config/config.php.example' is not found (PHP: ${{ matrix.php-version }})" -var body:"'config/config.php.example' が見つかりません"
+            exit 1
+          fi
+
           # config.php.exampleからconfig.phpを作成
           if [ ! -f config/config.php ]; then
             cp config/config.php.example config/config.php
             echo "✅ config.php.exampleからconfig.phpを作成しました"
           fi
+
           # 設定ファイルの構文チェック
-          php -l config/config.php
+          echo "📄 config.php構文チェック中..."
+          if ! php -l config/config.php; then
+            echo "❌ config.phpに構文エラーがあります"
+            github-comment post -k common-error -var title:"Check 'config.php' Failed (PHP: ${{ matrix.php-version }})" -var body:"'config.php' に構文エラーがあります"
+            exit 1
+          fi
+          echo "✅ 設定ファイルセットアップ完了"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check PHP syntax
+        run: |
+          echo "🔍 PHP構文チェックを実行中..."
+          SYNTAX_ERRORS_COUNT=0
+          SYNTAX_LOGS=""
+          while IFS= read -r -d '' file; do
+            echo "📄 Checking: $file"
+            SYNTAX_LOGS="$SYNTAX_LOGS\n📄 Checking: $file"
+            if ! php -l "$file"; then
+              echo "❌ 構文エラー: $file"
+            SYNTAX_LOGS="$SYNTAX_LOGS\n❌ 構文エラー: $file"
+              SYNTAX_ERRORS_COUNT=$((SYNTAX_ERRORS_COUNT + 1))
+            fi
+          done < <(find . -name "*.php" -not -path "./vendor/*" -print0)
+
+          if [ $SYNTAX_ERRORS_COUNT -gt 0 ]; then
+            echo "❌ $SYNTAX_ERRORS_COUNT 個のPHPファイルに構文エラーがあります"
+            SYNTAX_LOGS="$SYNTAX_LOGS\n❌ $SYNTAX_ERRORS_COUNT 個のPHPファイルに構文エラーがあります"
+            github-comment post -k common-error -var title:"Check PHP Syntax Failed (PHP: ${{ matrix.php-version }})" -var body:"$SYNTAX_LOGS"
+
+            exit 1
+          fi
+          echo "✅ PHP構文チェック完了 - エラーなし"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run PHP CodeSniffer
+        run: |
+          echo "🔍 PHP CodeSniffer実行中..."
+          if [ -f "vendor/bin/phpcs" ]; then
+            echo "📋 プロジェクト設定によるコーディング規約チェック開始"
+            # phpcs.xmlを使用してチェック
+            if ! vendor/bin/phpcs .; then
+              echo "❌ コーディング規約違反が検出されました"
+              echo "🔧 修正方法: vendor/bin/phpcbf"
+              echo "📋 設定ファイル: phpcs.xml"
+              github-comment exec -k common-error -var title:"Check PHP CodeSniffer Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpcs .
+              exit 1
+            fi
+            echo "✅ コーディング規約チェック完了"
+          else
+            echo "❌ PHPCS not installed..."
+            github-comment post -k common-error -var title:"Check PHP CodeSniffer Failed (PHP: ${{ matrix.php-version }})" -var body:"PHPCS not installed..."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run PHPStan
+        run: |
+          echo "🔍 PHPStan静的解析実行中..."
+          if [ -f "vendor/bin/phpstan" ]; then
+            echo "📋 静的解析チェック開始 (Level 1)"
+            if ! vendor/bin/phpstan analyse --level=1 --no-progress .; then
+              echo "❌ 静的解析でエラーが検出されました"
+              echo "🔧 詳細は上記のエラーメッセージを確認してください"
+              github-comment exec -k common-error -var title:"Check PHPStan Failed (PHP: ${{ matrix.php-version }})" -- vendor/bin/phpstan analyse --level=1 --no-progress .
+              exit 1
+            fi
+            echo "✅ 静的解析チェック完了"
+          else
+            echo "❌ PHPStan not installed..."
+            github-comment post -k common-error -var title:"Check PHPStan Failed (PHP: ${{ matrix.php-version }})" -var body:"PHPStan not installed..."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Test version synchronization
         run: |
@@ -126,64 +285,3 @@ jobs:
             exit 0
           }
           echo "✅ Dockerビルド完了"
-
-  security-scan:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 #v2.35.2
-        with:
-          php-version: '8.1'
-          extensions: pdo, pdo_sqlite
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Security audit
-        run: |
-          # Composerセキュリティ監査
-          composer audit
-
-      - name: Check for sensitive files
-        run: |
-          # 機密ファイルがコミットされていないかチェック
-          if [ -f "config/config.php" ]; then
-            echo "Error: config.php should not be committed"
-            exit 1
-          fi
-
-          # .envファイルのチェック
-          if [ -f ".env" ]; then
-            echo "Error: .env should not be committed"
-            exit 1
-          fi
-
-          echo "✅ No sensitive files found"
-
-  documentation:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 #v4.4.0
-        with:
-          node-version: '18'
-
-      - name: Install markdownlint
-        run: npm install -g markdownlint-cli
-
-      - name: Lint README
-        run: markdownlint README.md CHANGELOG.md --ignore node_modules --config .markdownlint.json
-
-      - name: Check links in README
-        uses: gaurav-nelson/github-action-markdown-link-check@3c3b66f1f7d0900e37b71eca45b63ea9eedfce31 #v1.10.17
-        with:
-          use-quiet-mode: 'yes'

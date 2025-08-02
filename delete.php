@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ファイル削除処理
  *
  * ワンタイムトークンによる安全なファイル削除
  */
+
+declare(strict_types=1);
 
 // エラー表示設定
 ini_set('display_errors', '0');
@@ -14,19 +14,22 @@ ini_set('log_errors', '1'); // ログファイルにエラーを記録
 error_reporting(E_ALL);
 
 try {
-    // 設定とユーティリティの読み込み
-    require_once './config/config.php';
-    require_once './src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
-    require_once './app/models/init.php';
-    $db = initializeApp($config);
+    require_once $baseDir . '/app/models/init.php';
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
 
     // パラメータの取得
     $fileId = (int)($_GET['id'] ?? 0);
@@ -43,12 +46,13 @@ try {
 
     try {
     // トークンの検証
-    $tokenStmt = $db->prepare("
-        SELECT t.*, u.origin_file_name, u.stored_file_name, u.file_hash
-        FROM access_tokens t
-        JOIN uploaded u ON t.file_id = u.id
-        WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
-    ");        $tokenStmt->execute([
+        $tokenStmt = $db->prepare("
+            SELECT t.*, u.origin_file_name, u.stored_file_name, u.file_hash
+            FROM access_tokens t
+            JOIN uploaded u ON t.file_id = u.id
+            WHERE t.token = :token AND t.token_type = 'delete' AND t.file_id = :file_id AND t.expires_at > :now
+        ");
+        $tokenStmt->execute([
             'token' => $token,
             'file_id' => $fileId,
             'now' => time()
@@ -57,20 +61,26 @@ try {
         $tokenData = $tokenStmt->fetch();
 
         if (!$tokenData) {
-            $logger->warning('Invalid or expired delete token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+            $logger->warning(
+                'Invalid or expired delete token',
+                [
+                    'file_id' => $fileId,
+                    'token' => substr($token, 0, 8) . '...'
+                ]
+            );
             $db->rollBack();
             header('Location: ./');
             exit;
         }
 
         // IPアドレスの検証（設定で有効な場合）
-        if ($config['security']['log_ip_address'] && !empty($tokenData['ip_address'])) {
+        if ($config['security']['logIpAddress'] && !empty($tokenData['ip_address'])) {
             $currentIP = $_SERVER['REMOTE_ADDR'] ?? '';
             if ($currentIP !== $tokenData['ip_address']) {
                 $logger->warning('IP address mismatch for delete', [
                     'file_id' => $fileId,
                     'token_ip' => $tokenData['ip_address'],
-                    'current_ip' => $currentIP
+                    'current_ip' => $currentIP,
                 ]);
                 // IPアドレスが異なる場合は警告ログのみで、削除は継続
             }
@@ -81,11 +91,11 @@ try {
 
         if (!empty($tokenData['stored_file_name'])) {
             // 新形式（ハッシュ化されたファイル名）
-            $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
+            $filePath = $config['dataDirectoryPath'] . '/' . $tokenData['stored_file_name'];
         } else {
             // 旧形式（互換性のため）
             $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $filePath = $config['data_directory'] . '/file_' . $fileId . '.' . $fileExtension;
+            $filePath = $config['dataDirectoryPath'] . '/file_' . $fileId . '.' . $fileExtension;
         }
 
         // 物理ファイルの削除
@@ -116,13 +126,13 @@ try {
         }
 
         // データベースからファイル情報を削除
-        $deleteStmt = $db->prepare("DELETE FROM uploaded WHERE id = :id");
+        $deleteStmt = $db->prepare('DELETE FROM uploaded WHERE id = :id');
         if (!$deleteStmt->execute(['id' => $fileId])) {
             throw new Exception('Failed to delete file record from database');
         }
 
         // 関連するアクセストークンを削除
-        $deleteTokensStmt = $db->prepare("DELETE FROM access_tokens WHERE file_id = :file_id");
+        $deleteTokensStmt = $db->prepare('DELETE FROM access_tokens WHERE file_id = :file_id');
         $deleteTokensStmt->execute(['file_id' => $fileId]);
 
         // トランザクションコミット
@@ -134,22 +144,18 @@ try {
         // 成功時のリダイレクト
         header('Location: ./?deleted=success');
         exit;
-
     } catch (Exception $e) {
         // トランザクションロールバック
         $db->rollBack();
         throw $e;
     }
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Delete Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
-        ]);
-    }
+    $logger->error('Delete Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'file_id' => $fileId,
+    ]);
 
     header('Location: ./?deleted=error');
     exit;

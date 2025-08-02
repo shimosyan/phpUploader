@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ファイルダウンロード処理
  *
  * ワンタイムトークンによる安全なダウンロード
  */
+
+declare(strict_types=1);
 
 // エラー表示設定
 ini_set('display_errors', '0');
@@ -14,19 +14,22 @@ ini_set('log_errors', '1'); // ログファイルにエラーを記録
 error_reporting(E_ALL);
 
 try {
-    // 設定とユーティリティの読み込み
-    require_once './config/config.php';
-    require_once './src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
-    require_once './app/models/init.php';
-    $db = initializeApp($config);
+    require_once $baseDir . '/app/models/init.php';
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger($config['log_directory'], $config['log_level'], $db);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
 
     // パラメータの取得
     $fileId = (int)($_GET['id'] ?? 0);
@@ -55,19 +58,25 @@ try {
     $tokenData = $tokenStmt->fetch();
 
     if (!$tokenData) {
-        $logger->warning('Invalid or expired download token', ['file_id' => $fileId, 'token' => substr($token, 0, 8) . '...']);
+        $logger->warning(
+            'Invalid or expired download token',
+            [
+                'file_id' => $fileId,
+                'token' => substr($token, 0, 8) . '...'
+            ]
+        );
         header('Location: ./');
         exit;
     }
 
     // IPアドレスの検証（設定で有効な場合）
-    if ($config['security']['log_ip_address'] && !empty($tokenData['ip_address'])) {
+    if ($config['security']['logIpAddress'] && !empty($tokenData['ip_address'])) {
         $currentIP = $_SERVER['REMOTE_ADDR'] ?? '';
         if ($currentIP !== $tokenData['ip_address']) {
             $logger->warning('IP address mismatch for download', [
                 'file_id' => $fileId,
                 'token_ip' => $tokenData['ip_address'],
-                'current_ip' => $currentIP
+                'current_ip' => $currentIP,
             ]);
             // IPアドレスが異なる場合は警告ログのみで、ダウンロードは継続
         }
@@ -78,11 +87,11 @@ try {
 
     if (!empty($tokenData['stored_file_name'])) {
         // 新形式（ハッシュ化されたファイル名）
-        $filePath = $config['data_directory'] . '/' . $tokenData['stored_file_name'];
+        $filePath = $config['dataDirectoryPath'] . '/' . $tokenData['stored_file_name'];
     } else {
         // 旧形式（互換性のため）
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $filePath = $config['data_directory'] . '/file_' . $fileId . '.' . $fileExtension;
+        $filePath = $config['dataDirectoryPath'] . '/file_' . $fileId . '.' . $fileExtension;
     }
 
     // ファイルの存在確認
@@ -107,14 +116,14 @@ try {
     }
 
     // ダウンロード回数の更新
-    $updateStmt = $db->prepare("UPDATE uploaded SET count = count + 1, updated_at = :updated_at WHERE id = :id");
+    $updateStmt = $db->prepare('UPDATE uploaded SET count = count + 1, updated_at = :updated_at WHERE id = :id');
     $updateStmt->execute([
         'id' => $fileId,
-        'updated_at' => time()
+        'updated_at' => time(),
     ]);
 
     // 使用済みトークンの削除（ワンタイム）
-    $deleteTokenStmt = $db->prepare("DELETE FROM access_tokens WHERE token = :token");
+    $deleteTokenStmt = $db->prepare('DELETE FROM access_tokens WHERE token = :token');
     $deleteTokenStmt->execute(['token' => $token]);
 
     // アクセスログの記録
@@ -147,16 +156,13 @@ try {
         $logger->error('Failed to open file for download', ['file_id' => $fileId, 'path' => $filePath]);
         header('Location: ./');
     }
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
-    if (isset($logger)) {
-        $logger->error('Download Error: ' . $e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'file_id' => $fileId ?? null
-        ]);
-    }
+    $logger->error('Download Error: ' . $e->getMessage(), [
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'file_id' => $fileId,
+    ]);
 
     header('Location: ./');
     exit;

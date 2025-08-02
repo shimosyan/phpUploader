@@ -1,0 +1,25 @@
+vars:
+  title: "Example"
+  body: "Example"
+templates:
+  base: |
+    {{template "link" .}}
+
+    {{template "join_command" .}}
+
+    {{template "hidden_combined_output" .}}
+post:
+  common-error: |
+    ## :x: {{.Vars.title}}
+
+    ```text
+    {{.Vars.body}}
+    ```
+
+exec:
+  common-error:
+    - when: ExitCode != 0
+      template: |
+        ## {{template "status" .}} {{.Vars.title}}
+
+        {{template "base" .}}

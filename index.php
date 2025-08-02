@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * PHP Uploader Ver.2.0 - メインエントリーポイント
  *
  * 簡易フレームワーク with モダンPHP対応
  */
+
+declare(strict_types=1);
 
 // エラー表示設定（本番環境用）
 ini_set('display_errors', '0'); // 本番環境では 0 に設定
@@ -23,10 +23,13 @@ try {
         throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
     }
 
-    require_once './config/config.php';
-    require_once './src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
-    $configInstance = new config();
+    $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // 設定の検証
@@ -39,18 +42,20 @@ try {
     $page = preg_replace('/[^a-zA-Z0-9_]/', '', $page); // セキュリティ: 英数字とアンダースコアのみ許可
 
     // アプリケーション初期化
-    require_once './app/models/init.php';
-    $db = initializeApp($config);
+    require_once $baseDir . '/app/models/init.php';
+
+    $initInstance = new \PHPUploader\Model\Init($config);
+    $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger(
-        $config['log_directory'],
-        $config['log_level'],
+    $logger = new \PHPUploader\Core\Logger(
+        $config['logDirectoryPath'],
+        $config['logLevel'],
         $db
     );
 
     // レスポンスハンドラーの初期化
-    $responseHandler = new ResponseHandler($logger);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // アクセスログの記録
     $logger->access(null, 'page_view', 'success');
@@ -58,14 +63,15 @@ try {
     // モデルの読み込みと実行
     $modelData = [];
     $modelPath = "./app/models/{$page}.php";
+    $modelQueriedName = '\\PHPUploader\\Model\\' . ucfirst($page);
 
     if (file_exists($modelPath)) {
         require_once $modelPath;
 
-        if (class_exists($page)) {
-            $model = new $page();
+        if (class_exists($modelQueriedName)) {
+            $model = new $modelQueriedName();
             if (method_exists($model, 'index')) {
-                $result = $model->index();
+                $result = $model -> index();
                 if (is_array($result)) {
                     $modelData = $result;
                 }
@@ -78,8 +84,8 @@ try {
         'logger' => $logger,
         'responseHandler' => $responseHandler,
         'db' => $db,
-        'csrf_token' => SecurityUtils::generateCSRFToken(),
-        'status_message' => $_GET['deleted'] ?? null
+        'csrfToken' => \PHPUploader\Core\SecurityUtils::generateCSRFToken(),
+        'statusMessage' => $_GET['deleted'] ?? null
     ]);
 
     // 変数の展開
@@ -99,7 +105,6 @@ try {
 
     // フッターの出力
     require './app/views/footer.php';
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     $errorMessage = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
@@ -109,11 +114,17 @@ try {
         $logger->error('Application Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
     } else {
         // ログが利用できない場合はファイルに直接記録
-        $logMessage = date('Y-m-d H:i:s') . " [CRITICAL] " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . PHP_EOL;
+        $logMessage = date('Y-m-d H:i:s') .
+            ' [CRITICAL] ' . $e->getMessage() .
+            ' in ' .
+            $e->getFile() .
+            ' on line ' .
+            $e->getLine() .
+            PHP_EOL;
         @file_put_contents('./logs/critical.log', $logMessage, FILE_APPEND | LOCK_EX);
     }
 
