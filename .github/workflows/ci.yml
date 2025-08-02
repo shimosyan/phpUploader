@@ -228,7 +228,7 @@ jobs:
           if [ -f "vendor/bin/phpcs" ]; then
             echo "📋 プロジェクト設定によるコーディング規約チェック開始"
             # phpcs.xmlを使用してチェック
-            if ! vendor/bin/phpcs; then
+            if ! vendor/bin/phpcs .; then
               echo "❌ コーディング規約違反が検出されました"
               echo "🔧 修正方法: vendor/bin/phpcbf"
               echo "📋 設定ファイル: phpcs.xml"
