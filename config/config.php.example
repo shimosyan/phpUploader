@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace PHPUploader;
+
 /**
  * PHP Uploader Ver.2.0 設定ファイル
  *
@@ -9,8 +11,10 @@ declare(strict_types=1);
  * .htaccess等で保護してください
  */
 
-class config {
-    public function index(): array {
+class Config
+{
+    public function index(): array
+    {
         return [
             // 管理者用マスターキー（必ず変更してください）
             'master' => 'CHANGE_THIS_MASTER_KEY',
@@ -19,35 +23,39 @@ class config {
             'key' => 'CHANGE_THIS_ENCRYPTION_KEY',
 
             // セッション用ソルト（必ず変更してください）
-            'session_salt' => 'CHANGE_THIS_SESSION_SALT',
+            'sessionSalt' => 'CHANGE_THIS_sessionSalt',
 
             // アプリケーション設定
             'title' => 'PHP Uploader',
-            'save_max_files' => 500,
-            'max_comment' => 80,
-            'max_file_size' => 2, // MB
-            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
+            'saveMaxFiles' => 500,
+            'maxComment' => 80,
+            'maxFileSize' => 2, // MB
+            'extension' => [
+                'zip',
+                'rar',
+                'lzh',
+                'pdf',
+                'jpg',
+                'png',
+                'gif',
+            ],
 
             // ディレクトリ設定
-            'db_directory' => dirname(__DIR__) . '/db',
-            'data_directory' => dirname(__DIR__) . '/data',
-            'log_directory' => dirname(__DIR__) . '/logs',
+            'dbDirectoryPath' => dirname(__DIR__) . '/db',
+            'dataDirectoryPath' => dirname(__DIR__) . '/data',
+            'logDirectoryPath' => dirname(__DIR__) . '/logs',
 
             // セキュリティ設定
             'security' => [
-                'csrf_token_expiry' => 30, // 分
-                'min_key_length' => 4,
-                'log_ip_address' => true,
-                'max_login_attempts' => 5,
-                'lockout_duration' => 900 // 15分
+                'minKeyLength' => 4,
+                'logIpAddress' => true,
             ],
 
             // ログ設定
-            'log_level' => 'INFO', // DEBUG, INFO, WARNING, ERROR
-            'log_retention_days' => 30,
+            'logLevel' => 'INFO', // DEBUG, INFO, WARNING, ERROR
 
             // トークン設定
-            'token_expiry_minutes' => 10,
+            'tokenExpiryMinutes' => 10,
 
             // バージョン情報（composer.jsonから自動取得）
             'version' => $this->getVersion()
@@ -57,7 +65,8 @@ class config {
     /**
      * セキュリティ設定の検証を行う
      */
-    public function validateSecurityConfig(): bool {
+    public function validateSecurityConfig(): bool
+    {
         $config = $this->index();
 
         // 基本的なセキュリティ設定をチェック
@@ -69,15 +78,18 @@ class config {
             return false;
         }
 
-        if (strpos($config['session_salt'], 'CHANGE_THIS') !== false) {
+        if (strpos($config['sessionSalt'], 'CHANGE_THIS') !== false) {
             return false;
         }
 
         return true;
-    }    /**
+    }
+
+    /**
      * 設定の検証を行う
      */
-    public function validate(): array {
+    public function validate(): array
+    {
         $errors = [];
         $config = $this->index();
 
@@ -90,12 +102,16 @@ class config {
             $errors[] = '暗号化キーを変更してください';
         }
 
-        if ($config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+        if ($config['sessionSalt'] === 'CHANGE_THIS_sessionSalt') {
             $errors[] = 'セッションソルトを変更してください';
         }
 
         // ディレクトリの存在確認
-        $directories = ['db_directory', 'data_directory', 'log_directory'];
+        $directories = [
+            'dbDirectoryPath',
+            'dataDirectoryPath',
+            'logDirectoryPath',
+        ];
         foreach ($directories as $dir) {
             if (!is_dir($config[$dir])) {
                 $errors[] = "{$dir} ディレクトリが存在しません: {$config[$dir]}";
@@ -108,7 +124,8 @@ class config {
     /**
      * composer.jsonからバージョン情報を取得
      */
-    private function getVersion(): string {
+    private function getVersion(): string
+    {
         $composerPath = __DIR__ . '/../composer.json';
 
         if (file_exists($composerPath)) {
@@ -124,7 +141,8 @@ class config {
     /**
      * アプリケーションルートディレクトリを取得
      */
-    private function getAppRoot(): string {
+    private function getAppRoot(): string
+    {
         // config.phpの位置からアプリケーションルートを算出
         return dirname(__DIR__);
     }

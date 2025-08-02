@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace PHPUploader\Model;
+
 /**
  * アプリケーション初期化スクリプト
  *
@@ -9,19 +11,21 @@ declare(strict_types=1);
  * セキュリティチェックを行います。
  */
 
-class AppInitializer {
-
+class Init
+{
     private array $config;
-    private ?PDO $db = null;
+    private ?\PDO $db = null;
 
-    public function __construct(array $config) {
+    public function __construct(array $config)
+    {
         $this->config = $config;
     }
 
     /**
      * 初期化メイン処理
      */
-    public function initialize(): PDO {
+    public function initialize(): \PDO
+    {
         $this->validateConfig();
         $this->createDirectories();
         $this->initializeDatabase();
@@ -33,7 +37,8 @@ class AppInitializer {
     /**
      * 設定ファイルの検証
      */
-    private function validateConfig(): void {
+    private function validateConfig(): void
+    {
         // セキュリティ設定の検証
         if ($this->config['master'] === 'CHANGE_THIS_MASTER_KEY') {
             $this->throwError('マスターキーが設定されていません。config.phpを確認してください。');
@@ -43,13 +48,18 @@ class AppInitializer {
             $this->throwError('暗号化キーが設定されていません。config.phpを確認してください。');
         }
 
-        if ($this->config['session_salt'] === 'CHANGE_THIS_SESSION_SALT') {
+        if ($this->config['sessionSalt'] === 'CHANGE_THIS_sessionSalt') {
             $this->throwError('セッションソルトが設定されていません。config.phpを確認してください。');
         }
 
         // 必要な拡張モジュールの確認
-        $required_extensions = ['pdo', 'sqlite3', 'openssl', 'json'];
-        foreach ($required_extensions as $ext) {
+        $requiredExtensions = [
+            'pdo',
+            'sqlite3',
+            'openssl',
+            'json',
+        ];
+        foreach ($requiredExtensions as $ext) {
             if (!extension_loaded($ext)) {
                 $this->throwError("必要なPHP拡張モジュール '{$ext}' がロードされていません。");
             }
@@ -59,11 +69,12 @@ class AppInitializer {
     /**
      * 必要なディレクトリの作成
      */
-    private function createDirectories(): void {
+    private function createDirectories(): void
+    {
         $directories = [
-            $this->config['db_directory'],
-            $this->config['data_directory'],
-            $this->config['log_directory']
+            $this->config['dbDirectoryPath'],
+            $this->config['dataDirectoryPath'],
+            $this->config['logDirectoryPath'],
         ];
 
         foreach ($directories as $dir) {
@@ -83,18 +94,18 @@ class AppInitializer {
     /**
      * データベース接続の初期化
      */
-    private function initializeDatabase(): void {
+    private function initializeDatabase(): void
+    {
         try {
-            $dsn = 'sqlite:' . $this->config['db_directory'] . '/uploader.db';
-            $this->db = new PDO($dsn);
+            $dsn = 'sqlite:' . $this->config['dbDirectoryPath'] . '/uploader.db';
+            $this->db = new \PDO($dsn);
 
             // エラーモードを例外に設定
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
             // デフォルトのフェッチモードを連想配列形式に設定
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
+            $this->db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
             $this->throwError('データベースの接続に失敗しました: ' . $e->getMessage());
         }
     }
@@ -102,7 +113,8 @@ class AppInitializer {
     /**
      * データベーステーブルの作成・更新
      */
-    private function setupDatabase(): void {
+    private function setupDatabase(): void
+    {
         try {
             // メインテーブルの作成
             $query = "
@@ -159,8 +171,7 @@ class AppInitializer {
 
             // 既存データの移行（必要に応じて）
             $this->migrateExistingData();
-
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $this->throwError('データベースの初期化に失敗しました: ' . $e->getMessage());
         }
     }
@@ -168,14 +179,15 @@ class AppInitializer {
     /**
      * データベースインデックスの作成
      */
-    private function createIndexes(): void {
+    private function createIndexes(): void
+    {
         $indexes = [
-            "CREATE INDEX IF NOT EXISTS idx_uploaded_input_date ON uploaded(input_date)",
-            "CREATE INDEX IF NOT EXISTS idx_uploaded_file_hash ON uploaded(file_hash)",
-            "CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON access_tokens(expires_at)",
-            "CREATE INDEX IF NOT EXISTS idx_tokens_file_id ON access_tokens(file_id)",
-            "CREATE INDEX IF NOT EXISTS idx_logs_created_at ON access_logs(created_at)",
-            "CREATE INDEX IF NOT EXISTS idx_logs_file_id ON access_logs(file_id)"
+            'CREATE INDEX IF NOT EXISTS idx_uploaded_input_date ON uploaded(input_date)',
+            'CREATE INDEX IF NOT EXISTS idx_uploaded_file_hash ON uploaded(file_hash)',
+            'CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON access_tokens(expires_at)',
+            'CREATE INDEX IF NOT EXISTS idx_tokens_file_id ON access_tokens(file_id)',
+            'CREATE INDEX IF NOT EXISTS idx_logs_created_at ON access_logs(created_at)',
+            'CREATE INDEX IF NOT EXISTS idx_logs_file_id ON access_logs(file_id)',
         ];
 
         foreach ($indexes as $indexQuery) {
@@ -186,9 +198,10 @@ class AppInitializer {
     /**
      * 既存データの移行処理
      */
-    private function migrateExistingData(): void {
+    private function migrateExistingData(): void
+    {
         // uploaded テーブルに新しいカラムが存在するかチェック
-        $columns = $this->db->query("PRAGMA table_info(uploaded)")->fetchAll();
+        $columns = $this->db->query('PRAGMA table_info(uploaded)')->fetchAll();
         $columnNames = array_column($columns, 'name');
 
         // 新しいカラムの追加
@@ -197,14 +210,14 @@ class AppInitializer {
             'file_hash' => 'ALTER TABLE uploaded ADD COLUMN file_hash text',
             'ip_address' => 'ALTER TABLE uploaded ADD COLUMN ip_address text',
             'created_at' => 'ALTER TABLE uploaded ADD COLUMN created_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))',
-            'updated_at' => 'ALTER TABLE uploaded ADD COLUMN updated_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))'
+            'updated_at' => 'ALTER TABLE uploaded ADD COLUMN updated_at INTEGER DEFAULT (strftime(\'%s\', \'now\'))',
         ];
 
         foreach ($newColumns as $columnName => $alterQuery) {
             if (!in_array($columnName, $columnNames)) {
                 try {
                     $this->db->exec($alterQuery);
-                } catch (PDOException $e) {
+                } catch (\PDOException $e) {
                     // カラム追加に失敗した場合はログに記録するが処理は続行
                     error_log("Column migration failed for {$columnName}: " . $e->getMessage());
                 }
@@ -215,11 +228,12 @@ class AppInitializer {
     /**
      * エラー処理
      */
-    private function throwError(string $message): void {
+    private function throwError(string $message): void
+    {
         // ログディレクトリが存在する場合はエラーログを記録
-        if (isset($this->config['log_directory']) && is_dir($this->config['log_directory'])) {
-            $logFile = $this->config['log_directory'] . '/error.log';
-            $logMessage = date('Y-m-d H:i:s') . " [ERROR] " . $message . PHP_EOL;
+        if (isset($this->config['logDirectoryPath']) && is_dir($this->config['logDirectoryPath'])) {
+            $logFile = $this->config['logDirectoryPath'] . '/error.log';
+            $logMessage = date('Y-m-d H:i:s') . ' [ERROR] ' . $message . PHP_EOL;
             file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
         }
 
@@ -230,15 +244,4 @@ class AppInitializer {
         include('./app/views/footer.php');
         exit;
     }
-}
-
-// 従来の処理との互換性のため、関数形式でのラッパーを提供
-function initializeApp(array $config): PDO {
-    $initializer = new AppInitializer($config);
-    return $initializer->initialize();
-}
-
-// 従来のinit.phpとの互換性を保つため、直接実行された場合の処理
-if (isset($config) && is_array($config)) {
-    $db = initializeApp($config);
 }

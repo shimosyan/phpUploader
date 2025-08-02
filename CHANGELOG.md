@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-08-03
+
+### Fixed
+
+- 古いライブラリが残ったままになっている問題に対処
+
+### Changed
+
+- サーバー側の処理の信頼性を向上
+- コーディング規約に準じた書き方を反映
+
+### Other
+
+- その他開発者向けワークフローの充実化
+
 ## [2.0.0] - 2025-07-31
 
 **🚨 BREAKING CHANGES: Ver.2.0は内部DBの仕様が刷新されているため、Ver.1.x系との互換性がありません。**

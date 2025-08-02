@@ -5,6 +5,13 @@ on:
     tags:
       - 'v*'
 
+concurrency:
+  group: release # repo レベルの排他制御
+  cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
+
+permissions:
+  contents: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -26,17 +33,26 @@ jobs:
           # 不要なファイルを除外してアーカイブ作成
           zip -r phpUploader-${GITHUB_REF#refs/tags/}.zip . \
             -x "*.git*" \
-            -x "tests/*" \
-            -x "docker/*" \
-            -x "node_modules/*" \
+            -x ".config/*" \
             -x ".github/*" \
-            -x "composer.lock" \
-            -x "phpunit.xml" \
-            -x "cspell.json" \
-            -x ".config" \
-            -x "*.md" \
+            -x "node_modules/*" \
             -x "data/*" \
-            -x "db/*"
+            -x "db/*" \
+            -x "docker/*" \
+            -x "image/*" \
+            -x "logs/*" \
+            -x "scripts/*" \
+            -x "tests/*" \
+            -x "vender/*" \
+            -x ".gitignore" \
+            -x ".markdownlint.json" \
+            -x "aqua.yaml" \
+            -x "composer.lock" \
+            -x "cspell.json" \
+            -x "github-comment.yaml" \
+            -x "phpunit.xml" \
+            -x "phpstan.neon" \
+            -x "*.md" \
 
       - name: Create Release
         uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 #2.3.2
