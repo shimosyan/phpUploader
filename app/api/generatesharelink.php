@@ -1,7 +1,7 @@
 <?php
 
 // エラーを画面に表示(1を0にすると画面上にはエラーは出ない)
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
 
 $id = $_POST['id'];
 $max_downloads = isset($_POST['max_downloads']) ? (int)$_POST['max_downloads'] : null;
