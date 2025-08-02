@@ -11,8 +11,10 @@ namespace PHPUploader;
  * .htaccess等で保護してください
  */
 
-class Config {
-    public function index(): array {
+class Config
+{
+    public function index(): array
+    {
         return [
             // 管理者用マスターキー（必ず変更してください）
             'master' => 'CHANGE_THIS_MASTER_KEY',
@@ -63,7 +65,8 @@ class Config {
     /**
      * セキュリティ設定の検証を行う
      */
-    public function validateSecurityConfig(): bool {
+    public function validateSecurityConfig(): bool
+    {
         $config = $this->index();
 
         // 基本的なセキュリティ設定をチェック
@@ -85,7 +88,8 @@ class Config {
     /**
      * 設定の検証を行う
      */
-    public function validate(): array {
+    public function validate(): array
+    {
         $errors = [];
         $config = $this->index();
 
@@ -120,7 +124,8 @@ class Config {
     /**
      * composer.jsonからバージョン情報を取得
      */
-    private function getVersion(): string {
+    private function getVersion(): string
+    {
         $composerPath = __DIR__ . '/../composer.json';
 
         if (file_exists($composerPath)) {
@@ -136,7 +141,8 @@ class Config {
     /**
      * アプリケーションルートディレクトリを取得
      */
-    private function getAppRoot(): string {
+    private function getAppRoot(): string
+    {
         // config.phpの位置からアプリケーションルートを算出
         return dirname(__DIR__);
     }
