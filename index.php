@@ -99,7 +99,6 @@ try {
 
     // フッターの出力
     require './app/views/footer.php';
-
 } catch (Exception $e) {
     // 緊急時のエラーハンドリング
     $errorMessage = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
@@ -109,11 +108,17 @@ try {
         $logger->error('Application Error: ' . $e->getMessage(), [
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
     } else {
         // ログが利用できない場合はファイルに直接記録
-        $logMessage = date('Y-m-d H:i:s') . " [CRITICAL] " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . PHP_EOL;
+        $logMessage = date('Y-m-d H:i:s') .
+            ' [CRITICAL] ' . $e->getMessage() .
+            ' in ' .
+            $e->getFile() .
+            ' on line ' .
+            $e->getLine() .
+            PHP_EOL;
         @file_put_contents('./logs/critical.log', $logMessage, FILE_APPEND | LOCK_EX);
     }
 
