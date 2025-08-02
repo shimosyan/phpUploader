@@ -26,6 +26,9 @@
     </div>
   <?php endif; ?>
 
+  <!-- ファイルマネージャ部分 -->
+  <?php include __DIR__ . '/partials/file-manager.php'; ?>
+
   <!-- フッター情報 -->
   <div class="row">
     <div class="col-sm-12">

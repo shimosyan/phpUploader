@@ -52,6 +52,7 @@
     <script src="https://cdn.jsdelivr.net/npm/tus-js-client@3.1.1/dist/tus.min.js"></script>
     
     <script src="./asset/js/common.js"></script>
+    <script src="./asset/js/file-manager.js"></script>
     <script src="./asset/js/dragdrop.js"></script>
   </body>
 </html>
