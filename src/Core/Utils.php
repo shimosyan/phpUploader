@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * セキュリティユーティリティクラス
  * Ver.2.0で追加されたセキュリティ機能
  */
+
+declare(strict_types=1);
+
 class SecurityUtils
 {
     /**

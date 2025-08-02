@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * 削除検証API
  *
  * ハッシュ化された削除キーの検証とワンタイムトークンの生成
  */
+
+declare(strict_types=1);
 
 // エラー表示設定
 ini_set('display_errors', '0');

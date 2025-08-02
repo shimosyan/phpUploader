@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * アプリケーション初期化スクリプト
  *
  * 必要なディレクトリの作成、データベースの初期化、
  * セキュリティチェックを行います。
  */
+
+declare(strict_types=1);
 
 class AppInitializer {
 

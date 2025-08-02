@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * ファイルアップロードAPI
  *
@@ -9,6 +7,9 @@ declare(strict_types=1);
  */
 
 // 出力バッファリング開始
+
+declare(strict_types=1);
+
 ob_start();
 
 // エラー表示設定（デバッグ用）
