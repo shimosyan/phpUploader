@@ -51,45 +51,22 @@
                   <?php if (isset($dlkey_required) && $dlkey_required) : ?>
                     <span class="text-danger">*必須</span>
                   <?php else : ?>
-                    <small class="text-muted">(任意・自動生成)</small>
+                    <small class="text-muted">(任意)</small>
                   <?php endif; ?>
                 </label>
                 <input type="text" class="form-control" id="dleyInput" name="dlkey"
                        placeholder="<?php echo (isset($dlkey_required) && $dlkey_required) ?
                                       'ダウンロードキーを入力してください' :
-                                      '任意のパスワード... (空白時16文字自動生成)'; ?>"
+                                      'ダウンロードキーを入力... (空白時は認証不要)'; ?>"
                        <?php echo (isset($dlkey_required) && $dlkey_required) ? 'required' : ''; ?>>
-                <p class="help-block">
-                  <?php if (isset($dlkey_required) && $dlkey_required) : ?>
-                    ファイルダウンロード時に必要なキーです（必須）
-                  <?php else : ?>
-                    空白の場合、16文字のランダムキーを自動生成します
-                  <?php endif; ?>
-                </p>
+                <p class="help-block">ファイルダウンロード時に必要なキーです</p>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
-                <label for="delkeyInput">
-                  🗑️ 削除キー
-                  <?php if (isset($delkey_required) && $delkey_required) : ?>
-                    <span class="text-danger">*必須</span>
-                  <?php else : ?>
-                    <small class="text-muted">(任意・自動生成)</small>
-                  <?php endif; ?>
-                </label>
-                <input type="text" class="form-control" id="deleyInput" name="delkey"
-                       placeholder="<?php echo (isset($delkey_required) && $delkey_required) ?
-                                      '削除キーを入力してください' :
-                                      '任意のパスワード... (空白時16文字自動生成)'; ?>"
-                       <?php echo (isset($delkey_required) && $delkey_required) ? 'required' : ''; ?>>
-                <p class="help-block">
-                  <?php if (isset($delkey_required) && $delkey_required) : ?>
-                    ファイル削除時に必要なキーです（必須）
-                  <?php else : ?>
-                    空白の場合、16文字のランダムキーを自動生成します
-                  <?php endif; ?>
-                </p>
+                <label for="delkeyInput">削除キー <small class="text-muted">(任意)</small></label>
+                <input type="text" class="form-control" id="deleyInput" name="delkey" placeholder="削除キーを入力... (空白時は削除不可)">
+                <p class="help-block">ファイル削除時に必要なキーです</p>
               </div>
             </div>
           </div>
