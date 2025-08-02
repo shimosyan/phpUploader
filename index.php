@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 // エラー表示設定（本番環境用）
-ini_set('display_errors', '1'); // 本番環境では 0 に設定
+ini_set('display_errors', '0'); // 本番環境では 0 に設定
 error_reporting(E_ALL);
 
 // セッション開始
@@ -23,8 +23,11 @@ try {
         throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
     }
 
-    require_once './config/config.php';
-    require_once './src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
     $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
@@ -39,20 +42,20 @@ try {
     $page = preg_replace('/[^a-zA-Z0-9_]/', '', $page); // セキュリティ: 英数字とアンダースコアのみ許可
 
     // アプリケーション初期化
-    require_once './app/models/init.php';
+    require_once $baseDir . '/app/models/init.php';
 
     $initInstance = new \PHPUploader\Model\Init($config);
     $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger(
+    $logger = new \PHPUploader\Core\Logger(
         $config['logDirectoryPath'],
         $config['logLevel'],
         $db
     );
 
     // レスポンスハンドラーの初期化
-    $responseHandler = new ResponseHandler($logger);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // アクセスログの記録
     $logger->access(null, 'page_view', 'success');
@@ -66,7 +69,7 @@ try {
         require_once $modelPath;
 
         if (class_exists($modelQueriedName)) {
-            $model = new $modelQueriedName;
+            $model = new $modelQueriedName();
             if (method_exists($model, 'index')) {
                 $result = $model -> index();
                 if (is_array($result)) {
@@ -81,7 +84,7 @@ try {
         'logger' => $logger,
         'responseHandler' => $responseHandler,
         'db' => $db,
-        'csrfToken' => SecurityUtils::generateCSRFToken(),
+        'csrfToken' => \PHPUploader\Core\SecurityUtils::generateCSRFToken(),
         'statusMessage' => $_GET['deleted'] ?? null
     ]);
 

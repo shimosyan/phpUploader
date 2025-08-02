@@ -1,4 +1,5 @@
 <?php
+
 /**
  * バージョン確認テストスクリプト
  * config.phpがcomposer.jsonから正しくバージョンを読み取れるかテスト
@@ -49,9 +50,9 @@ echo "⚙️  config.php バージョン: $configVersion\n";
 if ($expectedVersion === $configVersion) {
     echo "✅ バージョンが一致しています！\n";
     echo "\n=== その他の設定情報 ===\n";
-    echo "Title: " . $configData['title'] . "\n";
-    echo "Max file size: " . $configData['maxFileSize'] . "MB\n";
-    echo "Allowed extensions: " . implode(', ', $configData['extension']) . "\n";
+    echo 'Title: ' . $configData['title'] . "\n";
+    echo 'Max file size: ' . $configData['maxFileSize'] . "MB\n";
+    echo 'Allowed extensions: ' . implode(', ', $configData['extension']) . "\n";
     exit(0);
 } else {
     echo "❌ バージョンが一致しません\n";

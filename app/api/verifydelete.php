@@ -20,22 +20,24 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    // 設定とユーティリティの読み込み
-    require_once '../../config/config.php';
-    require_once '../../src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
     $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
-    require_once '../../app/models/init.php';
+    require_once $baseDir . '/app/models/init.php';
 
     $initInstance = new \PHPUploader\Model\Init($config);
     $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
-    $responseHandler = new ResponseHandler($logger);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // 入力データの取得
     $fileId = (int)($_POST['id'] ?? 0);
@@ -46,7 +48,7 @@ try {
     }
 
     // CSRFトークンの検証
-    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? '')) {
+    if (!\PHPUploader\Core\SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $logger->warning('CSRF token validation failed in delete verify', ['file_id' => $fileId]);
         $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
     }
@@ -73,7 +75,7 @@ try {
         } else {
             // ハッシュ化されたキーとの照合
             if (!empty($inputKey)) {
-                $isValidAuth = SecurityUtils::verifyPassword($inputKey, $fileData['del_key_hash']);
+                $isValidAuth = \PHPUploader\Core\SecurityUtils::verifyPassword($inputKey, $fileData['del_key_hash']);
             } else {
                 // キーが設定されているが、入力されていない場合
                 $isValidAuth = false;
@@ -98,7 +100,7 @@ try {
     $cleanupStmt->execute(['now' => time()]);
 
     // ワンタイムトークンの生成
-    $token = SecurityUtils::generateRandomToken(32);
+    $token = \PHPUploader\Core\SecurityUtils::generateRandomToken(32);
     $expiresAt = time() + ($config['tokenExpiryMinutes'] * 60);
 
     // トークンをデータベースに保存

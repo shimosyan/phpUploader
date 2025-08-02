@@ -14,21 +14,22 @@ ini_set('log_errors', '1'); // ログファイルにエラーを記録
 error_reporting(E_ALL);
 
 try {
-    // 設定とユーティリティの読み込み
-    require_once './config/config.php';
-    require_once './src/Core/Utils.php';
+    // 設定とユーティリティの読み込み（絶対パスで修正）
+    $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
+    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/Logger.php';
 
     $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
 
     // アプリケーション初期化
-    require_once './app/models/init.php';
+    require_once $baseDir . '/app/models/init.php';
 
     $initInstance = new \PHPUploader\Model\Init($config);
     $db = $initInstance -> initialize();
 
     // ログ機能の初期化
-    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
 
     // パラメータの取得
     $fileId = (int)($_GET['id'] ?? 0);

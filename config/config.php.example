@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
+namespace PHPUploader;
+
 /**
  * PHP Uploader Ver.2.0 設定ファイル
  *
  * このファイルおよびデータディレクトリは外部からアクセスできないように
  * .htaccess等で保護してください
  */
-
-namespace PHPUploader;
 
 class Config {
     public function index(): array {
@@ -28,7 +28,15 @@ class Config {
             'saveMaxFiles' => 500,
             'maxComment' => 80,
             'maxFileSize' => 2, // MB
-            'extension' => ['zip', 'rar', 'lzh', 'pdf', 'jpg', 'png', 'gif'],
+            'extension' => [
+                'zip',
+                'rar',
+                'lzh',
+                'pdf',
+                'jpg',
+                'png',
+                'gif',
+            ],
 
             // ディレクトリ設定
             'dbDirectoryPath' => dirname(__DIR__) . '/db',
@@ -95,7 +103,11 @@ class Config {
         }
 
         // ディレクトリの存在確認
-        $directories = ['dbDirectoryPath', 'dataDirectoryPath', 'logDirectoryPath'];
+        $directories = [
+            'dbDirectoryPath',
+            'dataDirectoryPath',
+            'logDirectoryPath',
+        ];
         foreach ($directories as $dir) {
             if (!is_dir($config[$dir])) {
                 $errors[] = "{$dir} ディレクトリが存在しません: {$config[$dir]}";

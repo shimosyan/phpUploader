@@ -5,6 +5,12 @@
     <!-- 拡張子が php のものにだけ適用 -->
     <arg name="extensions" value="php" />
 
+    <!-- 出力に色を適用 -->
+    <arg name="colors" />
+
+    <!-- オプション p:進捗表示  s:エラー表示時にルールを表示 -->
+    <arg value="ps" />
+
     <!-- 除外パス -->
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>tests/*</exclude-pattern>
@@ -17,6 +23,18 @@
     <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
         <!-- ルールを除外 -->
         <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
+
+    <!-- SideEffects 警告 -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <!-- ルールを除外 -->
+        <exclude-pattern>scripts/release.php</exclude-pattern>
+    </rule>
+
+    <!-- namespace を必須 -->
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
+        <!-- ルールを除外 -->
+        <exclude-pattern>scripts/release.php</exclude-pattern>
     </rule>
 
     <!-- 配列要素のインデントを4つにする -->

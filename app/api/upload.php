@@ -31,7 +31,8 @@ try {
     // 設定とユーティリティの読み込み（絶対パスで修正）
     $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
     require_once $baseDir . '/config/config.php';
-    require_once $baseDir . '/src/Core/Utils.php';
+    require_once $baseDir . '/src/Core/Logger.php';
+    require_once $baseDir . '/src/Core/ResponseHandler.php';
 
     $configInstance = new \PHPUploader\Config();
     $config = $configInstance->index();
@@ -43,8 +44,8 @@ try {
     $db = $initInstance -> initialize();
 
     // ログとレスポンスハンドラーの初期化
-    $logger = new Logger($config['logDirectoryPath'], $config['logLevel'], $db);
-    $responseHandler = new ResponseHandler($logger);
+    $logger = new \PHPUploader\Core\Logger($config['logDirectoryPath'], $config['logLevel'], $db);
+    $responseHandler = new \PHPUploader\Core\ResponseHandler($logger);
 
     // リクエストメソッドの確認
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -57,7 +58,7 @@ try {
     }
 
     // CSRFトークンの検証
-    if (!SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? null)) {
+    if (!\PHPUploader\Core\SecurityUtils::validateCSRFToken($_POST['csrf_token'] ?? null)) {
         $logger->warning('CSRF token validation failed', ['ip' => $_SERVER['REMOTE_ADDR'] ?? '']);
         $responseHandler->error('無効なリクエストです。ページを再読み込みしてください。', [], 403);
     }
@@ -178,8 +179,10 @@ try {
     $fileHash = hash_file('sha256', $fileTmpPath);
 
     // 認証キーのハッシュ化（空の場合はnull）
-    $dlKeyHash = (!empty($dlKey) && trim($dlKey) !== '') ? SecurityUtils::hashPassword($dlKey) : null;
-    $delKeyHash = (!empty($delKey) && trim($delKey) !== '') ? SecurityUtils::hashPassword($delKey) : null;
+    $dlKeyHash =
+        (!empty($dlKey) && trim($dlKey) !== '') ? \PHPUploader\Core\SecurityUtils::hashPassword($dlKey) : null;
+    $delKeyHash =
+        (!empty($delKey) && trim($delKey) !== '') ? \PHPUploader\Core\SecurityUtils::hashPassword($delKey) : null;
 
     // まず仮のデータベース登録（stored_file_nameは後で更新）
     $insertStmt = $db->prepare('
@@ -213,8 +216,8 @@ try {
     $fileId = (int)$db->lastInsertId();
 
     // セキュアなファイル名の生成（ハッシュ化）
-    $hashedFileName = SecurityUtils::generateSecureFileName($fileId, $fileName);
-    $storedFileName = SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
+    $hashedFileName = \PHPUploader\Core\SecurityUtils::generateSecureFileName($fileId, $fileName);
+    $storedFileName = \PHPUploader\Core\SecurityUtils::generateStoredFileName($hashedFileName, $fileExtension);
     $saveFilePath = $config['dataDirectoryPath'] . '/' . $storedFileName;
 
     // ファイル保存
