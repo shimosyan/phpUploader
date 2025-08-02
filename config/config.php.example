@@ -36,7 +36,6 @@ class config {
             'allow_comment_edit' => true,   // コメント編集機能の有効/無効
             'file_edit_admin_only' => false, // true: 管理者のみ編集可能, false: 誰でも編集可能
 
->>>>>>> d8b1d29 (config: Increase limits for better usability)
             // ディレクトリ設定
             'db_directory' => dirname(__DIR__) . '/db',
             'data_directory' => dirname(__DIR__) . '/data',
