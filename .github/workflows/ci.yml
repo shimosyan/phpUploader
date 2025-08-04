@@ -285,3 +285,13 @@ jobs:
             exit 0
           }
           echo "✅ Dockerビルド完了"
+
+  success:
+    needs:
+      - lint-and-test
+      - security-scan
+    if: ${{ !failure() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "Success!!"
