@@ -24,7 +24,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
         with:
-          aqua_version: v2.53.8
+          aqua_version: v2.53.9
 
       - run: github-comment exec -- github-comment hide
         env:
@@ -53,7 +53,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
         with:
-          aqua_version: v2.53.8
+          aqua_version: v2.53.9
 
       - name: Setup PHP
         uses: shivammathur/setup-php@ccf2c627fe61b1b4d924adfcbd19d661a18133a0 # v2.35.2
@@ -109,7 +109,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
         with:
-          aqua_version: v2.53.8
+          aqua_version: v2.53.9
 
       - name: Display PHP version info
         run: |
