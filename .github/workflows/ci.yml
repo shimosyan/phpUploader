@@ -11,8 +11,10 @@ concurrency:
   cancel-in-progress: true # PR の更新があった場合は前のジョブをキャンセルする
 
 permissions:
+  id-token: write
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   documentation:
