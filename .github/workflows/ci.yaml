@@ -101,9 +101,11 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - '8.1'
+          - '8.1'  # minimum supported version
           - '8.2'
           - '8.3'
+          # renovate: php-version-add
+          # Add new PHP versions here
 
     steps:
       - name: Checkout code

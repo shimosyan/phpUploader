@@ -27,6 +27,28 @@
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "labels": ["composer"],
       "automerge": true
+    },
+    {
+      "matchSourceUrls": ["https://github.com/php/php-src"],
+      "labels": ["php-version"],
+      "automerge": false,
+      "assignees": ["shimosyan"]
+    }
+  ],
+  "regexManagers": [
+    {
+      "description": "Add new PHP version to GitHub Actions workflow matrix",
+      "fileMatch": [
+        "^\\.github/workflows/.*\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: php-version-add\\s*\\n\\s*#\\s*Add new PHP versions here"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "php/php-src",
+      "extractVersionTemplate": "^php-(?<version>\\d+\\.\\d+)$",
+      "versioningTemplate": "loose",
+      "replacementTemplate": "# renovate: php-version-add\n          - '{{newValue}}'\n          # Add new PHP versions here"
     }
   ],
   "schedule": [
