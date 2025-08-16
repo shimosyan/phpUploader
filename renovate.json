@@ -19,6 +19,12 @@
       "enabled": false
     },
     {
+      "description": "Keep PHP version fixed at 8.1 in composer.json",
+      "matchFiles": ["composer.json"],
+      "matchPackageNames": ["php"],
+      "enabled": false
+    },
+    {
       "matchDepTypes": ["action"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "pinDigests": true,
