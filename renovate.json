@@ -6,6 +6,9 @@
     "github>aquaproj/aqua-renovate-config#2.8.2"
   ],
   "labels": ["renovate"],
+  "prConcurrentLimit": 2,
+  "prHourlyLimit": 1,
+  "stabilityDays": 1,
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
@@ -13,6 +16,12 @@
     },
     {
       "matchFileNames": ["docker/Dockerfile"],
+      "enabled": false
+    },
+    {
+      "description": "Keep PHP version fixed in composer.json",
+      "matchFiles": ["composer.json"],
+      "matchPackageNames": ["php"],
       "enabled": false
     },
     {
@@ -27,6 +36,42 @@
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "labels": ["composer"],
       "automerge": true
+    },
+    {
+      "matchSourceUrls": ["https://github.com/php/php-src"],
+      "labels": ["php-version"],
+      "automerge": false,
+      "assignees": ["shimosyan"]
+    },
+    {
+      "description": "Keep shivammathur/setup-php up to date for PHP version support",
+      "matchPackageNames": ["shivammathur/setup-php"],
+      "labels": ["setup-php", "critical"],
+      "automerge": false,
+      "prPriority": 10,
+      "assignees": ["shimosyan"],
+      "reviewers": ["shimosyan"]
+    },
+    {
+      "description": "Ensure setup-php is updated before PHP version additions",
+      "matchSourceUrls": ["https://github.com/php/php-src"],
+      "dependsOn": ["shivammathur/setup-php"]
+    }
+  ],
+  "regexManagers": [
+    {
+      "description": "Add new PHP version to GitHub Actions workflow matrix",
+      "fileMatch": [
+        "^\\.github/workflows/.*\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: php-version-add\\s*\\n\\s*#\\s*Add new PHP versions here"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "php/php-src",
+      "extractVersionTemplate": "^php-(?<version>\\d+\\.\\d+)$",
+      "versioningTemplate": "loose",
+      "replacementTemplate": "# renovate: php-version-add\n          - '{{newValue}}'\n          # Add new PHP versions here"
     }
   ],
   "schedule": [
