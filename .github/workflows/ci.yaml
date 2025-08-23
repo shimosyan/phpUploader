@@ -293,8 +293,24 @@ jobs:
     needs:
       - lint-and-test
       - security-scan
-    if: ${{ !failure() }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "Success!!"
+      - name: Check job result
+        run: |
+          RESULT="${{ needs.lint-and-test.result }}"
+
+          if [[ $RESULT != "success" && $RESULT != "skipped" ]]; then
+            echo "This workflow failed or was cancelled!"
+            exit 1
+          fi
+
+          RESULT="${{ needs.security-scan.result }}"
+          if [[ $RESULT != "success" && $RESULT != "skipped" ]]; then
+            echo "This workflow failed or was cancelled!"
+            exit 1
+          fi
+
+          echo "Success!!"
+          exit 0
