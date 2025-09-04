@@ -3,6 +3,7 @@ name: Update aqua-checksums.json
 on:
   pull_request:
     branches:
+      - master
       - main
     paths:
       - aqua.yaml
