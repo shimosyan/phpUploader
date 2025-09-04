@@ -12,3 +12,11 @@ phpunit
 softprops
 classmap
 aquaproj
+elif
+unmatch
+suzuki-shunsuke
+securefix
+libsqlite3
+a2enmod
+phpcbf
+squiz
