@@ -1,0 +1,60 @@
+name: Update aqua-checksums.json
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - aqua.yaml
+
+concurrency:
+  group: ${{ github.workflow }}-update-aqua-checksums-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  cancel-in-progress: true # PR の更新があった場合は前のジョブをキャンセルする
+
+permissions: {}
+
+jobs:
+  securefix:
+    runs-on: ubuntu-24.04
+    permissions: {}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Install aqua
+        uses: aquaproj/aqua-installer@d1fe50798dbadd4eb5b98957290ca175f6b4870f # v4.0.2
+        with:
+          aqua_version: v2.53.9
+
+      - name: Fix aqua-checksums.json
+        run: aqua upc -prune
+
+      - name: Check if aqua-checksums.json is changed
+        id: diff
+        run: |
+          # git管理されていないファイルも含めて変更を検出
+          if [ ! -f ./aqua-checksums.json ]; then
+            # ファイルが存在しない場合は変更なしとみなす
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          elif ! git ls-files --error-unmatch ./aqua-checksums.json >/dev/null 2>&1; then
+            # ファイルが存在するがgit管理されていない場合（新規作成）
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          elif git diff --exit-code ./aqua-checksums.json; then
+            # 既存ファイルで変更なし
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          else
+            # 既存ファイルで変更あり
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == '1'
+        uses: suzuki-shunsuke/commit-action@ca8e761ccb3533295065c3e90a8555fcdde8b467 # v0.0.10
+        with:
+          app_id: ${{secrets.APP_ID}}
+          app_private_key: ${{ secrets.PRIVATE_KEY }}
+          commit_message: "update: aqua-checksums.json"
+          files: aqua-checksums.json
