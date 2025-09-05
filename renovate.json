@@ -5,60 +5,106 @@
     "helpers:pinGitHubActionDigests",
     "github>aquaproj/aqua-renovate-config#2.8.2"
   ],
-  "labels": ["renovate"],
+  "labels": [
+    "renovate"
+  ],
   "prConcurrentLimit": 2,
   "prHourlyLimit": 1,
-  "stabilityDays": 1,
+  "minimumReleaseAge": "1 day",
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "automerge": true
     },
     {
-      "matchFileNames": ["docker/Dockerfile"],
+      "matchFileNames": [
+        "docker/Dockerfile"
+      ],
       "enabled": false
     },
     {
       "description": "Keep PHP version fixed in composer.json",
-      "matchFiles": ["composer.json"],
-      "matchPackageNames": ["php"],
+      "matchFileNames": [
+        "composer.json"
+      ],
+      "matchPackageNames": [
+        "php"
+      ],
       "enabled": false
     },
     {
-      "matchDepTypes": ["action"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchDepTypes": [
+        "action"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
       "pinDigests": true,
-      "labels": ["action"],
+      "labels": [
+        "action"
+      ],
       "automerge": true
     },
     {
-      "matchManagers": ["composer"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "labels": ["composer"],
+      "matchManagers": [
+        "composer"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "labels": [
+        "composer"
+      ],
       "automerge": true
     },
     {
-      "matchSourceUrls": ["https://github.com/php/php-src"],
-      "labels": ["php-version"],
+      "matchSourceUrls": [
+        "https://github.com/php/php-src"
+      ],
+      "labels": [
+        "php-version"
+      ],
       "automerge": false,
-      "assignees": ["shimosyan"]
+      "assignees": [
+        "shimosyan"
+      ]
     },
     {
       "description": "Keep shivammathur/setup-php up to date for PHP version support",
-      "matchPackageNames": ["shivammathur/setup-php"],
-      "labels": ["setup-php", "critical"],
+      "matchPackageNames": [
+        "shivammathur/setup-php"
+      ],
+      "labels": [
+        "setup-php",
+        "critical"
+      ],
       "automerge": false,
       "prPriority": 10,
-      "assignees": ["shimosyan"],
-      "reviewers": ["shimosyan"]
+      "assignees": [
+        "shimosyan"
+      ],
+      "reviewers": [
+        "shimosyan"
+      ]
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
       "description": "Update PHP version in GitHub Actions workflow matrix",
-      "fileMatch": [
-        "^\\.github/workflows/.*\\.ya?ml$"
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/"
       ],
       "matchStrings": [
         "# renovate: php-version\\s*\\n\\s*-\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
