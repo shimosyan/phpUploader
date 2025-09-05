@@ -1,0 +1,134 @@
+name: Auto Rebase Renovate PRs
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - .github/workflows/**
+      - aqua.yaml
+      - aqua-checksums.json
+  workflow_dispatch:
+    inputs:
+      pr_numbers:
+        description: 'Specific PR numbers to rebase (comma-separated,optional)'
+        required: false
+        type: string
+
+env:
+  TARGET_LABEL_NAME: rebase
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  get-renovate-prs:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has-prs: ${{ steps.set-matrix.outputs.has-prs }}
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Get Renovate PRs
+        id: get-prs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          if [ -n "${{ github.event.inputs.pr_numbers }}" ]; then
+            # 手動実行時に特定のPR番号が指定された場合
+            IFS=',' read -ra PR_ARRAY <<< "${{github.event.inputs.pr_numbers }}"
+            pr_json="["
+            for pr in "${PR_ARRAY[@]}"; do
+              pr_json="${pr_json}${pr},"
+            done
+            pr_json="${pr_json%,}]"
+          else
+            # RenovatePRを自動検出（aquaラベルまたはrenovateユーザーのPR）
+            pr_json=$(gh pr list \
+              --repo ${{ github.repository }} \
+              --state open \
+              --json number,author,labels \
+              --jq '[.[] | select((.author.login == "app/renovate") or (.labels | map(.name) | contains(["dependencies", "renovate"]))) | .number]')
+          fi
+          echo "pr_numbers=$pr_json" >> $GITHUB_OUTPUT
+
+      - name: Set Matrix
+        id: set-matrix
+        run: |
+          pr_numbers='${{ steps.get-prs.outputs.pr_numbers }}'
+          if [ "$pr_numbers" = "[]" ] || [ -z "$pr_numbers" ]; then
+            echo "has-prs=false" >> $GITHUB_OUTPUT
+            echo "matrix={\"pr\":[]}" >> $GITHUB_OUTPUT
+          else
+            echo "has-prs=true" >> $GITHUB_OUTPUT
+            echo "matrix={\"pr\":$pr_numbers}" >> $GITHUB_OUTPUT
+          fi
+
+  add-rebase-label:
+    needs: get-renovate-prs
+    if: needs.get-renovate-prs.outputs.has-prs == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.get-renovate-prs.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 10  # 同時実行数を制限
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Check if PR needs rebase
+        id: check-pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          # PRの状態を確認
+          pr_info=$(gh pr view ${{ matrix.pr }} \
+            --repo ${{ github.repository }} \
+            --json mergeable,labels,state)
+
+          mergeable=$(echo "$pr_info" | jq -r '.mergeable')
+          state=$(echo "$pr_info" | jq -r '.state')
+          has_rebase_label=$(echo "$pr_info" | jq '.labels | map(.name) | contains(["${{ env.TARGET_LABEL_NAME }}"])')
+
+          echo "mergeable=$mergeable" >> $GITHUB_OUTPUT
+          echo "state=$state" >> $GITHUB_OUTPUT
+          echo "has_rebase_label=$has_rebase_label" >> $GITHUB_OUTPUT
+
+      - name: Add rebase label
+        if: |
+          steps.check-pr.outputs.state == 'OPEN' &&
+          steps.check-pr.outputs.has_rebase_label == 'false'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "Adding rebase label to PR #${{ matrix.pr }}"
+          gh pr edit ${{ matrix.pr }} \
+            --repo ${{ github.repository }} \
+            --add-label ${{ env.TARGET_LABEL_NAME }}
+
+  summary:
+    needs:
+      - get-renovate-prs
+      - add-rebase-label
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          if [ "${{ needs.get-renovate-prs.outputs.has-prs }}" == "false" ]; then
+            echo "📝 No Renovate PRs found to rebase"
+          else
+            echo "✅ Rebase labels have been processed for Renovate PRs"
+            echo "Renovate will rebase the PRs on its next run."
+          fi

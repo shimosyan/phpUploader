@@ -75,5 +75,5 @@
     "* 0 * * *"
   ],
   "timezone": "Asia/Tokyo",
-  "dependencyDashboard": false
+  "dependencyDashboard": true
 }
