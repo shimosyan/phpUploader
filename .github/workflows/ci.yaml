@@ -26,7 +26,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342 # v4.0.3
         with:
-          aqua_version: v2.53.9
+          aqua_version: v2.53.10
 
       - id: app-token
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
@@ -61,7 +61,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342 # v4.0.3
         with:
-          aqua_version: v2.53.9
+          aqua_version: v2.53.10
 
       - id: app-token
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
@@ -123,7 +123,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342 # v4.0.3
         with:
-          aqua_version: v2.53.9
+          aqua_version: v2.53.10
 
       - id: app-token
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
