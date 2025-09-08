@@ -1,14 +1,12 @@
-name: CI
+name: PHP Test
 
 on:
-  pull_request:
-    branches:
-      - master
-      - main
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
-  cancel-in-progress: true # PR の更新があった場合は前のジョブをキャンセルする
+  workflow_call:
+    secrets:
+      APP_ID:
+        required: true
+      PRIVATE_KEY:
+        required: true
 
 permissions:
   id-token: write
@@ -17,43 +15,16 @@ permissions:
   issues: write
 
 jobs:
-  documentation:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-
-      - uses: aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342 # v4.0.3
-        with:
-          aqua_version: v2.53.11
-
-      - id: app-token
-        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-
-      - run: github-comment exec -- github-comment hide
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version: '22'
-
-      - name: Install markdownlint
-        run: npm install -g markdownlint-cli2
-
-      - name: Lint Markdown Files
-        run: github-comment exec -k common-error -var title:"Check Markdown Failed" -- markdownlint-cli2 "**/*.md" --config ".markdownlint.json"
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
   security-scan:
-    needs: documentation
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '8.1'  # minimum supported version
+          # renovate: php-version
+          - '8.3'
 
     steps:
       - name: Checkout code
@@ -72,8 +43,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 # 2.35.4
         with:
-          php-version: '8.1'
-          extensions: pdo, pdo_sqlite
+          php-version: ${{ matrix.php-version }}
+          extensions: pdo, pdo_sqlite, sqlite3
           tools: composer
 
       - name: Install dependencies
@@ -106,7 +77,6 @@ jobs:
 
 
   lint-and-test:
-    needs: documentation
     runs-on: ubuntu-latest
 
     strategy:
@@ -305,29 +275,3 @@ jobs:
             exit 0
           }
           echo "✅ Dockerビルド完了"
-
-  success:
-    needs:
-      - lint-and-test
-      - security-scan
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check job result
-        run: |
-          RESULT="${{ needs.lint-and-test.result }}"
-
-          if [[ $RESULT != "success" && $RESULT != "skipped" ]]; then
-            echo "This workflow failed or was cancelled!"
-            exit 1
-          fi
-
-          RESULT="${{ needs.security-scan.result }}"
-          if [[ $RESULT != "success" && $RESULT != "skipped" ]]; then
-            echo "This workflow failed or was cancelled!"
-            exit 1
-          fi
-
-          echo "Success!!"
-          exit 0

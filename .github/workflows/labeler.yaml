@@ -7,7 +7,7 @@ on:
       - synchronize
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  group: ${{ github.workflow }}-labeler-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
   cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
 
 permissions:
