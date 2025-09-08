@@ -1,0 +1,57 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  cancel-in-progress: true # PR の更新があった場合は前のジョブをキャンセルする
+
+permissions: {}
+
+jobs:
+  status-check:
+    needs:
+      - document-test
+      - update-aqua-checksums
+      - php-test
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    if: failure()
+    steps:
+      - run: exit 1
+
+  document-test:
+    uses: ./.github/workflows/wc-document-pull-request.yaml
+    secrets:
+      APP_ID: ${{secrets.APP_ID}}
+      PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+  update-aqua-checksums:
+    uses: ./.github/workflows/wc-update-aqua-checksums.yaml
+    secrets:
+      APP_ID: ${{secrets.APP_ID}}
+      PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+  php-test:
+    uses: ./.github/workflows/wc-php-test.yaml
+    secrets:
+      APP_ID: ${{secrets.APP_ID}}
+      PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      issues: write
