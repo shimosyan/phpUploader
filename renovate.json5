@@ -1,0 +1,132 @@
+{
+  '$schema': 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: [
+    'config:recommended',
+    'helpers:pinGitHubActionDigests',
+    'github>aquaproj/aqua-renovate-config#2.8.2',
+  ],
+
+  labels: [
+    'renovate',
+  ],
+
+  packageRules: [
+    {
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'pin',
+        'digest',
+      ],
+      automerge: true,
+    },
+    {
+      matchFileNames: [
+        'docker/Dockerfile',
+      ],
+      enabled: false,
+    },
+    {
+      description: 'Keep PHP version fixed in composer.json',
+      matchFileNames: [
+        'composer.json',
+      ],
+      matchPackageNames: [
+        'php',
+      ],
+      enabled: false,
+    },
+    {
+      matchDepTypes: [
+        'action',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'pin',
+        'digest',
+      ],
+      pinDigests: true,
+      labels: [
+        'action',
+      ],
+      automerge: true,
+    },
+    {
+      matchManagers: [
+        'composer',
+      ],
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'pin',
+        'digest',
+      ],
+      labels: [
+        'composer',
+      ],
+      automerge: true,
+    },
+    {
+      matchSourceUrls: [
+        'https://github.com/php/php-src',
+      ],
+      labels: [
+        'php-version',
+      ],
+      automerge: false,
+      assignees: [
+        'shimosyan',
+      ]
+    },
+    {
+      description: 'Keep shivammathur/setup-php up to date for PHP version support',
+      matchPackageNames: [
+        'shivammathur/setup-php',
+      ],
+      labels: [
+        'setup-php',
+        'critical',
+      ],
+      automerge: false,
+      prPriority: 10,
+      assignees: [
+        'shimosyan',
+      ],
+      reviewers: [
+        'shimosyan',
+      ]
+    }
+  ],
+
+  customManagers: [
+    {
+      customType: 'regex',
+      description: 'Update PHP version in GitHub Actions workflow matrix',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      matchStrings: [
+        "# renovate: php-version\\s*\\n\\s*-\\s*['\"]?(?<currentValue>[^'\"\\s]+)['\"]?",
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'php/php-src',
+      extractVersionTemplate: '^php-(?<version>\\d+\\.\\d+)$',
+    }
+  ],
+
+  prHourlyLimit: 1,
+  prConcurrentLimit: 10,
+  branchConcurrentLimit: 20,
+
+  minimumReleaseAge: '3 days', // 公開後3日間は PR を作成しない
+
+  schedule: [
+    '* 18-23,0-4 * * *',
+  ],
+  platformAutomerge: true,
+
+  timezone: 'Asia/Tokyo',
+  dependencyDashboard: true,
+}
