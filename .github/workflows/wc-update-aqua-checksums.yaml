@@ -48,11 +48,6 @@ jobs:
       - name: Fix aqua-checksums.json
         run: aqua upc -prune
 
-      - uses: suzuki-shunsuke/tfaction/js@c7f4e11bb3b673f40c3894b7612669e149d7b452 # v1.19.2
-        id: global-config
-        with:
-          action: get-global-config
-
       - name: Check if aqua-checksums.json is changed
         id: diff
         run: |
@@ -72,20 +67,10 @@ jobs:
           fi
 
       - name: Commit and push
-        if: steps.global-config.outputs.securefix_action_server_repository == '' && steps.diff.outputs.changed == '1'
+        if: steps.diff.outputs.changed == '1'
         uses: suzuki-shunsuke/commit-action@ca8e761ccb3533295065c3e90a8555fcdde8b467 # v0.0.10
         with:
           app_id: ${{secrets.APP_ID}}
           app_private_key: ${{ secrets.PRIVATE_KEY }}
           commit_message: "update: aqua-checksums.json"
           files: aqua-checksums.json
-
-      - name: Commit and push
-        if: steps.global-config.outputs.securefix_action_server_repository != '' && steps.diff.outputs.changed == '1'
-        uses: securefix-action/action@05036cda4e1fcaeba401d23261056048fe20ba27 # v0.2.2
-        with:
-          app_id: ${{secrets.APP_ID}}
-          app_private_key: ${{ secrets.PRIVATE_KEY }}
-          commit_message: "update: aqua-checksums.json"
-          files: aqua-checksums.json
-          server_repository: ${{ steps.global-config.outputs.securefix_action_server_repository }}
