@@ -122,9 +122,6 @@
 
   minimumReleaseAge: '3 days', // 公開後3日間は PR を作成しない
 
-  schedule: [
-    '* 16-23,0-5 * * *',
-  ],
   platformAutomerge: true,
 
   timezone: 'Asia/Tokyo',
