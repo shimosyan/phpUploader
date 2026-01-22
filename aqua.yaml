@@ -7,6 +7,6 @@ checksum:
 #   - all
 registries:
 - type: standard
-  ref: v4.457.0 # renovate: depName=aquaproj/aqua-registry
+  ref: v4.458.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: suzuki-shunsuke/github-comment@v6.4.1
