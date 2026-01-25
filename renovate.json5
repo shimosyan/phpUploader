@@ -4,7 +4,7 @@
   extends: [
     'config:recommended',
     'helpers:pinGitHubActionDigests',
-    'github>aquaproj/aqua-renovate-config#2.9.0',
+    'github>aquaproj/aqua-renovate-config#2.10.0',
   ],
 
   labels: [
