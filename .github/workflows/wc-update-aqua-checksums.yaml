@@ -3,7 +3,7 @@ name: Update aqua-checksums.json
 on:
   workflow_call:
     secrets:
-      APP_ID:
+      CLIENT_ID:
         required: true
       PRIVATE_KEY:
         required: true
@@ -66,11 +66,16 @@ jobs:
             echo "changed=1" >> "$GITHUB_OUTPUT"
           fi
 
+      - id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
       - name: Commit and push
         if: steps.diff.outputs.changed == '1'
         uses: suzuki-shunsuke/commit-action@44cc32c01e261a029c0161ff908a3a2895bfc46f # v0.1.2
         with:
-          app_id: ${{secrets.APP_ID}}
-          app_private_key: ${{ secrets.PRIVATE_KEY }}
+          github_token: ${{ steps.app-token.outputs.token }}
           commit_message: "update: aqua-checksums.json"
           files: aqua-checksums.json

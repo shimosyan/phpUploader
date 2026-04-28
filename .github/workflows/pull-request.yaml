@@ -28,7 +28,7 @@ jobs:
   document-test:
     uses: ./.github/workflows/wc-document-pull-request.yaml
     secrets:
-      APP_ID: ${{secrets.APP_ID}}
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
       PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
     permissions:
       id-token: write
@@ -38,7 +38,7 @@ jobs:
   update-aqua-checksums:
     uses: ./.github/workflows/wc-update-aqua-checksums.yaml
     secrets:
-      APP_ID: ${{secrets.APP_ID}}
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
       PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
     permissions:
       id-token: write
@@ -48,7 +48,7 @@ jobs:
   php-test:
     uses: ./.github/workflows/wc-php-test.yaml
     secrets:
-      APP_ID: ${{secrets.APP_ID}}
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
       PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
     permissions:
       id-token: write
