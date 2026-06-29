@@ -4,6 +4,15 @@ namespace PHPUploader\Model;
 
 class Index
 {
+    public const PUBLIC_FILE_COLUMNS = [
+        'id',
+        'origin_file_name',
+        'comment',
+        'size',
+        'count',
+        'input_date',
+    ];
+
     public function index()
     {
         $config = new \PHPUploader\Config();
@@ -27,8 +36,8 @@ class Index
         // (毎回\PDO::FETCH_ASSOCを指定する必要が無くなる)
         $db->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
-        // 選択 (プリペアドステートメント)
-        $stmt = $db->prepare('SELECT * FROM uploaded');
+        // 選択 (公開してよいファイル一覧用の列だけを取得)
+        $stmt = $db->prepare('SELECT ' . implode(', ', self::PUBLIC_FILE_COLUMNS) . ' FROM uploaded');
         $stmt->execute();
         $r = $stmt->fetchAll();
 
