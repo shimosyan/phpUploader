@@ -8,7 +8,6 @@ WORKDIR /var/www/html
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        libsqlite3-dev \
         git \
         unzip \
         curl \
@@ -16,8 +15,12 @@ RUN set -eux; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
-# 必要な拡張機能をインストール
-RUN docker-php-ext-install pdo pdo_sqlite
+# 必要な拡張機能が利用可能であることを確認
+RUN set -eux; \
+    php -m | grep -q '^mbstring$'; \
+    php -m | grep -q '^PDO$'; \
+    php -m | grep -q '^pdo_sqlite$'; \
+    php -m | grep -q '^sqlite3$'
 
 # Composerのインストール
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \

@@ -2,10 +2,17 @@ parameters:
     level: 1
     paths:
         - .
+    scanFiles:
+        - config/config.php.example
     excludePaths:
         - vendor
+        - node_modules (?)
+        - .test-runtime (?)
+        - playwright-report (?)
+        - test-results (?)
     ignoreErrors:
         # レガシーコードのため一時的に無視する項目
         - '#Variable \$[a-zA-Z_]+ might not be defined#'
         - '#Function extract\(\) should not be used#'
+        - '#Path in include\(\) "\./config/config\.php" is not a file or it does not exist#'
     reportUnmatchedIgnoredErrors: false

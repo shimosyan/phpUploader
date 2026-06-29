@@ -18,14 +18,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    // 設定ファイルの読み込み
-    if (!file_exists('./config/config.php')) {
-        throw new Exception('設定ファイルが見つかりません。config.php.example を参考に config.php を作成してください。');
-    }
-
     // 設定とユーティリティの読み込み（絶対パスで修正）
     $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
-    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/ConfigLoader.php';
+    \PHPUploader\Core\ConfigLoader::requireConfig($baseDir);
     require_once $baseDir . '/src/Core/Logger.php';
     require_once $baseDir . '/src/Core/ResponseHandler.php';
 

@@ -16,7 +16,8 @@ error_reporting(E_ALL);
 try {
     // 設定とユーティリティの読み込み（絶対パスで修正）
     $baseDir = dirname(__FILE__); // アプリケーションルートディレクトリ
-    require_once $baseDir . '/config/config.php';
+    require_once $baseDir . '/src/Core/ConfigLoader.php';
+    \PHPUploader\Core\ConfigLoader::requireConfig($baseDir);
     require_once $baseDir . '/src/Core/Logger.php';
 
     $configInstance = new \PHPUploader\Config();

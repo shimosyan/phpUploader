@@ -14,6 +14,10 @@ node_modules/
 # Build artifacts
 *.zip
 *.tar.gz
+.phpunit.cache/
+playwright-report/
+test-results/
+.test-runtime/
 
 # Environment
 .env
