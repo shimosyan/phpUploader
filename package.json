@@ -1,0 +1,14 @@
+{
+  "name": "php-uploader-tests",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test:e2e": "node tests/e2e/prepare-app.cjs && playwright test",
+    "test:e2e:docker": "node tests/e2e/prepare-app.cjs && PHPUPLOADER_E2E_USE_DOCKER=1 playwright test",
+    "test:e2e:headed": "node tests/e2e/prepare-app.cjs && playwright test --headed",
+    "test:e2e:debug": "node tests/e2e/prepare-app.cjs && playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0"
+  }
+}

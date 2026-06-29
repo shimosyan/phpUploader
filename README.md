@@ -190,6 +190,36 @@ scripts\release.bat x.x.x
 ./scripts/composer.sh update
 ```
 
+### テスト
+
+PHPUnitによる単体・統合テストと、PlaywrightによるUI/E2Eテストを用意しています。
+
+```bash
+# PHP依存関係のインストール
+composer install
+
+# PHP単体・統合テスト
+composer test
+
+# UI/E2Eテスト依存関係のインストール
+npm ci
+npx playwright install chromium
+
+# UI/E2Eテスト
+npm run test:e2e
+
+# ローカルにPHPが無い場合はDockerでWebサーバーを起動して実行
+npm run test:e2e:docker
+```
+
+UI/E2Eテストは実行時に `.test-runtime/` 配下へテスト用の設定・DB・アップロード領域を作成します。通常の `config/config.php`、`db/`、`data/`、`logs/` は使用しません。
+
+Docker環境でPHP側の品質チェックをまとめて実行する場合:
+
+```bash
+./scripts/check-quality.sh
+```
+
 ### リリース手順
 
 1. **バージョン更新**: `./scripts/release.sh x.x.x`

@@ -13,7 +13,7 @@ class Logger
 {
     private string $logDirectory;
     private string $logLevel;
-    private \PDO $db;
+    private ?\PDO $db;
 
     public const LOG_EMERGENCY = 'emergency';
     public const LOG_ALERT = 'alert';
@@ -35,13 +35,13 @@ class Logger
         self::LOG_DEBUG => 7,
     ];
 
-    public function __construct(string $logDirectory, string $logLevel = self::LOG_INFO, \PDO $db = null)
+    public function __construct(string $logDirectory, string $logLevel = self::LOG_INFO, ?\PDO $db = null)
     {
         $baseDir = dirname(dirname(__DIR__)); // アプリケーションルートディレクトリ
         require_once $baseDir . '/src/Core/SecurityUtils.php';
 
         $this->logDirectory = rtrim($logDirectory, '/');
-        $this->logLevel = $logLevel;
+        $this->logLevel = strtolower($logLevel);
         $this->db = $db;
 
         // ログディレクトリが存在しない場合は作成

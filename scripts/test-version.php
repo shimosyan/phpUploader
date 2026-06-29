@@ -7,15 +7,16 @@
 
 echo "=== バージョン情報テスト ===\n\n";
 
-// config.phpが存在しない場合はテンプレートからコピー
-if (!file_exists('./config/config.php')) {
-    if (file_exists('./config/config.php.example')) {
-        copy('./config/config.php.example', './config/config.php');
-        echo "📋 config.php.exampleからconfig.phpを作成しました\n";
-    } else {
+// config.phpが存在しない場合はテンプレートを直接使用
+$configPath = './config/config.php';
+if (!file_exists($configPath)) {
+    $configPath = './config/config.php.example';
+    if (!file_exists($configPath)) {
         echo "❌ config.php.example が見つかりません\n";
         exit(1);
     }
+
+    echo "📋 config.php.exampleを使用します\n";
 }
 
 // composer.jsonのバージョンを取得
@@ -36,7 +37,7 @@ echo "📦 composer.json バージョン: $expectedVersion\n";
 
 // config.phpからバージョンを取得
 ob_start();
-include('./config/config.php');
+include($configPath);
 ob_end_clean();
 
 // configクラスのインスタンス化
