@@ -44,6 +44,22 @@ test.describe('phpUploader UI', () => {
 
     await expect(page.locator('.file-card-v2__filename')).toContainText('sample-upload.pdf');
 
+    const fileData = await page.evaluate(() => window.fileData);
+    expect(fileData).toHaveLength(1);
+    expect(fileData[0]).toEqual(expect.objectContaining({
+      id: expect.any(Number),
+      origin_file_name: 'sample-upload.pdf',
+      comment: '',
+      size: expect.any(Number),
+      count: expect.any(Number),
+      input_date: expect.any(Number)
+    }));
+    expect(fileData[0]).not.toHaveProperty('ip_address');
+    expect(fileData[0]).not.toHaveProperty('dl_key_hash');
+    expect(fileData[0]).not.toHaveProperty('del_key_hash');
+    expect(fileData[0]).not.toHaveProperty('stored_file_name');
+    expect(fileData[0]).not.toHaveProperty('file_hash');
+
     await page.locator('#fileSearchInput').fill('sample');
     await expect(page.locator('.file-card-v2__filename')).toContainText('sample-upload.pdf');
 
