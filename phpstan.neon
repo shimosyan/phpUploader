@@ -6,6 +6,7 @@ parameters:
         - config/config.php.example
     excludePaths:
         - vendor
+        - config/config.php (?)
         - node_modules (?)
         - .test-runtime (?)
         - playwright-report (?)
