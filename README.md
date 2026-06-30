@@ -125,15 +125,6 @@ docker-compose down web
   - `db`
   - `logs`
 
-**推奨セキュリティ設定**:
-
-```php
-// 強力なキーの例（実際は異なる値を使用してください）
-'master'       => bin2hex(random_bytes(16)), // 32文字のランダム文字列
-'key'          => bin2hex(random_bytes(32)), // 64文字のランダム文字列
-'sessionSalt' => hash('sha256', bin2hex(random_bytes(32))), // 32文字のランダム文字列
-```
-
 ## Development
 
 ### 初期セットアップ
