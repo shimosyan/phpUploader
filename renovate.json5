@@ -69,6 +69,16 @@
       automerge: true,
     },
     {
+      description: 'Keep PHPUnit compatible with the supported PHP runtime range',
+      matchManagers: [
+        'composer',
+      ],
+      matchPackageNames: [
+        'phpunit/phpunit',
+      ],
+      allowedVersions: '<11.0.0',
+    },
+    {
       matchSourceUrls: [
         'https://github.com/php/php-src',
       ],
