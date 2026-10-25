@@ -23,7 +23,7 @@ jobs:
 
       - uses: aquaproj/aqua-installer@611554c6f0137ba41c8dd15aca8bee82504ea461 # v4.1.1
         with:
-          aqua_version: v2.64.0
+          aqua_version: v2.65.2
 
       - id: app-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
