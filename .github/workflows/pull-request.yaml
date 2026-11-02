@@ -17,6 +17,7 @@ jobs:
     needs:
       - document-test
       - update-aqua-checksums
+      - update-composer-lock
       - php-test
     runs-on: ubuntu-latest
     permissions: {}
@@ -45,7 +46,18 @@ jobs:
       contents: read
       pull-requests: write
 
+  update-composer-lock:
+    uses: ./.github/workflows/wc-update-composer-lock.yaml
+    secrets:
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
+      PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
   php-test:
+    needs: update-composer-lock
     uses: ./.github/workflows/wc-php-test.yaml
     secrets:
       CLIENT_ID: ${{secrets.CLIENT_ID}}

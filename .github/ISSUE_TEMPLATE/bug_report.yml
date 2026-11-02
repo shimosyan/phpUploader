@@ -62,12 +62,11 @@ body:
       label: 🐘 PHP バージョン
       description: 使用しているPHPのバージョン
       options:
-        - PHP 7.4
-        - PHP 8.0
-        - PHP 8.1
         - PHP 8.2
         - PHP 8.3
-        - その他
+        - PHP 8.4
+        - PHP 8.5
+        - Other / Legacy (PHP <= 8.1)
     validations:
       required: true
 
