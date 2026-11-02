@@ -15,77 +15,17 @@ permissions:
   issues: write
 
 jobs:
-  security-scan:
+  tests:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         php-version:
-          - '8.1'  # minimum supported version
-          # renovate: php-version
+          - '8.2'
           - '8.3'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7.0.1
-
-      - uses: aquaproj/aqua-installer@v4.1.1
-        with:
-          aqua_version: v2.65.2
-
-      - id: app-token
-        uses: actions/create-github-app-token@v3.3.0
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@2.40.0
-        with:
-          php-version: ${{ matrix.php-version }}
-          extensions: mbstring, pdo, pdo_sqlite, sqlite3
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Security audit
-        run: |
-          # Composerセキュリティ監査
-          composer audit
-
-      - name: Check for sensitive files
-        run: |
-          # 機密ファイルがコミットされていないかチェック
-          if [ -f "config/config.php" ]; then
-            echo "Error: config.php should not be committed"
-            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: config.php should not be committed"
-            exit 1
-          fi
-
-          # .envファイルのチェック
-          if [ -f ".env" ]; then
-            echo "Error: .env should not be committed"
-            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: .env should not be committed"
-            exit 1
-          fi
-
-          echo "✅ No sensitive files found"
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-
-  lint-and-test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version:
-          - '8.1'  # minimum supported version
-          # renovate: php-version
-          - '8.3'
+          - '8.4'
+          - '8.5'
 
     steps:
       - name: Checkout code
@@ -113,6 +53,44 @@ jobs:
           tools: composer
           coverage: none
           ini-values: error_reporting=E_ALL&~E_DEPRECATED&~E_STRICT
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      # Security Scan
+      - name: Display Security Scan
+        run: |
+          echo "Starting Security Scan for PHP ${{ matrix.php-version }}"
+
+      - name: Security audit
+        run: |
+          # Composerセキュリティ監査
+          composer audit
+
+      - name: Check for sensitive files
+        run: |
+          # 機密ファイルがコミットされていないかチェック
+          if [ -f "config/config.php" ]; then
+            echo "Error: config.php should not be committed"
+            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: config.php should not be committed"
+            exit 1
+          fi
+
+          # .envファイルのチェック
+          if [ -f ".env" ]; then
+            echo "Error: .env should not be committed"
+            github-comment post -k common-error -var title:"Check Sensitive Files Exists" -var body:"Error: .env should not be committed"
+            exit 1
+          fi
+
+          echo "✅ No sensitive files found"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      # PHP Code Quality Checks
+      - name: Display PHP Code Quality Checks
+        run: |
+          echo "Starting PHP Code Quality Checks for PHP ${{ matrix.php-version }}"
 
       - name: Validate composer.json
         run: |
@@ -276,23 +254,10 @@ jobs:
           }
           echo "✅ Dockerビルド完了"
 
-  ui-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7.0.1
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@2.40.0
-        with:
-          php-version: '8.3'
-          extensions: mbstring, pdo, pdo_sqlite, sqlite3
-          tools: composer
-          coverage: none
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+      # UI Test
+      - name: Display UI Test
+        run: |
+          echo "Starting UI Test for PHP ${{ matrix.php-version }}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.1.0

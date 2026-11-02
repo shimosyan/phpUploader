@@ -1,0 +1,78 @@
+name: Update composer.lock
+
+on:
+  workflow_call:
+    secrets:
+      CLIENT_ID:
+        required: true
+      PRIVATE_KEY:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  path-filter:
+    timeout-minutes: 10
+    outputs:
+      composer-json: ${{ steps.changes.outputs.composer-json }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: dorny/paths-filter@v4.0.3
+        id: changes
+        with:
+          filters: |
+            composer-json:
+              - 'composer.json'
+
+  update-composer-lock:
+    needs: path-filter
+    if: needs.path-filter.outputs.composer-json == 'true'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.40.0
+        with:
+          php-version: '8.2'
+          tools: composer
+          coverage: none
+
+      - name: Update composer.lock
+        run: |
+          # 依存パッケージの全体更新を行わず、composer.jsonの変更のみをロックファイルに同期
+          composer update --lock --no-install
+
+      - name: Check if composer.lock is changed
+        id: diff
+        run: |
+          if git diff --exit-code composer.lock; then
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: app-token
+        if: steps.diff.outputs.changed == '1'
+        uses: actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == '1'
+        uses: suzuki-shunsuke/commit-action@v1.1.0
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          commit_message: "chore: update composer.lock"
+          files: composer.lock

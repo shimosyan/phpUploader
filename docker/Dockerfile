@@ -1,5 +1,5 @@
-# PHP 8.1に固定（アプリケーションの安定版として固定）
-FROM php:8.1-apache
+# PHP 8.2に固定
+FROM php:8.2-apache
 
 # 作業ディレクトリを設定
 WORKDIR /var/www/html

@@ -98,9 +98,8 @@ class SecurityUtils
         }
 
         // MIMEタイプの基本チェック
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
 
         $allowedMimeTypes = [
             'jpg' => ['image/jpeg'],

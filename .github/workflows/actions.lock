@@ -34,6 +34,12 @@ workflows:
         - 'aquaproj/aqua-installer@v4.1.1'
         - 'dorny/paths-filter@v4.0.3'
         - 'suzuki-shunsuke/commit-action@v1.1.0'
+    '.github/workflows/wc-update-composer-lock.yaml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/create-github-app-token@v3.3.0'
+        - 'dorny/paths-filter@v4.0.3'
+        - 'shivammathur/setup-php@2.40.0'
+        - 'suzuki-shunsuke/commit-action@v1.1.0'
 dependencies:
     'actions/cache@v6.1.0':
         ref: 'v6.1.0'

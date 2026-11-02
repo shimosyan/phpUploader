@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-11-03
+
+### Security
+
+- PHP 8.5 をサポート
+- PHP 8.1 のサポートを終了し、最低動作環境を PHP 8.2 に変更
+
 ## [2.0.2] - 2026-06-29
 
 ### Security

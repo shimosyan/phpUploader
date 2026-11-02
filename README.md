@@ -14,7 +14,7 @@ phpUploader
 
 ## Requirement
 
-- PHP Version 8.1+
+- PHP Version 8.2+
 - SQLite (PHPにバンドルされたもので可、一部の環境によってはphp○-sqliteのインストールが必要です。)
 - PHP拡張: `openssl`, `json`, `mbstring`, `hash`
 - Webサーバー: Apache もしくは Nginx + PHP-FPM
