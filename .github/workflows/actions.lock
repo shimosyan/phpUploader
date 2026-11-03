@@ -28,6 +28,11 @@ workflows:
         - 'actions/setup-node@v7.1.0'
         - 'aquaproj/aqua-installer@v4.1.1'
         - 'shivammathur/setup-php@2.40.0'
+    '.github/workflows/wc-update-actions-lock.yaml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/create-github-app-token@v3.3.0'
+        - 'dorny/paths-filter@v4.0.3'
+        - 'suzuki-shunsuke/commit-action@v1.1.0'
     '.github/workflows/wc-update-aqua-checksums.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
