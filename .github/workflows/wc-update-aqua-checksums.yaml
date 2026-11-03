@@ -67,6 +67,7 @@ jobs:
           fi
 
       - id: app-token
+        if: steps.diff.outputs.changed == '1'
         uses: actions/create-github-app-token@v3.3.0
         with:
           client-id: ${{ secrets.CLIENT_ID }}
