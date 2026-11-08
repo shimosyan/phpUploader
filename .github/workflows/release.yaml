@@ -59,7 +59,7 @@ jobs:
             -x "*.md" \
 
       - name: Create Release
-        uses: softprops/action-gh-release@v3.0.3
+        uses: softprops/action-gh-release@v3.0.4
         with:
           files: phpUploader-*.zip
           body_path: CHANGELOG.md
