@@ -39,7 +39,9 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v7.0.1
         with:
+          ref: ${{ github.head_ref }}
           persist-credentials: false
+  
       - name: Install aqua
         uses: aquaproj/aqua-installer@v4.1.1
         with:
