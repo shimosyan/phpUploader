@@ -63,7 +63,7 @@ jobs:
       - name: Security audit
         run: |
           # Composerセキュリティ監査
-          composer audit
+          composer audit --locked
 
       - name: Check for sensitive files
         run: |
