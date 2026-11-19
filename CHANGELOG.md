@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0] - 2026-11-03
 
-### Security
+### Changed
 
 - PHP 8.5 をサポート
 - PHP 8.1 のサポートを終了し、最低動作環境を PHP 8.2 に変更

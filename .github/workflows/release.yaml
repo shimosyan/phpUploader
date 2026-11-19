@@ -53,9 +53,9 @@ jobs:
             -x "cspell.json" \
             -x "github-comment.yaml" \
             -x "phpcs.xml" \
-            -x "phpunit.xml" \
+            -x "phpunit.xml.dist" \
             -x "phpstan.neon" \
-            -x "renovate.json" \
+            -x "renovate.json5" \
             -x "*.md" \
 
       - name: Create Release
