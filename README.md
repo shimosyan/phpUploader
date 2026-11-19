@@ -224,4 +224,4 @@ Docker環境でPHP側の品質チェックをまとめて実行する場合:
 
 Copyright (c) 2017 shimosyan
 Released under the MIT license
-<https://github.com/shimosyan/phpUploader/blob/master/MIT-LICENSE.txt>
+<https://github.com/shimosyan/phpUploader/blob/main/MIT-LICENSE.txt>
