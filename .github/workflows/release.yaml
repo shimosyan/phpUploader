@@ -2,16 +2,19 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths:
+      - 'composer.json'
+  workflow_dispatch:
 
 concurrency:
-  group: release # repo レベルの排他制御
-  cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
+  group: release
+  cancel-in-progress: false
 
 permissions:
   id-token: write
-  contents: write # Release ページの書き込みに必要
+  contents: write
 
 jobs:
   release:
@@ -19,26 +22,78 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
-
-      - id: app-token
-        uses: actions/create-github-app-token@v3.3.0
         with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@2.40.0
         with:
           php-version: '8.2'
           extensions: pdo, sqlite3
+          coverage: none
+
+      - name: Check version and tag existence
+        id: version
+        run: |
+          VERSION=$(php -r 'echo json_decode(file_get_contents("composer.json"), true)["version"] ?? "";')
+          if [ -z "${VERSION}" ]; then
+            echo "❌ composer.json からバージョンを取得できませんでした"
+            exit 1
+          fi
+
+          TAG="v${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          git fetch --tags
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "ℹ️ タグ ${TAG} は既に存在するため、リリース処理をスキップします"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "🚀 新しいバージョン ${TAG} のリリースを開始します"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: app-token
+        if: steps.version.outputs.should_release == 'true'
+        uses: actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Create and push tag
+        if: steps.version.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          git tag "${TAG}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          git push origin "${TAG}"
+
+      - name: Extract release notes from CHANGELOG.md
+        if: steps.version.outputs.should_release == 'true'
+        run: |
+          php -r '
+            $md = file_get_contents("CHANGELOG.md");
+            $ver = preg_quote($argv[1], "/");
+            if (preg_match("/^## \[" . $ver . "\][^\r\n]*\R+(.*?)(?=^## \[|\z)/ms", $md, $m)) {
+                $notes = trim($m[1]);
+            } else {
+                $notes = "Release v" . $argv[1];
+            }
+            file_put_contents("release_notes.md", $notes . "\n");
+          ' "${{ steps.version.outputs.version }}"
 
       - name: Install dependencies
+        if: steps.version.outputs.should_release == 'true'
         run: composer install --no-dev --optimize-autoloader
 
       - name: Create release archive
+        if: steps.version.outputs.should_release == 'true'
         run: |
-          # 不要なファイルを除外してアーカイブ作成
-          zip -r phpUploader-${GITHUB_REF#refs/tags/}.zip . \
+          TAG="${{ steps.version.outputs.tag }}"
+          zip -r "phpUploader-${TAG}.zip" . \
             -x "*.git*" \
             -x ".config/*" \
             -x ".github/*" \
@@ -56,13 +111,16 @@ jobs:
             -x "phpunit.xml.dist" \
             -x "phpstan.neon" \
             -x "renovate.json5" \
-            -x "*.md" \
+            -x "*.md"
 
       - name: Create Release
+        if: steps.version.outputs.should_release == 'true'
         uses: softprops/action-gh-release@v3.0.4
         with:
-          files: phpUploader-*.zip
-          body_path: CHANGELOG.md
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          files: phpUploader-${{ steps.version.outputs.tag }}.zip
+          body_path: release_notes.md
           draft: false
           prerelease: false
         env:

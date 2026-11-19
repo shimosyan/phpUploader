@@ -1,0 +1,116 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'リリースするバージョン番号 (例: 2.2.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: prepare-release
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate version format
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ バージョン形式が不正です (x.y.z の形式で指定してください): ${{ inputs.version }}"
+            exit 1
+          fi
+
+      - name: Checkout main
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.40.0
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Update composer.json and CHANGELOG.md
+        run: |
+          VERSION="${{ inputs.version }}"
+          TODAY=$(TZ='Asia/Tokyo' date '+%Y-%m-%d')
+
+          # composer.json のバージョン更新
+          php scripts/release.php "${VERSION}"
+          printf '\n' >> composer.json
+
+          # CHANGELOG.md の更新（[Unreleased] があれば置換、なければ先頭にテンプレートを挿入）
+          php -r '
+            $file = "CHANGELOG.md";
+            $content = file_get_contents($file);
+            $ver = $argv[1];
+            $date = $argv[2];
+            $header = "## [{$ver}] - {$date}";
+
+            if (preg_match("/^## \[Unreleased\]/m", $content)) {
+                $content = preg_replace("/^## \[Unreleased\]/m", $header, $content, 1);
+            } elseif (!preg_match("/^## \[" . preg_quote($ver, "/") . "\]/m", $content)) {
+                $template = "{$header}\n\n### Changed\n\n- 変更内容を記載してください\n\n";
+                $content = preg_replace("/(^## \[)/m", $template . "$1", $content, 1);
+            }
+            file_put_contents($file, $content);
+          ' "${VERSION}" "${TODAY}"
+
+      - id: app-token
+        uses: actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Commit and push to release branch
+        uses: suzuki-shunsuke/commit-action@v1.1.0
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          branch: release/v${{ inputs.version }}
+          commit_message: "chore: prepare release v${{ inputs.version }}"
+          files: |
+            composer.json
+            CHANGELOG.md
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          VERSION="${{ inputs.version }}"
+          BRANCH="release/v${VERSION}"
+
+          # 既に同じブランチの PR がオープンしている場合は新規作成をスキップ
+          EXISTING_PR=$(gh pr list --head "${BRANCH}" --state open --json url --jq '.[0].url')
+          if [ -n "${EXISTING_PR}" ]; then
+            echo "ℹ️ 既にリリースPRが存在します: ${EXISTING_PR}"
+            exit 0
+          fi
+
+          gh pr create \
+            --base main \
+            --head "${BRANCH}" \
+            --title "Release v${VERSION}" \
+            --label "area/release" \
+            --body "$(cat <<EOF
+          ## 🚀 リリース準備: v${VERSION}
+
+          ### 自動更新されたファイル
+          - \`composer.json\` のバージョンを \`${VERSION}\` に更新
+          - \`CHANGELOG.md\` の見出しを更新
+
+          ### リリース手順
+          1. \`CHANGELOG.md\` の内容を確認・必要に応じて追記してください
+          2. すべての CI チェックがパスしたら **Approve ＆ マージ** してください
+          3. マージ後、自動的に \`v${VERSION}\` タグの作成と GitHub Release の公開が実行されます
+          EOF
+          )"
