@@ -10,6 +10,11 @@ workflows:
         - 'actions/create-github-app-token@v3.3.0'
         - 'actions/labeler@v7.0.0'
         - 'codelytv/pr-size-labeler@v1.12.0'
+    '.github/workflows/prepare-release.yaml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/create-github-app-token@v3.3.0'
+        - 'shivammathur/setup-php@2.40.0'
+        - 'suzuki-shunsuke/commit-action@v1.1.0'
     '.github/workflows/pull-request.yaml': []
     '.github/workflows/release.yaml':
         - 'actions/checkout@v7.0.1'

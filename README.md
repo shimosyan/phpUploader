@@ -167,15 +167,6 @@ PHPがローカルにインストールされていなくても、Dockerを使�
 # Webサーバーの起動
 docker-compose up -d web
 
-# リリース管理（Linux/Mac）
-./scripts/release.sh x.x.x
-
-# リリース管理（Windows）
-scripts\release.bat x.x.x
-
-# 自動プッシュ付きリリース
-./scripts/release.sh x.x.x --push
-
 # Composer管理
 ./scripts/composer.sh install
 ./scripts/composer.sh update
@@ -213,10 +204,10 @@ Docker環境でPHP側の品質チェックをまとめて実行する場合:
 
 ### リリース手順
 
-1. **バージョン更新**: `./scripts/release.sh x.x.x`
-2. **変更確認**: 自動的に`composer.json`が更新され、`config.php`は動的に読み取ります
-3. **Git操作**: 表示される手順に従ってコミット・タグ・プッシュ
-4. **自動リリース**: GitHub Actionsが自動でリリースを作成
+1. **`CHANGELOG.md`の用意**: 事前に `CHANGELOG.md` に更新内容を記載しておきます。バージョンを示す箇所は `## [Unreleased]` と記述します。この後、自動的に `## [x.y.z] - YYYY-MM-DD` に更新されます。
+2. **リリース準備PRの作成**: GitHubの **Actions** タブから **Prepare Release** ワークフローを実行し、リリースするバージョン番号（`x.y.z`形式）を入力します。自動的に `composer.json` と `CHANGELOG.md` を更新したPRが作成されます
+3. **内容確認とマージ**: 作成されたPR上で `CHANGELOG.md` の内容を確認・必要に応じて追記し、すべてのCIチェックがパスしたら **Approve ＆ マージ** します
+4. **自動リリース**: `main` ブランチへのマージをトリガーに、GitHub Actionsが自動でタグ（`vx.y.z`）の作成、配布用アーカイブの生成、GitHub Releaseの公開を実行します
 
 **重要**: リリース時は`config/config.php.example`テンプレートが配布され、エンドユーザーが自分で設定ファイルを作成する必要があります。
 
