@@ -1,8 +1,9 @@
-# Name
+# phpUploader
 
-phpUploader
-
-## Description
+[![Pull Request](https://github.com/shimosyan/phpUploader/actions/workflows/pull-request.yaml/badge.svg)](https://github.com/shimosyan/phpUploader/actions/workflows/pull-request.yaml)
+![GitHub Release](https://img.shields.io/github/v/release/shimosyan/phpUploader)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/shimosyan/phpUploader/total)
+![GitHub License](https://img.shields.io/github/license/shimosyan/phpUploader)
 
 サーバーに設置するだけで使える簡易PHPアップローダーです。
 
