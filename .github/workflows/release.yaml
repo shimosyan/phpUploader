@@ -57,7 +57,7 @@ jobs:
 
       - id: app-token
         if: steps.version.outputs.should_release == 'true'
-        uses: actions/create-github-app-token@v3.3.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
