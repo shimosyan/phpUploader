@@ -3,13 +3,8 @@
 # Docs: https://gh.io/actions-lockfile
 version: 'v0.0.3'
 workflows:
-    '.github/workflows/auto-rebase-renovate-prs.yaml':
-        - 'actions/create-github-app-token@v3.3.0'
-    '.github/workflows/labeler.yaml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.3.0'
-        - 'actions/labeler@v7.0.0'
-        - 'codelytv/pr-size-labeler@v1.12.0'
+    '.github/workflows/auto-rebase-renovate-prs.yaml': []
+    '.github/workflows/labeler.yaml': []
     '.github/workflows/prepare-release.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -21,11 +16,6 @@ workflows:
         - 'actions/create-github-app-token@v3.3.0'
         - 'shivammathur/setup-php@2.40.0'
         - 'softprops/action-gh-release@v3.0.4'
-    '.github/workflows/wc-document-pull-request.yaml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.3.0'
-        - 'actions/setup-node@v7.1.0'
-        - 'aquaproj/aqua-installer@v4.1.1'
     '.github/workflows/wc-php-test.yaml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v7.0.1'
@@ -33,17 +23,6 @@ workflows:
         - 'actions/setup-node@v7.1.0'
         - 'aquaproj/aqua-installer@v4.1.1'
         - 'shivammathur/setup-php@2.40.0'
-    '.github/workflows/wc-update-actions-lock.yaml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.3.0'
-        - 'dorny/paths-filter@v4.0.3'
-        - 'suzuki-shunsuke/commit-action@v1.1.0'
-    '.github/workflows/wc-update-aqua-checksums.yaml':
-        - 'actions/checkout@v7.0.1'
-        - 'actions/create-github-app-token@v3.3.0'
-        - 'aquaproj/aqua-installer@v4.1.1'
-        - 'dorny/paths-filter@v4.0.3'
-        - 'suzuki-shunsuke/commit-action@v1.1.0'
     '.github/workflows/wc-update-composer-lock.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
@@ -66,11 +45,6 @@ dependencies:
         commit: 'sha1-64ab729a6294000f5aa4a4bc0b73d1f32bc45510'
         owner_id: 44036562
         repo_id: 642580244
-    'actions/labeler@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13'
-        owner_id: 44036562
-        repo_id: 177139928
     'actions/setup-node@v7.1.0':
         ref: 'v7.1.0'
         commit: 'sha1-949feb2413d6458794dcd2491c4babbbce0c15c1'
@@ -81,11 +55,6 @@ dependencies:
         commit: 'sha1-611554c6f0137ba41c8dd15aca8bee82504ea461'
         owner_id: 95116411
         repo_id: 400140776
-    'codelytv/pr-size-labeler@v1.12.0':
-        ref: 'v1.12.0'
-        commit: 'sha1-19c335e7695ba922de938806dd129f0a9b992644'
-        owner_id: 14278228
-        repo_id: 243538828
     'dorny/paths-filter@v4.0.3':
         ref: 'v4.0.3'
         commit: 'sha1-ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d'

@@ -7,7 +7,7 @@ on:
       - synchronize
 
 concurrency:
-  group: ${{ github.workflow }}-labeler-${{ github.ref }}  # デプロイしないため PR レベルの排他制御
+  group: ${{ github.workflow }}-labeler-${{ github.ref }} # デプロイしないため PR レベルの排他制御
   cancel-in-progress: false # PR の更新があった場合は前のジョブをキャンセルしない
 
 permissions:
@@ -17,47 +17,6 @@ permissions:
   issues: write
 
 jobs:
-  label:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      - id: app-token
-        uses: actions/create-github-app-token@v3.3.0
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-
-      - name: Auto Label PR
-        uses: actions/labeler@v7.0.0
-        with:
-          repo-token: ${{ steps.app-token.outputs.token }}
-          configuration-path: .github/labeler.yaml
-
-  size-label:
-    runs-on: ubuntu-latest
-
-    steps:
-      - id: app-token
-        uses: actions/create-github-app-token@v3.3.0
-        with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-
-      - name: Add size labels
-        uses: codelytv/pr-size-labeler@v1.12.0
-        with:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          xs_label: 'size/XS'
-          xs_max_size: 10
-          s_label: 'size/S'
-          s_max_size: 100
-          m_label: 'size/M'
-          m_max_size: 500
-          l_label: 'size/L'
-          l_max_size: 1000
-          xl_label: 'size/XL'
+  labeler:
+    uses: shimosyan/.github/.github/workflows/wc-labeler.yaml@bc3ed1de3b27f64e0adef836c21a808ce44624fc # main
+    secrets: inherit
