@@ -27,7 +27,7 @@ jobs:
       - run: exit 1
 
   document-test:
-    uses: shimosyan/.github/.github/workflows/wc-document-pull-request.yaml@bc3ed1de3b27f64e0adef836c21a808ce44624fc # main
+    uses: shimosyan/.github/.github/workflows/wc-document-pull-request.yaml@d2c775546e84981c2b238f9a7fe69a7eae74cb37 # main
     secrets: inherit
     permissions:
       id-token: write
@@ -35,7 +35,7 @@ jobs:
       pull-requests: write
 
   update-aqua-checksums:
-    uses: shimosyan/.github/.github/workflows/wc-update-aqua-checksums.yaml@bc3ed1de3b27f64e0adef836c21a808ce44624fc # main
+    uses: shimosyan/.github/.github/workflows/wc-update-aqua-checksums.yaml@d2c775546e84981c2b238f9a7fe69a7eae74cb37 # main
     secrets: inherit
     permissions:
       id-token: write
@@ -43,7 +43,7 @@ jobs:
       pull-requests: write
 
   update-actions-lock:
-    uses: shimosyan/.github/.github/workflows/wc-update-actions-lock.yaml@bc3ed1de3b27f64e0adef836c21a808ce44624fc # main
+    uses: shimosyan/.github/.github/workflows/wc-update-actions-lock.yaml@d2c775546e84981c2b238f9a7fe69a7eae74cb37 # main
     secrets: inherit
     permissions:
       id-token: write
