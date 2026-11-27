@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   rebase:
-    uses: shimosyan/.github/.github/workflows/wc-auto-rebase-renovate-prs.yaml@bc3ed1de3b27f64e0adef836c21a808ce44624fc # main
+    uses: shimosyan/.github/.github/workflows/wc-auto-rebase-renovate-prs.yaml@d2c775546e84981c2b238f9a7fe69a7eae74cb37 # main
     with:
       pr_numbers: ${{ inputs.pr_numbers }}
     secrets: inherit
